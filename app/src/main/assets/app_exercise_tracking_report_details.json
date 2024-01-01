@@ -1,0 +1,79 @@
+{
+  "attributes": [
+    {
+      "item_tag": "abs_exercise_duration",
+      "image_name": "ic_dot",
+      "title_localized": {
+        "ja_JP": "腹筋運動時間",
+        "en_JP": "ABS Exercise Duration",
+        "vi_JP": "Thời gian tập cơ bụng",
+        "ja_US": "腹筋運動時間",
+        "en_US": "ABS Exercise Duration",
+        "vi_US": "Thời gian tập cơ bụng",
+        "ja_VN": "腹筋運動時間",
+        "en_VN": "ABS Exercise Duration",
+        "vi_VN": "Thời gian tập cơ bụng"
+      }
+    },
+    {
+      "item_tag": "chest_exercise_duration",
+      "image_name": "ic_dot",
+      "title_localized": {
+        "ja_JP": "胸部運動時間",
+        "en_JP": "Chest Exercise Duration",
+        "vi_JP": "Thời gian tập ngực",
+        "ja_US": "胸部運動時間",
+        "en_US": "Chest Exercise Duration",
+        "vi_US": "Thời gian tập ngực",
+        "ja_VN": "胸部運動時間",
+        "en_VN": "Chest Exercise Duration",
+        "vi_VN": "Thời gian tập ngực"
+      }
+    },
+    {
+      "item_tag": "arms_exercise_duration",
+      "image_name": "ic_dot",
+      "title_localized": {
+        "ja_JP": "腕の運動時間",
+        "en_JP": "Arms Exercise Duration",
+        "vi_JP": "Thời gian tập tay",
+        "ja_US": "腕の運動時間",
+        "en_US": "Arms Exercise Duration",
+        "vi_US": "Thời gian tập tay",
+        "ja_VN": "腕の運動時間",
+        "en_VN": "Arms Exercise Duration",
+        "vi_VN": "Thời gian tập tay"
+      }
+    },
+    {
+      "item_tag": "legs_exercise_duration",
+      "image_name": "ic_dot",
+      "title_localized": {
+        "ja_JP": "脚の運動時間",
+        "en_JP": "Legs Exercise Duration",
+        "vi_JP": "Thời gian tập chân",
+        "ja_US": "脚の運動時間",
+        "en_US": "Legs Exercise Duration",
+        "vi_US": "Thời gian tập chân",
+        "ja_VN": "脚の運動時間",
+        "en_VN": "Legs Exercise Duration",
+        "vi_VN": "Thời gian tập chân"
+      }
+    },
+    {
+      "item_tag": "shoulder_back_exercise_duration",
+      "image_name": "ic_dot",
+      "title_localized": {
+        "ja_JP": "肩と背中の運動時間",
+        "en_JP": "Shoulder & Back Exercise Duration",
+        "vi_JP": "Thời gian tập vai & lưng",
+        "ja_US": "肩と背中の運動時間",
+        "en_US": "Shoulder & Back Exercise Duration",
+        "vi_US": "Thời gian tập vai & lưng",
+        "ja_VN": "肩と背中の運動時間",
+        "en_VN": "Shoulder & Back Exercise Duration",
+        "vi_VN": "Thời gian tập vai & lưng"
+      }
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "797762986274",
+    "firebase_url": "https://medijourney-36b1e-default-rtdb.firebaseio.com",
+    "project_id": "medijourney-36b1e",
+    "storage_bucket": "medijourney-36b1e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:797762986274:android:4c2c2f2e9cf48c7cb7057b",
+        "android_client_info": {
+          "package_name": "com.example.medijourney"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "797762986274-a6pv5smir8mgufp3j1tdp54l3np6p3kc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.medijourney",
+            "certificate_hash": "ede7f094ee92c6b01bf28d57b98daf6110eed8fc"
+          }
+        },
+        {
+          "client_id": "797762986274-h0j51q3t2dsppkcfqf9efiromoouu00t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNw6wVxl0MMdaHevNCWo1uZXjkFQ1BV8A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "797762986274-b6nrk97o84uoj4keli5id1dsvlm169db.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

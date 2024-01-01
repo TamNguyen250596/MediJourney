@@ -1,0 +1,32 @@
+{
+  "attributes": [
+    {
+      "item_tag": "credit_card",
+      "title_localized": {
+        "ja_JP": "クレジットカード",
+        "en_JP": "Credit Card",
+        "vi_JP": "Thẻ tín dụng",
+        "ja_US": "クレジットカード",
+        "en_US": "Credit Card",
+        "vi_US": "Thẻ tín dụng",
+        "ja_VN": "クレジットカード",
+        "en_VN": "Credit Card",
+        "vi_VN": "Thẻ tín dụng"
+      }
+    },
+    {
+      "item_tag": "momo",
+      "title_localized": {
+        "ja_JP": "MOMO",
+        "en_JP": "MOMO",
+        "vi_JP": "MOMO",
+        "ja_US": "MOMO",
+        "en_US": "MOMO",
+        "vi_US": "MOMO",
+        "ja_VN": "MOMO",
+        "en_VN": "MOMO",
+        "vi_VN": "MOMO"
+      }
+    }
+  ]
+}

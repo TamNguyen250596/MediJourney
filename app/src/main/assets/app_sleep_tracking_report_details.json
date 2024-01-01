@@ -1,0 +1,64 @@
+{
+  "attributes": [
+    {
+      "item_tag": "n1_stage",
+      "image_name": "ic_dot",
+      "title_localized": {
+        "ja_JP": "軽い睡眠",
+        "en_JP": "Light Sleep",
+        "vi_JP": "Ngủ Nông",
+        "ja_US": "軽い睡眠",
+        "en_US": "Light Sleep",
+        "vi_US": "Ngủ Nông",
+        "ja_VN": "軽い睡眠",
+        "en_VN": "Light Sleep",
+        "vi_VN": "Ngủ Nông"
+      }
+    },
+    {
+      "item_tag": "n2_stage",
+      "image_name": "ic_dot",
+      "title_localized": {
+        "ja_JP": "深い睡眠",
+        "en_JP": "Deeper Sleep",
+        "vi_JP": "Ngủ Lim Dim",
+        "ja_US": "深い睡眠",
+        "en_US": "Deeper Sleep",
+        "vi_US": "Ngủ Lim Dim",
+        "ja_VN": "深い睡眠",
+        "en_VN": "Deeper Sleep",
+        "vi_VN": "Ngủ Lim Dim"
+      }
+    },
+    {
+      "item_tag": "n3_stage",
+      "image_name": "ic_dot",
+      "title_localized": {
+        "ja_JP": "最も深い睡眠",
+        "en_JP": "Deepest Non-REM Sleep",
+        "vi_JP": "Ngủ Sóng Chậm",
+        "ja_US": "最も深い睡眠",
+        "en_US": "Deepest Non-REM Sleep",
+        "vi_US": "Ngủ Sóng Chậm",
+        "ja_VN": "最も深い睡眠",
+        "en_VN": "Deepest Non-REM Sleep",
+        "vi_VN": "Ngủ Sóng Chậm"
+      }
+    },
+    {
+      "item_tag": "rem_stage",
+      "image_name": "ic_dot",
+      "title_localized": {
+        "ja_JP": "レム睡眠",
+        "en_JP": "REM",
+        "vi_JP": "REM",
+        "ja_US": "レム睡眠",
+        "en_US": "REM",
+        "vi_US": "REM",
+        "ja_VN": "レム睡眠",
+        "en_VN": "REM",
+        "vi_VN": "REM"
+      }
+    }
+  ]
+}

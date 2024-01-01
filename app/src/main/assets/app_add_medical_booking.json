@@ -1,0 +1,79 @@
+{
+  "attributes": [
+    {
+      "item_tag": "hospital",
+      "title_localized": {
+        "ja_JP": "病院",
+        "en_JP": "Hospital",
+        "vi_JP": "Bệnh viện",
+        "ja_US": "病院",
+        "en_US": "Hospital",
+        "vi_US": "Bệnh viện",
+        "ja_VN": "病院",
+        "en_VN": "Hospital",
+        "vi_VN": "Bệnh viện"
+      },
+      "secondary_image_name": "ic_right_arrow"
+    },
+    {
+      "item_tag": "medical_specialty",
+      "title_localized": {
+        "ja_JP": "診療科",
+        "en_JP": "Medical Specialty",
+        "vi_JP": "Chuyên khoa",
+        "ja_US": "診療科",
+        "en_US": "Medical Specialty",
+        "vi_US": "Chuyên khoa",
+        "ja_VN": "診療科",
+        "en_VN": "Medical Specialty",
+        "vi_VN": "Chuyên khoa"
+      },
+      "secondary_image_name": "ic_right_arrow"
+    },
+    {
+      "item_tag": "date",
+      "title_localized": {
+        "ja_JP": "日付",
+        "en_JP": "Date",
+        "vi_JP": "Ngày",
+        "ja_US": "日付",
+        "en_US": "Date",
+        "vi_US": "Ngày",
+        "ja_VN": "日付",
+        "en_VN": "Date",
+        "vi_VN": "Ngày"
+      },
+      "secondary_image_name": "ic_calendar"
+    },
+    {
+      "item_tag": "doctor_and_time",
+      "title_localized": {
+        "ja_JP": "医師と時間",
+        "en_JP": "Doctor & Time",
+        "vi_JP": "Bác sĩ & Thời gian",
+        "ja_US": "医師と時間",
+        "en_US": "Doctor & Time",
+        "vi_US": "Bác sĩ & Thời gian",
+        "ja_VN": "医師と時間",
+        "en_VN": "Doctor & Time",
+        "vi_VN": "Bác sĩ & Thời gian"
+      },
+      "secondary_image_name": "ic_right_arrow"
+    },
+    {
+      "item_tag": "payment",
+      "title_localized": {
+        "ja_JP": "支払い",
+        "en_JP": "Payment",
+        "vi_JP": "Thanh toán",
+        "ja_US": "支払い",
+        "en_US": "Payment",
+        "vi_US": "Thanh toán",
+        "ja_VN": "支払い",
+        "en_VN": "Payment",
+        "vi_VN": "Thanh toán"
+      },
+      "secondary_image_name": "ic_right_arrow"
+    }
+  ]
+}

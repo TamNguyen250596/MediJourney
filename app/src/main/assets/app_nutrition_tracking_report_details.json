@@ -1,0 +1,506 @@
+{
+  "macronutrients": [
+    {
+      "item_tag": "carbohydrates",
+      "image_name": "ic_dot",
+      "title_localized": {
+        "ja_JP": "炭水化物",
+        "en_JP": "Carbohydrates",
+        "vi_JP": "Carbohydrate",
+        "ja_US": "炭水化物",
+        "en_US": "Carbohydrates",
+        "vi_US": "Carbohydrate",
+        "ja_VN": "Carbohydrate",
+        "en_VN": "Carbohydrates",
+        "vi_VN": "Carbohydrate"
+      }
+    },
+    {
+      "item_tag": "lipids",
+      "image_name": "ic_dot",
+      "title_localized": {
+        "ja_JP": "脂質",
+        "en_JP": "Lipids",
+        "vi_JP": "Lipid",
+        "ja_US": "脂質",
+        "en_US": "Lipids",
+        "vi_US": "Lipid",
+        "ja_VN": "Lipid",
+        "en_VN": "Lipids",
+        "vi_VN": "Lipid"
+      }
+    },
+    {
+      "item_tag": "proteins",
+      "image_name": "ic_dot",
+      "title_localized": {
+        "ja_JP": "タンパク質",
+        "en_JP": "Proteins",
+        "vi_JP": "Protein",
+        "ja_US": "タンパク質",
+        "en_US": "Proteins",
+        "vi_US": "Protein",
+        "ja_VN": "Protein",
+        "en_VN": "Proteins",
+        "vi_VN": "Protein"
+      }
+    }
+  ],
+  "water": {},
+  "micronutrients": {
+    "vitamins": [
+      {
+        "section_tag": "water_soluble_vitamin",
+        "section_name_localized": {
+          "ja_JP": "水溶性ビタミン",
+          "en_JP": "Water-soluble Vitamins",
+          "vi_JP": "Vitamin tan trong nước",
+          "ja_US": "水溶性ビタミン",
+          "en_US": "Water-soluble Vitamins",
+          "vi_US": "Vitamin tan trong nước",
+          "ja_VN": "Vitamin tan trong nước",
+          "en_VN": "Water-soluble Vitamins",
+          "vi_VN": "Vitamin tan trong nước"
+        },
+        "secondary_image_name": "ic_arrow_down",
+        "items": [
+          {
+            "image_name": "ic_dot",
+            "item_tag": "vitamin_b1",
+            "title_localized": {
+              "en_JP": "Vitamin B1",
+              "en_US": "Vitamin B1",
+              "en_VN": "Vitamin B1",
+              "ja_JP": "ビタミンB1",
+              "ja_US": "ビタミンB1",
+              "ja_VN": "ビタミンB1",
+              "vi_JP": "Vitamin B1",
+              "vi_US": "Vitamin B1",
+              "vi_VN": "Vitamin B1"
+            }
+          },
+          {
+            "image_name": "ic_dot",
+            "item_tag": "vitamin_b2",
+            "title_localized": {
+              "en_JP": "Vitamin B2",
+              "en_US": "Vitamin B2",
+              "en_VN": "Vitamin B2",
+              "ja_JP": "ビタミンB2",
+              "ja_US": "ビタミンB2",
+              "ja_VN": "ビタミンB2",
+              "vi_JP": "Vitamin B2",
+              "vi_US": "Vitamin B2",
+              "vi_VN": "Vitamin B2"
+            }
+          },
+          {
+            "image_name": "ic_dot",
+            "item_tag": "vitamin_b3",
+            "title_localized": {
+              "en_JP": "Vitamin B3",
+              "en_US": "Vitamin B3",
+              "en_VN": "Vitamin B3",
+              "ja_JP": "ビタミンB3",
+              "ja_US": "ビタミンB3",
+              "ja_VN": "ビタミンB3",
+              "vi_JP": "Vitamin B3",
+              "vi_US": "Vitamin B3",
+              "vi_VN": "Vitamin B3"
+            }
+          },
+          {
+            "image_name": "ic_dot",
+            "item_tag": "vitamin_b5",
+            "title_localized": {
+              "en_JP": "Vitamin B5",
+              "en_US": "Vitamin B5",
+              "en_VN": "Vitamin B5",
+              "ja_JP": "ビタミンB5",
+              "ja_US": "ビタミンB5",
+              "ja_VN": "ビタミンB5",
+              "vi_JP": "Vitamin B5",
+              "vi_US": "Vitamin B5",
+              "vi_VN": "Vitamin B5"
+            }
+          },
+          {
+            "image_name": "ic_dot",
+            "item_tag": "vitamin_b6",
+            "title_localized": {
+              "en_JP": "Vitamin B6",
+              "en_US": "Vitamin B6",
+              "en_VN": "Vitamin B6",
+              "ja_JP": "ビタミンB6",
+              "ja_US": "ビタミンB6",
+              "ja_VN": "ビタミンB6",
+              "vi_JP": "Vitamin B6",
+              "vi_US": "Vitamin B6",
+              "vi_VN": "Vitamin B6"
+            }
+          },
+          {
+            "image_name": "ic_dot",
+            "item_tag": "vitamin_b7",
+            "title_localized": {
+              "en_JP": "Vitamin B7",
+              "en_US": "Vitamin B7",
+              "en_VN": "Vitamin B7",
+              "ja_JP": "ビタミンB7",
+              "ja_US": "ビタミンB7",
+              "ja_VN": "ビタミンB7",
+              "vi_JP": "Vitamin B7",
+              "vi_US": "Vitamin B7",
+              "vi_VN": "Vitamin B7"
+            }
+          },
+          {
+            "image_name": "ic_dot",
+            "item_tag": "vitamin_b9",
+            "title_localized": {
+              "en_JP": "Vitamin B9",
+              "en_US": "Vitamin B9",
+              "en_VN": "Vitamin B9",
+              "ja_JP": "ビタミンB9",
+              "ja_US": "ビタミンB9",
+              "ja_VN": "ビタミンB9",
+              "vi_JP": "Vitamin B9",
+              "vi_US": "Vitamin B9",
+              "vi_VN": "Vitamin B9"
+            }
+          },
+          {
+            "image_name": "ic_dot",
+            "item_tag": "vitamin_b12",
+            "title_localized": {
+              "en_JP": "Vitamin B12",
+              "en_US": "Vitamin B12",
+              "en_VN": "Vitamin B12",
+              "ja_JP": "ビタミンB12",
+              "ja_US": "ビタミンB12",
+              "ja_VN": "ビタミンB12",
+              "vi_JP": "Vitamin B12",
+              "vi_US": "Vitamin B12",
+              "vi_VN": "Vitamin B12"
+            }
+          },
+          {
+            "image_name": "ic_dot",
+            "item_tag": "vitamin_c",
+            "title_localized": {
+              "en_JP": "Vitamin C",
+              "en_US": "Vitamin C",
+              "en_VN": "Vitamin C",
+              "ja_JP": "ビタミンC",
+              "ja_US": "ビタミンC",
+              "ja_VN": "ビタミンC",
+              "vi_JP": "Vitamin C",
+              "vi_US": "Vitamin C",
+              "vi_VN": "Vitamin C"
+            }
+          }
+        ]
+      },
+      {
+        "section_tag": "fat_soluble_vitamin",
+        "section_name_localized": {
+          "ja_JP": "脂溶性ビタミン",
+          "en_JP": "Fat-soluble Vitamins",
+          "vi_JP": "Vitamin tan trong dầu",
+          "ja_US": "脂溶性ビタミン",
+          "en_US": "Fat-soluble Vitamins",
+          "vi_US": "Vitamin tan trong dầu",
+          "ja_VN": "Vitamin tan trong dầu",
+          "en_VN": "Fat-soluble Vitamins",
+          "vi_VN": "Vitamin tan trong dầu"
+        },
+        "secondary_image_name": "ic_arrow_down",
+        "items": [
+          {
+            "item_tag": "vitamin_a",
+            "image_name": "ic_dot",
+            "title_localized": {
+              "ja_JP": "ビタミンA",
+              "en_JP": "Vitamin A",
+              "vi_JP": "Vitamin A",
+              "ja_US": "ビタミンA",
+              "en_US": "Vitamin A",
+              "vi_US": "Vitamin A",
+              "ja_VN": "ビタミンA",
+              "en_VN": "Vitamin A",
+              "vi_VN": "Vitamin A"
+            }
+          },
+          {
+            "item_tag": "vitamin_d",
+            "image_name": "ic_dot",
+            "title_localized": {
+              "ja_JP": "ビタミンD",
+              "en_JP": "Vitamin D",
+              "vi_JP": "Vitamin D",
+              "ja_US": "ビタミンD",
+              "en_US": "Vitamin D",
+              "vi_US": "Vitamin D",
+              "ja_VN": "ビタミンD",
+              "en_VN": "Vitamin D",
+              "vi_VN": "Vitamin D"
+            }
+          },
+          {
+            "item_tag": "vitamin_e",
+            "image_name": "ic_dot",
+            "title_localized": {
+              "ja_JP": "ビタミンE",
+              "en_JP": "Vitamin E",
+              "vi_JP": "Vitamin E",
+              "ja_US": "ビタミンE",
+              "en_US": "Vitamin E",
+              "vi_US": "Vitamin E",
+              "ja_VN": "ビタミンE",
+              "en_VN": "Vitamin E",
+              "vi_VN": "Vitamin E"
+            }
+          },
+          {
+            "item_tag": "vitamin_k",
+            "image_name": "ic_dot",
+            "title_localized": {
+              "ja_JP": "ビタミンK",
+              "en_JP": "Vitamin K",
+              "vi_JP": "Vitamin K",
+              "ja_US": "ビタミンK",
+              "en_US": "Vitamin K",
+              "vi_US": "Vitamin K",
+              "ja_VN": "ビタミンK",
+              "en_VN": "Vitamin K",
+              "vi_VN": "Vitamin K"
+            }
+          }
+        ]
+      }
+    ],
+    "minerals": [
+      {
+        "section_tag": "macrominerals",
+        "secondary_image_name": "ic_arrow_down",
+        "section_name_localized": {
+          "ja_JP": "主要ミネラル",
+          "en_JP": "Macrominerals",
+          "vi_JP": "Khoáng chất đa lượng",
+          "ja_US": "主要ミネラル",
+          "en_US": "Macrominerals",
+          "vi_US": "Khoáng chất đa lượng",
+          "ja_VN": "主要ミネラル",
+          "en_VN": "Macrominerals",
+          "vi_VN": "Khoáng chất đa lượng"
+        },
+        "description_localized": {
+          "ja_JP": "主要ミネラルは 1 日あたり 100 mg を超える量が必要です。",
+          "en_JP": "Macrominerals are required in amounts greater than 100 mg per day.",
+          "vi_JP": "Khoáng chất đa lượng cần thiết với lượng lớn hơn 100 mg mỗi ngày.",
+          "ja_US": "主要ミネラルは 1 日あたり 100 mg を超える量が必要です。",
+          "en_US": "Macrominerals are required in amounts greater than 100 mg per day.",
+          "vi_US": "Khoáng chất đa lượng cần thiết với lượng lớn hơn 100 mg mỗi ngày.",
+          "ja_VN": "主要ミネラルは 1 日あたり 100 mg を超える量が必要です。",
+          "en_VN": "Macrominerals are required in amounts greater than 100 mg per day.",
+          "vi_VN": "Khoáng chất đa lượng cần thiết với lượng lớn hơn 100 mg mỗi ngày."
+        },
+        "items": [
+          {
+            "item_tag": "calcium",
+            "image_name": "ic_dot",
+            "title_localized": {
+              "ja_JP": "カルシウム",
+              "en_JP": "Calcium",
+              "vi_JP": "Canxi",
+              "ja_US": "カルシウム",
+              "en_US": "Calcium",
+              "vi_US": "Canxi",
+              "ja_VN": "カルシウム",
+              "en_VN": "Calcium",
+              "vi_VN": "Canxi"
+            }
+          },
+          {
+            "item_tag": "phosphorous",
+            "image_name": "ic_dot",
+            "title_localized": {
+              "ja_JP": "リン",
+              "en_JP": "Phosphorous",
+              "vi_JP": "Phốt pho",
+              "ja_US": "リン",
+              "en_US": "Phosphorous",
+              "vi_US": "Phốt pho",
+              "ja_VN": "リン",
+              "en_VN": "Phosphorous",
+              "vi_VN": "Phốt pho"
+            }
+          },
+          {
+            "item_tag": "magnesium",
+            "image_name": "ic_dot",
+            "title_localized": {
+              "ja_JP": "マグネシウム",
+              "en_JP": "Magnesium",
+              "vi_JP": "Magiê",
+              "ja_US": "マグネシウム",
+              "en_US": "Magnesium",
+              "vi_US": "Magiê",
+              "ja_VN": "マグネシウム",
+              "en_VN": "Magnesium",
+              "vi_VN": "Magiê"
+            }
+          },
+          {
+            "item_tag": "sodium",
+            "image_name": "ic_dot",
+            "title_localized": {
+              "ja_JP": "ナトリウム",
+              "en_JP": "Sodium",
+              "vi_JP": "Natri",
+              "ja_US": "ナトリウム",
+              "en_US": "Sodium",
+              "vi_US": "Natri",
+              "ja_VN": "ナトリウム",
+              "en_VN": "Sodium",
+              "vi_VN": "Natri"
+            }
+          },
+          {
+            "item_tag": "potassium",
+            "image_name": "ic_dot",
+            "title_localized": {
+              "ja_JP": "カリウム",
+              "en_JP": "Potassium",
+              "vi_JP": "Kali",
+              "ja_US": "カリウム",
+              "en_US": "Potassium",
+              "vi_US": "Kali",
+              "ja_VN": "カリウム",
+              "en_VN": "Potassium",
+              "vi_VN": "Kali"
+            }
+          },
+          {
+            "item_tag": "chloride",
+            "image_name": "ic_dot",
+            "title_localized": {
+              "ja_JP": "塩化物",
+              "en_JP": "Chloride",
+              "vi_JP": "Clorua",
+              "ja_US": "塩化物",
+              "en_US": "Chloride",
+              "vi_US": "Clorua",
+              "ja_VN": "塩化物",
+              "en_VN": "Chloride",
+              "vi_VN": "Clorua"
+            }
+          }
+        ]
+      },
+      {
+        "section_tag": "microminerals",
+        "section_name_localized": {
+          "ja_JP": "微量ミネラル",
+          "en_JP": "Microminerals",
+          "vi_JP": "Khoáng chất vi lượng",
+          "ja_US": "微量ミネラル",
+          "en_US": "Microminerals",
+          "vi_US": "Khoáng chất vi lượng",
+          "ja_VN": "微量ミネラル",
+          "en_VN": "Microminerals",
+          "vi_VN": "Khoáng chất vi lượng"
+        },
+        "secondary_image_name": "ic_arrow_down",
+        "description_localized": {
+          "ja_JP": "微量ミネラルは 1 日あたり 100 mg 未満の量が必要な栄養素です。",
+          "en_JP": "Microminerals are those nutrients required in amounts less than 100 mg per day.",
+          "vi_JP": "Khoáng chất vi lượng là những dưỡng chất cần thiết với lượng nhỏ hơn 100 mg mỗi ngày.",
+          "ja_US": "微量ミネラルは 1 日あたり 100 mg 未満の量が必要な栄養素です。",
+          "en_US": "Microminerals are those nutrients required in amounts less than 100 mg per day.",
+          "vi_US": "Khoáng chất vi lượng là những dưỡng chất cần thiết với lượng nhỏ hơn 100 mg mỗi ngày.",
+          "ja_VN": "微量ミネラルは 1 日あたり 100 mg 未満の量が必要な栄養素です。",
+          "en_VN": "Microminerals are those nutrients required in amounts less than 100 mg per day.",
+          "vi_VN": "Khoáng chất vi lượng là những dưỡng chất cần thiết với lượng nhỏ hơn 100 mg mỗi ngày."
+        },
+        "items": [
+          {
+            "item_tag": "iron",
+            "image_name": "ic_dot",
+            "title_localized": {
+              "ja_JP": "鉄",
+              "en_JP": "Iron",
+              "vi_JP": "Sắt",
+              "ja_US": "鉄",
+              "en_US": "Iron",
+              "vi_US": "Sắt",
+              "ja_VN": "鉄",
+              "en_VN": "Iron",
+              "vi_VN": "Sắt"
+            }
+          },
+          {
+            "item_tag": "copper",
+            "image_name": "ic_dot",
+            "title_localized": {
+              "ja_JP": "銅",
+              "en_JP": "Copper",
+              "vi_JP": "Đồng",
+              "ja_US": "銅",
+              "en_US": "Copper",
+              "vi_US": "Đồng",
+              "ja_VN": "銅",
+              "en_VN": "Copper",
+              "vi_VN": "Đồng"
+            }
+          },
+          {
+            "item_tag": "zinc",
+            "image_name": "ic_dot",
+            "title_localized": {
+              "ja_JP": "亜鉛",
+              "en_JP": "Zinc",
+              "vi_JP": "Kẽm",
+              "ja_US": "亜鉛",
+              "en_US": "Zinc",
+              "vi_US": "Kẽm",
+              "ja_VN": "亜鉛",
+              "en_VN": "Zinc",
+              "vi_VN": "Kẽm"
+            }
+          },
+          {
+            "item_tag": "selenium",
+            "image_name": "ic_dot",
+            "title_localized": {
+              "ja_JP": "セレン",
+              "en_JP": "Selenium",
+              "vi_JP": "Selen",
+              "ja_US": "セレン",
+              "en_US": "Selenium",
+              "vi_US": "Selen",
+              "ja_VN": "セレン",
+              "en_VN": "Selenium",
+              "vi_VN": "Selen"
+            }
+          },
+          {
+            "item_tag": "iodine",
+            "image_name": "ic_dot",
+            "title_localized": {
+              "ja_JP": "ヨウ素",
+              "en_JP": "Iodine",
+              "vi_JP": "I-ốt",
+              "ja_US": "ヨウ素",
+              "en_US": "Iodine",
+              "vi_US": "I-ốt",
+              "ja_VN": "ヨウ素",
+              "en_VN": "Iodine",
+              "vi_VN": "I-ốt"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,225 @@
+{
+  "attributes": [
+    {
+      "section_tag": "fitness_tracker_information",
+      "section_name_localized": {
+        "ja_JP": "フィットネストラッカー情報",
+        "en_JP": "Fitness Tracker Information",
+        "vi_JP": "Thông tin theo dõi thể dục",
+        "ja_US": "フィットネストラッカー情報",
+        "en_US": "Fitness Tracker Information",
+        "vi_US": "Thông tin theo dõi thể dục",
+        "ja_VN": "フィットネストラッカー情報",
+        "en_VN": "Fitness Tracker Information",
+        "vi_VN": "Thông tin theo dõi thể dục"
+      },
+      "items": [
+        {
+          "item_tag": "name",
+          "title_localized": {
+            "ja_JP": "名前",
+            "en_JP": "Name",
+            "vi_JP": "Tên",
+            "ja_US": "名前",
+            "en_US": "Name",
+            "vi_US": "Tên",
+            "ja_VN": "名前",
+            "en_VN": "Name",
+            "vi_VN": "Tên"
+          }
+        },
+        {
+          "item_tag": "model",
+          "title_localized": {
+            "ja_JP": "モデル名",
+            "en_JP": "Model Name",
+            "vi_JP": "Tên kiểu máy",
+            "ja_US": "モデル名",
+            "en_US": "Model Name",
+            "vi_US": "Tên kiểu máy",
+            "ja_VN": "モデル名",
+            "en_VN": "Model Name",
+            "vi_VN": "Tên kiểu máy"
+          }
+        },
+        {
+          "item_tag": "version",
+          "title_localized": {
+            "ja_JP": "バージョン",
+            "en_JP": "Version",
+            "vi_JP": "Phiên bản",
+            "ja_US": "バージョン",
+            "en_US": "Version",
+            "vi_US": "Phiên bản",
+            "ja_VN": "バージョン",
+            "en_VN": "Version",
+            "vi_VN": "Phiên bản"
+          }
+        },
+        {
+          "item_tag": "device_id",
+          "title_localized": {
+            "ja_JP": "デバイスID",
+            "en_JP": "Device ID",
+            "vi_JP": "ID thiết bị",
+            "ja_US": "デバイスID",
+            "en_US": "Device ID",
+            "vi_US": "ID thiết bị",
+            "ja_VN": "デバイスID",
+            "en_VN": "Device ID",
+            "vi_VN": "ID thiết bị"
+          }
+        }
+      ]
+    },
+    {
+      "section_tag": "tracking_activities",
+      "section_name_localized": {
+        "ja_JP": "アクティビティのトラッキング",
+        "en_JP": "Tracking Activities",
+        "vi_JP": "Theo dõi hoạt động",
+        "ja_US": "アクティビティのトラッキング",
+        "en_US": "Tracking Activities",
+        "vi_US": "Theo dõi hoạt động",
+        "ja_VN": "アクティビティのトラッキング",
+        "en_VN": "Tracking Activities",
+        "vi_VN": "Theo dõi hoạt động"
+      },
+      "items": [
+        {
+          "item_tag": "sleep_tracking",
+          "title_localized": {
+            "ja_JP": "睡眠トラッキング",
+            "en_JP": "Sleep Tracking",
+            "vi_JP": "Theo dõi giấc ngủ",
+            "ja_US": "睡眠トラッキング",
+            "en_US": "Sleep Tracking",
+            "vi_US": "Theo dõi giấc ngủ",
+            "ja_VN": "睡眠トラッキング",
+            "en_VN": "Sleep Tracking",
+            "vi_VN": "Theo dõi giấc ngủ"
+          },
+          "secondary_image_name": "ic_right_arrow"
+        },
+        {
+          "item_tag": "nutrition_tracking",
+          "title_localized": {
+            "ja_JP": "栄養トラッキング",
+            "en_JP": "Nutrition Tracking",
+            "vi_JP": "Theo dõi dinh dưỡng",
+            "ja_US": "栄養トラッキング",
+            "en_US": "Nutrition Tracking",
+            "vi_US": "Theo dõi dinh dưỡng",
+            "ja_VN": "栄養トラッキング",
+            "en_VN": "Nutrition Tracking",
+            "vi_VN": "Theo dõi dinh dưỡng"
+          },
+          "secondary_image_name": "ic_right_arrow"
+        },
+        {
+          "item_tag": "exercise_tracking",
+          "title_localized": {
+            "ja_JP": "運動トラッキング",
+            "en_JP": "Exercise Tracking",
+            "vi_JP": "Theo dõi luyện tập",
+            "ja_US": "運動トラッキング",
+            "en_US": "Exercise Tracking",
+            "vi_US": "Theo dõi luyện tập",
+            "ja_VN": "運動トラッキング",
+            "en_VN": "Exercise Tracking",
+            "vi_VN": "Theo dõi luyện tập"
+          },
+          "secondary_image_name": "ic_right_arrow"
+        }
+      ]
+    },
+    {
+      "section_tag": "battery",
+      "section_name_localized": {
+        "ja_JP": "バッテリー",
+        "en_JP": "Battery",
+        "vi_JP": "Pin",
+        "ja_US": "バッテリー",
+        "en_US": "Battery",
+        "vi_US": "Pin",
+        "ja_VN": "バッテリー",
+        "en_VN": "Battery",
+        "vi_VN": "Pin"
+      },
+      "items": [
+        {
+          "item_tag": "battery_percentage",
+          "title_localized": {
+            "ja_JP": "残量",
+            "en_JP": "Percentage",
+            "vi_JP": "Phần trăm",
+            "ja_US": "残量",
+            "en_US": "Percentage",
+            "vi_US": "Phần trăm",
+            "ja_VN": "残量",
+            "en_VN": "Percentage",
+            "vi_VN": "Phần trăm"
+          }
+        },
+        {
+          "item_tag": "battery_maximum_capacity",
+          "title_localized": {
+            "ja_JP": "最大容量",
+            "en_JP": "Maximum Capacity",
+            "vi_JP": "Dung lượng tối đa",
+            "ja_US": "最大容量",
+            "en_US": "Maximum Capacity",
+            "vi_US": "Dung lượng tối đa",
+            "ja_VN": "最大容量",
+            "en_VN": "Maximum Capacity",
+            "vi_VN": "Dung lượng tối đa"
+          }
+        }
+      ]
+    },
+    {
+      "section_tag": "storage",
+      "section_name_localized": {
+        "ja_JP": "ストレージ",
+        "en_JP": "Storage",
+        "vi_JP": "Bộ nhớ",
+        "ja_US": "ストレージ",
+        "en_US": "Storage",
+        "vi_US": "Bộ nhớ",
+        "ja_VN": "ストレージ",
+        "en_VN": "Storage",
+        "vi_VN": "Bộ nhớ"
+      },
+      "items": [
+        {
+          "item_tag": "storage_capacity",
+          "title_localized": {
+            "ja_JP": "ストレージ容量",
+            "en_JP": "Storage Capacity",
+            "vi_JP": "Dung lượng bộ nhớ",
+            "ja_US": "ストレージ容量",
+            "en_US": "Storage Capacity",
+            "vi_US": "Dung lượng bộ nhớ",
+            "ja_VN": "ストレージ容量",
+            "en_VN": "Storage Capacity",
+            "vi_VN": "Dung lượng bộ nhớ"
+          }
+        },
+        {
+          "item_tag": "storage_availability",
+          "title_localized": {
+            "ja_JP": "空き容量",
+            "en_JP": "Storage Availability",
+            "vi_JP": "Dung lượng khả dụng",
+            "ja_US": "空き容量",
+            "en_US": "Storage Availability",
+            "vi_US": "Dung lượng khả dụng",
+            "ja_VN": "空き容量",
+            "en_VN": "Storage Availability",
+            "vi_VN": "Dung lượng khả dụng"
+          }
+        }
+      ]
+    }
+  ]
+}

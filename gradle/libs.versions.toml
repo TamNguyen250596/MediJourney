@@ -1,0 +1,166 @@
+[versions]
+# Kotlin, Android, and Google Services
+kotlin-android = "1.9.24"
+compose-kotlin-android = "2.0.21"
+android-application = "8.9.2"
+google-services = "4.4.2"
+navigation-safe-args-gradle-plugin = "2.8.9"
+realm-kotlin = "2.3.0"
+navigation-safeargs = "2.8.9"
+androidx-biometric = "1.1.0"
+fragment-ktx = "1.8.6"
+recyclerview = "1.4.0"
+
+# Jetpack Navigation Component
+navigation = "2.8.9"
+
+# Firebase
+firebase-bom = "33.13.0"
+firebase-installations = "18.0.0"
+
+# Glide
+glide = "4.16.0"
+glide-compose = "1.0.0-beta01"
+
+# RxJava
+rxjava = "3.1.8"
+
+# Datastore
+datastore = "1.1.4"
+
+# Facebook SDK
+facebook-release = "18.0.2"
+
+# Gson
+gson = "2.11.0"
+
+# Play Services
+play-services-auth = "21.3.0"
+
+# AndroidX Core and Lifecycle
+androidx-core-ktx = "1.15.0"
+lifecycle-runtime-ktx = "2.8.7"
+lifecycle-livedata-ktx = "2.8.7"
+lifecycle-viewmodel-ktx = "2.8.7"
+
+# Jetpack Compose
+compose-bom = "2025.04.01"
+activity-compose = "1.10.1"
+constraintlayout_compose = "1.1.1"
+material3-android = "1.3.2"
+media3 = "1.6.1"
+camerax = "1.5.0-alpha06"
+
+# AndroidX AppCompat, Material, and ConstraintLayout
+appcompat = "1.7.0"
+material = "1.12.0"
+constraintlayout = "2.2.1"
+
+# Chart
+mpandroidchart = "3.1.0"
+
+# Retrofit
+retrofit = "3.0.0"
+
+# Testing Libraries
+junit = "4.13.2"
+androidx-test-junit = "1.2.1"
+espresso-core = "3.6.1"
+legacy-support-v4 = "1.0.0"
+
+[libraries]
+# Jetpack Navigation
+androidx-navigation-safe-args-gradle-plugin = { module = "androidx.navigation:navigation-safe-args-gradle-plugin", version.ref = "navigation-safe-args-gradle-plugin" }
+navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
+navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigation" }
+navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigation" }
+navigation-dynamic-features-fragment = { group = "androidx.navigation", name = "navigation-dynamic-features-fragment", version.ref = "navigation" }
+
+# Glide
+glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
+glide-compose = { module = "com.github.bumptech.glide:compose", version.ref = "glide-compose" }
+
+# Realm
+realm-library-base = { group = "io.realm.kotlin", name = "library-base", version.ref = "realm-kotlin" }
+
+# RxJava
+rxjava = { group = "io.reactivex.rxjava3", name = "rxjava", version.ref = "rxjava" }
+
+# Datastore
+datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
+
+# Facebook SDK
+facebook-login = { group = "com.facebook.android", name = "facebook-login", version.ref = "facebook-release" }
+facebook-share = { group = "com.facebook.android", name = "facebook-share", version.ref = "facebook-release" }
+
+# Gson
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+
+# Firebase
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
+firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
+firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
+firebase-storage = { group = "com.google.firebase", name = "firebase-storage" }
+firebase-installations = { module = "com.google.firebase:firebase-installations", version.ref = "firebase-installations" }
+
+# Play Services
+play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "play-services-auth" }
+
+# AndroidX Core and Lifecycle
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core-ktx" }
+lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle-runtime-ktx" }
+
+# Jetpack Compose
+compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
+compose-ui = { group = "androidx.compose.ui", name = "ui" }
+compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3-android" }
+activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
+media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "media3" }
+media3-exoplayer-dash = { module = "androidx.media3:media3-exoplayer-dash", version.ref = "media3" }
+media3-ui = { module = "androidx.media3:media3-ui", version.ref = "media3" }
+androidx_constraintlayout_compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayout_compose" }
+camera-core = { module = "androidx.camera:camera-core", version.ref = "camerax" }
+camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "camerax" }
+camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "camerax" }
+camera-video = { module = "androidx.camera:camera-video", version.ref = "camerax" }
+camera-view = { module = "androidx.camera:camera-view", version.ref = "camerax" }
+camera-mlkit-vision = { module = "androidx.camera:camera-mlkit-vision", version.ref = "camerax" }
+camera-extensions = { module = "androidx.camera:camera-extensions", version.ref = "camerax" }
+
+# AndroidX AppCompat, Material, and ConstraintLayout
+appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+
+# Biometric
+androidx-biometric = { group = "androidx.biometric", name = "biometric", version.ref = "androidx-biometric" }
+
+# Chart
+mpandroidchart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "mpandroidchart" }
+
+# Retrofit
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+retrofit-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
+
+# Testing Libraries
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-test-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-junit" }
+espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
+compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+androidx-legacy-support-v4 = { group = "androidx.legacy", name = "legacy-support-v4", version.ref = "legacy-support-v4" }
+androidx-lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "lifecycle-livedata-ktx" }
+androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle-viewmodel-ktx" }
+androidx-fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragment-ktx" }
+androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "android-application" }
+jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin-android" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "compose-kotlin-android" }
+google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
+realm-kotlin = { id = "io.realm.kotlin", version.ref = "realm-kotlin" }
+navigation-safeargs = { id = "androidx.navigation.safeargs", version.ref = "navigation-safeargs" }

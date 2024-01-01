@@ -1,0 +1,41 @@
+{
+  "attributes": [
+    {
+      "item_tag": "share_via_facebook",
+      "image_name": "ic_facebook_logo",
+      "share_content": {
+        "ja_JP": "MediJourneyは、健康管理をこれまでになく簡単にするシンプルで信頼できるアプリです。目標を追跡し、予定を整理し、いつでもどこでも記録にアクセスできます。\n\nウェルネスの旅を管理する場合でも、大切な人のケアをする場合でも、MediJourneyはそのすべてをサポートするツールを提供します。",
+        "en_JP": "MediJourney is a simple, reliable, and secure app designed to make managing your health easier than ever. With MediJourney, you can track your health goals, stay organized with appointment reminders, and access your records anytime, anywhere.\n\nWhether you're managing your wellness journey or caring for loved ones, MediJourney gives you the tools you need to stay on top of it all.",
+        "vi_JP": "MediJourney là một ứng dụng đơn giản, đáng tin cậy và an toàn, được thiết kế để quản lý sức khỏe của bạn dễ dàng hơn bao giờ hết. Với MediJourney, bạn có thể theo dõi các mục tiêu sức khỏe, tổ chức lịch hẹn một cách khoa học và truy cập hồ sơ của bạn bất cứ lúc nào, bất cứ đâu.\n\nDù bạn đang theo dõi sức khỏe cá nhân hay chăm sóc người thân, MediJourney cung cấp các công cụ cần thiết để hỗ trợ bạn trong mọi tình huống.",
+        "en_US": "MediJourney is a simple, reliable, and secure app designed to make managing your health easier than ever. With MediJourney, you can track your health goals, stay organized with appointment reminders, and access your records anytime, anywhere.\n\nWhether you're managing your wellness journey or caring for loved ones, MediJourney gives you the tools you need to stay on top of it all.",
+        "vi_US": "MediJourney là một ứng dụng đơn giản, đáng tin cậy và an toàn, được thiết kế để quản lý sức khỏe của bạn dễ dàng hơn bao giờ hết. Với MediJourney, bạn có thể theo dõi các mục tiêu sức khỏe, tổ chức lịch hẹn một cách khoa học và truy cập hồ sơ của bạn bất cứ lúc nào, bất cứ đâu.\n\nDù bạn đang theo dõi sức khỏe cá nhân hay chăm sóc người thân, MediJourney cung cấp các công cụ cần thiết để hỗ trợ bạn trong mọi tình huống.",
+        "ja_US": "MediJourneyは、健康管理をこれまでになく簡単にするシンプルで信頼できるアプリです。目標を追跡し、予定を整理し、いつでもどこでも記録にアクセスできます。\n\nウェルネスの旅を管理する場合でも、大切な人のケアをする場合でも、MediJourneyはそのすべてをサポートするツールを提供します。",
+        "vi_VN": "MediJourney là một ứng dụng đơn giản, đáng tin cậy và an toàn, được thiết kế để quản lý sức khỏe của bạn dễ dàng hơn bao giờ hết. Với MediJourney, bạn có thể theo dõi các mục tiêu sức khỏe, tổ chức lịch hẹn một cách khoa học và truy cập hồ sơ của bạn bất cứ lúc nào, bất cứ đâu.\n\nDù bạn đang theo dõi sức khỏe cá nhân hay chăm sóc người thân, MediJourney cung cấp các công cụ cần thiết để hỗ trợ bạn trong mọi tình huống.",
+        "en_VN": "MediJourney is a simple, reliable, and secure app designed to make managing your health easier than ever. With MediJourney, you can track your health goals, stay organized with appointment reminders, and access your records anytime, anywhere.\n\nWhether you're managing your wellness journey or caring for loved ones, MediJourney gives you the tools you need to stay on top of it all.",
+        "ja_VN": "MediJourneyは、健康管理をこれまでになく簡単にするシンプルで信頼できるアプリです。目標を追跡し、予定を整理し、いつでもどこでも記録にアクセスできます。\n\nウェルネスの旅を管理する場合でも、大切な人のケアをする場合でも、MediJourneyはそのすべてをサポートするツールを提供します。"
+      },
+      "share_url": "https://medijourney.com/12345678"
+    },
+    {
+      "item_tag": "share_via_telegram",
+      "image_name": "ic_telegram_logo",
+      "share_content": {
+        "ja_JP": "MediJourneyは、健康管理をこれまでになく簡単にするシンプルで信頼できるアプリです。目標を追跡し、予定を整理し、いつでもどこでも記録にアクセスできます。\n\nウェルネスの旅を管理する場合でも、大切な人のケアをする場合でも、MediJourneyはそのすべてをサポートするツールを提供します。",
+        "en_JP": "MediJourney is a simple, reliable, and secure app designed to make managing your health easier than ever. With MediJourney, you can track your health goals, stay organized with appointment reminders, and access your records anytime, anywhere.\n\nWhether you're managing your wellness journey or caring for loved ones, MediJourney gives you the tools you need to stay on top of it all.",
+        "vi_JP": "MediJourney là một ứng dụng đơn giản, đáng tin cậy và an toàn, được thiết kế để quản lý sức khỏe của bạn dễ dàng hơn bao giờ hết. Với MediJourney, bạn có thể theo dõi các mục tiêu sức khỏe, tổ chức lịch hẹn một cách khoa học và truy cập hồ sơ của bạn bất cứ lúc nào, bất cứ đâu.\n\nDù bạn đang theo dõi sức khỏe cá nhân hay chăm sóc người thân, MediJourney cung cấp các công cụ cần thiết để hỗ trợ bạn trong mọi tình huống.",
+        "en_US": "MediJourney is a simple, reliable, and secure app designed to make managing your health easier than ever. With MediJourney, you can track your health goals, stay organized with appointment reminders, and access your records anytime, anywhere.\n\nWhether you're managing your wellness journey or caring for loved ones, MediJourney gives you the tools you need to stay on top of it all.",
+        "vi_US": "MediJourney là một ứng dụng đơn giản, đáng tin cậy và an toàn, được thiết kế để quản lý sức khỏe của bạn dễ dàng hơn bao giờ hết. Với MediJourney, bạn có thể theo dõi các mục tiêu sức khỏe, tổ chức lịch hẹn một cách khoa học và truy cập hồ sơ của bạn bất cứ lúc nào, bất cứ đâu.\n\nDù bạn đang theo dõi sức khỏe cá nhân hay chăm sóc người thân, MediJourney cung cấp các công cụ cần thiết để hỗ trợ bạn trong mọi tình huống.",
+        "ja_US": "MediJourneyは、健康管理をこれまでになく簡単にするシンプルで信頼できるアプリです。目標を追跡し、予定を整理し、いつでもどこでも記録にアクセスできます。\n\nウェルネスの旅を管理する場合でも、大切な人のケアをする場合でも、MediJourneyはそのすべてをサポートするツールを提供します。",
+        "vi_VN": "MediJourney là một ứng dụng đơn giản, đáng tin cậy và an toàn, được thiết kế để quản lý sức khỏe của bạn dễ dàng hơn bao giờ hết. Với MediJourney, bạn có thể theo dõi các mục tiêu sức khỏe, tổ chức lịch hẹn một cách khoa học và truy cập hồ sơ của bạn bất cứ lúc nào, bất cứ đâu.\n\nDù bạn đang theo dõi sức khỏe cá nhân hay chăm sóc người thân, MediJourney cung cấp các công cụ cần thiết để hỗ trợ bạn trong mọi tình huống.",
+        "en_VN": "MediJourney is a simple, reliable, and secure app designed to make managing your health easier than ever. With MediJourney, you can track your health goals, stay organized with appointment reminders, and access your records anytime, anywhere.\n\nWhether you're managing your wellness journey or caring for loved ones, MediJourney gives you the tools you need to stay on top of it all.",
+        "ja_VN": "MediJourneyは、健康管理をこれまでになく簡単にするシンプルで信頼できるアプリです。目標を追跡し、予定を整理し、いつでもどこでも記録にアクセスできます。\n\nウェルネスの旅を管理する場合でも、大切な人のケアをする場合でも、MediJourneyはそのすべてをサポートするツールを提供します。"
+      },
+      "share_url": "https://medijourney.com/12345678"
+    },
+    {
+      "item_tag": "copy_share_link",
+      "image_name": "ic_copy_share_link",
+      "share_url": "https://medijourney.com/12345678"
+    }
+  ]
+}

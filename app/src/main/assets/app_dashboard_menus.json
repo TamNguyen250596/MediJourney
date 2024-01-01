@@ -1,0 +1,135 @@
+{
+  "attributes": [
+    {
+      "section_tag": "booking",
+      "section_name_localized": {
+        "ja_JP": "予約",
+        "en_JP": "Booking",
+        "vi_JP": "Đặt lịch",
+        "ja_US": "予約",
+        "en_US": "Booking",
+        "vi_US": "Đặt lịch",
+        "ja_VN": "予約",
+        "en_VN": "Booking",
+        "vi_VN": "Đặt lịch"
+      },
+      "items": [
+        {
+          "item_tag": "medical_booking",
+          "image_name": "menu_medical_booking",
+          "title_localized": {
+            "ja_JP": "医療予約",
+            "en_JP": "Medical Booking",
+            "vi_JP": "Đặt lịch khám bệnh",
+            "ja_US": "医療予約",
+            "en_US": "Medical booking",
+            "vi_US": "Đặt lịch khám bệnh",
+            "ja_VN": "医療予約",
+            "en_VN": "Medical booking",
+            "vi_VN": "Đặt lịch khám bệnh"
+          },
+          "keywords": {
+            "ja_JP": "医療, 予約",
+            "en_JP": "medical, booking",
+            "vi_JP": "y tế, đặt lịch",
+            "ja_US": "医療, 予約",
+            "en_US": "medical, booking",
+            "vi_US": "y tế, đặt lịch",
+            "ja_VN": "医療, 予約",
+            "en_VN": "medical, booking",
+            "vi_VN": "y tế, đặt lịch"
+          }
+        }
+      ]
+    },
+    {
+      "section_tag": "purchase",
+      "section_name_localized": {
+        "ja_JP": "購入",
+        "en_JP": "Purchase",
+        "vi_JP": "Mua hàng",
+        "ja_US": "購入",
+        "en_US": "Purchase",
+        "vi_US": "Mua hàng",
+        "ja_VN": "購入",
+        "en_VN": "Purchase",
+        "vi_VN": "Mua hàng"
+      },
+      "items": [
+        {
+          "item_tag": "buy_medication",
+          "image_name": "menu_buy_medication",
+          "title_localized": {
+            "ja_JP": "薬を買う",
+            "en_JP": "Buy Medication",
+            "vi_JP": "Mua thuốc",
+            "ja_US": "薬を買う",
+            "en_US": "Buy medication",
+            "vi_US": "Mua thuốc",
+            "ja_VN": "薬を買う",
+            "en_VN": "Buy medication",
+            "vi_VN": "Mua thuốc"
+          },
+          "keywords": {
+            "ja_JP": "薬, 購入",
+            "en_JP": "buy, medication",
+            "vi_JP": "mua, thuốc",
+            "ja_US": "薬, 購入",
+            "en_US": "buy, medication",
+            "vi_US": "mua, thuốc",
+            "ja_VN": "薬, 購入",
+            "en_VN": "buy, medication",
+            "vi_VN": "mua, thuốc"
+          }
+        }
+      ]
+    },
+    {
+      "section_tag": "education",
+      "section_name_localized": {
+        "ja_JP": "教育",
+        "en_JP": "Education",
+        "vi_JP": "Giáo dục",
+        "ja_US": "教育",
+        "en_US": "Education",
+        "vi_US": "Giáo dục",
+        "ja_VN": "教育",
+        "en_VN": "Education",
+        "vi_VN": "Giáo dục"
+      },
+      "items": [
+        {
+          "item_tag": "medical_knowledge",
+          "image_name": "menu_medical_knowledge",
+          "title_localized": {
+            "ja_JP": "医療知識",
+            "en_JP": "Medical Knowledge",
+            "vi_JP": "Kiến thức y tế",
+            "ja_US": "医療知識",
+            "en_US": "Medical knowledge",
+            "vi_US": "Kiến thức y tế",
+            "ja_VN": "医療知識",
+            "en_VN": "Medical knowledge",
+            "vi_VN": "Kiến thức y tế"
+          },
+          "keywords": {
+            "ja_JP": "医療, 知識, 教育",
+            "en_JP": "medical, knowledge, education",
+            "vi_JP": "y tế, kiến thức, giáo dục",
+            "ja_US": "医療, 知識, 教育",
+            "en_US": "medical, knowledge, education",
+            "vi_US": "y tế, kiến thức, giáo dục",
+            "ja_VN": "医療, 知識, 教育",
+            "en_VN": "medical, knowledge, education",
+            "vi_VN": "y tế, kiến thức, giáo dục"
+          }
+        }
+      ]
+    }
+  ],
+  "top_menus": [
+    "medical_booking",
+    "buy_medication",
+    "medical_knowledge"
+  ]
+}

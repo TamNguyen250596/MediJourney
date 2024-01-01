@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigationNotification"
+    app:startDestination="@id/notificationFragment">
+
+    <fragment
+        android:id="@+id/notificationFragment"
+        android:name="com.example.medijourney.modules.notification.NotificationFragment"
+        android:label="@string/notification"
+        tools:layout="@layout/fragment_notification" >
+        <action
+            android:id="@+id/action_notificationFragment_to_addFitnessTrackerFragment"
+            app:destination="@id/addFitnessTrackerFragment" >
+            <argument
+                android:name="userFitnessTrackerId"
+                app:argType="string"
+                app:nullable="true"/>
+            <argument
+                android:name="viewType"
+                app:argType="string"
+                android:defaultValue="" />
+        </action>
+        <action
+            android:id="@+id/action_notificationFragment_to_fitnessTrackerDetailFragment"
+            app:destination="@id/fitnessTrackerDetailFragment" >
+            <argument
+                android:name="userFitnessTrackerId"
+                app:argType="string"
+                app:nullable="true"/>
+            <argument
+                android:name="notificationType"
+                app:argType="string"
+                app:nullable="true"/>
+        </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/addFitnessTrackerFragment"
+        android:name="com.example.medijourney.modules.health_center.add_fitness_tracker.AddFitnessTrackerFragment"
+        android:label="@string/add_fitness_tracker"
+        tools:layout="@layout/fragment_add_fitness_tracker">
+        <argument
+            android:name="userFitnessTrackerId"
+            app:argType="string"
+            app:nullable="true"/>
+        <argument
+            android:name="viewType"
+            app:argType="string"
+            android:defaultValue="" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fitnessTrackerDetailFragment"
+        android:name="com.example.medijourney.modules.health_center.fitness_tracker_detail.FitnessTrackerDetailFragment"
+        android:label="@string/fitness_tracker_detail"
+        tools:layout="@layout/fragment_fitness_tracker_detail" >
+        <argument
+            android:name="userFitnessTrackerId"
+            app:argType="string"
+            app:nullable="true"/>
+        <argument
+            android:name="notificationType"
+            app:argType="string"
+            app:nullable="true"/>
+        <action
+            android:id="@+id/action_fitnessTrackerDetailFragment_to_sleepTrackingReportFragment"
+            app:destination="@id/sleepTrackingReportFragment" >
+            <argument
+                android:name="userFitnessTrackerId"
+                app:argType="string"
+                app:nullable="true"/>
+            <argument
+                android:name="viewType"
+                app:argType="string"
+                android:defaultValue="" />
+        </action>
+        <action
+            android:id="@+id/action_fitnessTrackerDetailFragment_to_addFitnessTrackerFragment"
+            app:destination="@id/addFitnessTrackerFragment" >
+            <argument
+                android:name="userFitnessTrackerId"
+                app:argType="string"
+                app:nullable="true"/>
+            <argument
+                android:name="viewType"
+                app:argType="string"
+                android:defaultValue="" />
+        </action>
+        <action
+            android:id="@+id/action_fitnessTrackerDetailFragment_to_nutritionTrackingReportFragment"
+            app:destination="@id/nutritionTrackingReportFragment" >
+            <argument
+                android:name="userFitnessTrackerId"
+                app:argType="string"
+                app:nullable="true"/>
+        </action>
+        <action
+            android:id="@+id/action_fitnessTrackerDetailFragment_to_exerciseTrackingReportFragment"
+            app:destination="@id/exerciseTrackingReportFragment" >
+            <argument
+                android:name="userFitnessTrackerId"
+                app:argType="string"
+                app:nullable="true"/>
+        </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/sleepTrackingReportFragment"
+        android:name="com.example.medijourney.modules.health_center.sleep_tracking_report.SleepTrackingReportFragment"
+        android:label="@string/sleep_tracking_report"
+        tools:layout="@layout/fragment_sleep_tracking_report" >
+        <argument
+            android:name="userFitnessTrackerId"
+            app:argType="string"
+            app:nullable="true"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/nutritionTrackingReportFragment"
+        android:name="com.example.medijourney.modules.health_center.nutrition_tracking_report.NutritionTrackingReportFragment"
+        android:label="@string/nutrition_tracking_report"
+        tools:layout="@layout/fragment_nutrition_tracking_report" >
+        <argument
+            android:name="userFitnessTrackerId"
+            app:argType="string"
+            app:nullable="true"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/exerciseTrackingReportFragment"
+        android:name="com.example.medijourney.modules.health_center.exercise_tracking_report.ExerciseTrackingReportFragment"
+        android:label="@string/exercise_tracking_report"
+        tools:layout="@layout/fragment_exercise_tracking_report" >
+        <argument
+            android:name="userFitnessTrackerId"
+            app:argType="string"
+            app:nullable="true"/>
+    </fragment>
+
+</navigation>

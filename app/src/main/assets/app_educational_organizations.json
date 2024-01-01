@@ -1,0 +1,30 @@
+{
+  "attributes": [
+    {
+      "item_tag": "syndigo_university",
+      "image_name": "syndigo_university",
+      "title_localized": {
+        "ja_JP": "シンディゴ大学",
+        "en_JP": "Syndigo University",
+        "vi_JP": "Đại học Syndigo",
+        "ja_US": "シンディゴ大学",
+        "en_US": "Syndigo University",
+        "vi_US": "Đại học Syndigo",
+        "ja_VN": "シンディゴ大学",
+        "en_VN": "Syndigo University",
+        "vi_VN": "Đại học Syndigo"
+      },
+      "description_localized": {
+        "ja_JP": "Nutritionix API v2は、ユーザーが食事によって摂取したカロリーや運動によって消費したカロリーを簡単に追跡できるように設計されています。",
+        "en_JP": "The Nutritionix API v2 is geared towards making it as easy as possible for a user to track calories they consume while eating, and calories they expend while exercising.",
+        "vi_JP": "Nutritionix API v2 được thiết kế để giúp người dùng dễ dàng theo dõi lượng calo tiêu thụ khi ăn và lượng calo đốt cháy khi tập thể dục.",
+        "ja_US": "Nutritionix API v2は、ユーザーが食事によって摂取したカロリーや運動によって消費したカロリーを簡単に追跡できるように設計されています。",
+        "en_US": "The Nutritionix API v2 is geared towards making it as easy as possible for a user to track calories they consume while eating, and calories they expend while exercising.",
+        "vi_US": "Nutritionix API v2 được thiết kế để giúp người dùng dễ dàng theo dõi lượng calo tiêu thụ khi ăn và lượng calo đốt cháy khi tập thể dục.",
+        "ja_VN": "Nutritionix API v2は、ユーザーが食事によって摂取したカロリーや運動によって消費したカロリーを簡単に追跡できるように設計されています。",
+        "en_VN": "The Nutritionix API v2 is geared towards making it as easy as possible for a user to track calories they consume while eating, and calories they expend while exercising.",
+        "vi_VN": "Nutritionix API v2 được thiết kế để giúp người dùng dễ dàng theo dõi lượng calo tiêu thụ khi ăn và lượng calo đốt cháy khi tập thể dục."
+      }
+    }
+  ]
+}

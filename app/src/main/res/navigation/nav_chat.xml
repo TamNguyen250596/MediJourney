@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigationChat"
+    app:startDestination="@id/mainChatFragment">
+
+    <fragment
+        android:id="@+id/mainChatFragment"
+        android:name="com.example.medijourney.modules.chat.main.MainChatFragment"
+        android:label="@string/chat"
+        tools:layout="@layout/fragment_main_chat" >
+        <action
+            android:id="@+id/action_mainChatFragment_to_searchConversationFragment"
+            app:destination="@id/searchConversationFragment" />
+        <action
+            android:id="@+id/action_mainChatFragment_to_messageFragment"
+            app:destination="@id/messageFragment" >
+            <argument
+                android:name="conversationId"
+                app:argType="string"
+                app:nullable="false"
+                android:defaultValue=""/>
+            <argument
+                android:name="searchUserMessageId"
+                app:argType="string"
+                app:nullable="true"
+                android:defaultValue="null"/>
+        </action>
+        <action
+            android:id="@+id/action_mainChatFragment_to_searchMessageFragment"
+            app:destination="@id/searchMessageFragment" >
+            <argument
+                android:name="conversationId"
+                app:argType="string"
+                app:nullable="true"
+                android:defaultValue="null"/>
+        </action>
+        <action
+            android:id="@+id/action_mainChatFragment_to_aiChatFragment"
+            app:destination="@id/aiChatFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/searchConversationFragment"
+        android:name="com.example.medijourney.modules.chat.search_conversation.SearchConversationFragment"
+        android:label="@string/search_conversation"
+        tools:layout="@layout/fragment_search_conversation" />
+
+    <fragment
+        android:id="@+id/messageFragment"
+        android:name="com.example.medijourney.modules.chat.message.MessageFragment"
+        tools:layout="@layout/fragment_message" >
+        <argument
+            android:name="conversationId"
+            app:argType="string"
+            app:nullable="false"
+            android:defaultValue=""/>
+        <argument
+            android:name="searchUserMessageId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="null"/>
+        <action
+            android:id="@+id/action_messageFragment_to_searchMessageFragment"
+            app:destination="@id/searchMessageFragment" >
+            <argument
+                android:name="conversationId"
+                app:argType="string"
+                app:nullable="true"
+                android:defaultValue="null"/>
+        </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/searchMessageFragment"
+        android:name="com.example.medijourney.modules.chat.search_message.SearchMessageFragment"
+        android:label="@string/search_message"
+        tools:layout="@layout/fragment_search_message" >
+        <argument
+            android:name="conversationId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="null"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/aiChatFragment"
+        android:name="com.example.medijourney.modules.chat.ai_chat.AIChatFragment"
+        android:label="@string/health_ai_assistant"
+        tools:layout="@layout/fragment_ai_chat" />
+
+</navigation>
