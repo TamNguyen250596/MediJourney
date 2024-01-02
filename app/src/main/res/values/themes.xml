@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.MediJourney" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.MediJourney" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:fontFamily">@font/proximanova_font_family</item>
+        <item name="fontFamily">@font/proximanova_font_family</item>
+    </style>
+
 </resources>
