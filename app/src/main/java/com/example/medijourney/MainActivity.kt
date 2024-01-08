@@ -5,7 +5,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.View
 import androidx.activity.ComponentActivity
-import com.example.medijourney.modules.SignInActivity
+import com.example.medijourney.modules.authentication.sign_in.SignInActivity
+import com.example.medijourney.modules.authentication.sign_up.SignUpActivity
 
 
 class MainActivity : ComponentActivity() {
@@ -15,7 +16,7 @@ class MainActivity : ComponentActivity() {
         actionBar?.hide()
         setContentView(R.layout.activity_main)
         Handler().postDelayed({
-            startActivity(Intent(this@MainActivity, SignInActivity::class.java))
+            startActivity(Intent(this@MainActivity, SignUpActivity::class.java))
             finish()
         }, 5000)
     }

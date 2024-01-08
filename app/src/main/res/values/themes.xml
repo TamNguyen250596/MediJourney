@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.MediJourney" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="Theme.MediJourney" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="android:fontFamily">@font/proximanova_font_family</item>
         <item name="fontFamily">@font/proximanova_font_family</item>
     </style>
 
+    <style name="ThemeOverlay.AppTheme.TextInputEditText.Outlined" parent="">
+        <item name="colorPrimary">@color/black</item>
+    </style>
 </resources>
