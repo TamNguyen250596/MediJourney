@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "797762986274",
+    "project_id": "medijourney-36b1e",
+    "storage_bucket": "medijourney-36b1e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:797762986274:android:4c2c2f2e9cf48c7cb7057b",
+        "android_client_info": {
+          "package_name": "com.example.medijourney"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNw6wVxl0MMdaHevNCWo1uZXjkFQ1BV8A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
