@@ -11,4 +11,5 @@
     <color name="sky_blue_color">#B4D4FF</color>
     <color name="corn_flower_blue_color">#86B6F6</color>
     <color name="deep_turquoise_blue_color">#176B87</color>
+    <color name="disable_grey_color">#969595</color>
 </resources>

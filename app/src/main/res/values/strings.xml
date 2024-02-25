@@ -18,4 +18,6 @@
     <string name="sign_up_by_google">Sign up by google</string>
     <string name="sign_up_by_zalo">Sign up by Zalo</string>
     <string name="already_have_an_account">Already have an account?</string>
+    <string name="email_format_invalid">Your email format isn\'t valid</string>
+    <string name="password_length_short">Your password must contain more 6 characters</string>
 </resources>
