@@ -1,13 +1,13 @@
 package com.example.medijourney.modules.authentication.sign_up
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.example.medijourney.R.color.*
 import com.example.medijourney.databinding.ActivitySignUpBinding
@@ -32,13 +32,17 @@ class SignUpActivity : AppCompatActivity() {
         setupResultLauncher()
     }
 
+    @Deprecated("override onActivityResult to sign in by facebook")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        signUpViewModel.onActivityResult(requestCode, resultCode, data)
+    }
+
     override fun onStart() {
         super.onStart()
         signUpViewModel.user?.observe(this) { user ->
             if (user == null) {
                 showFailedAuthenticationToast()
-            } else {
-
             }
         }
         signUpViewModel.enableSignUpButton.observe(this) { enable ->
@@ -54,6 +58,9 @@ class SignUpActivity : AppCompatActivity() {
             val email = binding.emailTextInputEditText.text.toString()
             val password = binding.passwordTextInputEditText.text.toString()
             signUpViewModel.signUpUser(fullName, email, password)
+        }
+        binding.facebookImageButton.setOnClickListener {
+            signUpViewModel.signInFacebook(this)
         }
         binding.googleImageButton.setOnClickListener {
             signUpViewModel.signInGmail(this, resultLauncher)

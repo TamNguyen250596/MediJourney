@@ -20,4 +20,7 @@
     <string name="already_have_an_account">Already have an account?</string>
     <string name="email_format_invalid">Your email format isn\'t valid</string>
     <string name="password_length_short">Your password must contain more 6 characters</string>
+    <string name="facebook_app_id">1147958443242504</string>
+    <string name="fb_login_protocol_scheme">fb1147958443242504</string>
+    <string name="facebook_client_token">c27a4062a60c4ba48b1dfc6364d657da</string>
 </resources>

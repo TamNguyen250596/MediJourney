@@ -52,6 +52,7 @@ android {
 }
 
 dependencies {
+    implementation ("com.facebook.android:facebook-login:latest.release")
     implementation ("com.google.code.gson:gson:2.10.1")
     implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
     implementation("com.google.firebase:firebase-auth")
