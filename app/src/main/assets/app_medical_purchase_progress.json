@@ -1,0 +1,64 @@
+{
+  "attributes": [
+    {
+      "item_tag": "to_pay",
+      "image_name": "ic_wallet",
+      "title_localized": {
+        "ja_JP": "支払い待ち",
+        "en_JP": "To Pay",
+        "vi_JP": "Chờ thanh toán",
+        "ja_US": "支払い待ち",
+        "en_US": "To Pay",
+        "vi_US": "Chờ thanh toán",
+        "ja_VN": "支払い待ち",
+        "en_VN": "To Pay",
+        "vi_VN": "Chờ thanh toán"
+      }
+    },
+    {
+      "item_tag": "to_ship",
+      "image_name": "ic_box",
+      "title_localized": {
+        "ja_JP": "発送待ち",
+        "en_JP": "To Ship",
+        "vi_JP": "Chờ giao hàng",
+        "ja_US": "発送待ち",
+        "en_US": "To Ship",
+        "vi_US": "Chờ giao hàng",
+        "ja_VN": "発送待ち",
+        "en_VN": "To Ship",
+        "vi_VN": "Chờ giao hàng"
+      }
+    },
+    {
+      "item_tag": "to_receive",
+      "image_name": "ic_delivery",
+      "title_localized": {
+        "ja_JP": "受取待ち",
+        "en_JP": "To Receive",
+        "vi_JP": "Chờ nhận hàng",
+        "ja_US": "受取待ち",
+        "en_US": "To Receive",
+        "vi_US": "Chờ nhận hàng",
+        "ja_VN": "受取待ち",
+        "en_VN": "To Receive",
+        "vi_VN": "Chờ nhận hàng"
+      }
+    },
+    {
+      "item_tag": "to_rate",
+      "image_name": "ic_star",
+      "title_localized": {
+        "ja_JP": "評価待ち",
+        "en_JP": "To Rate",
+        "vi_JP": "Chờ đánh giá",
+        "ja_US": "評価待ち",
+        "en_US": "To Rate",
+        "vi_US": "Chờ đánh giá",
+        "ja_VN": "評価待ち",
+        "en_VN": "To Rate",
+        "vi_VN": "Chờ đánh giá"
+      }
+    }
+  ]
+}

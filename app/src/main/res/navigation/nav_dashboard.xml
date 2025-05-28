@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigationDashboard"
+    app:startDestination="@id/homeDashboardFragment">
+
+    <fragment
+        android:id="@+id/homeDashboardFragment"
+        android:name="com.example.medijourney.modules.dashboard.home.HomeDashboardFragment"
+        android:label="@string/home"
+        tools:layout="@layout/fragment_home_dashboard" >
+        <action
+            android:id="@+id/action_homeDashboardFragment_to_webViewFragment"
+            app:destination="@id/nav_web_view" >
+            <argument
+                android:name="webModel"
+                app:argType="com.example.medijourney.common.models.WebModel"
+                app:nullable="true"
+                android:defaultValue="@null" />
+        </action>
+        <action
+            android:id="@+id/action_homeDashboardFragment_to_manageOnboardingFragment"
+            app:destination="@id/manageOnboardingFragment" />
+        <action
+            android:id="@+id/action_homeDashboardFragment_to_dashboardMenusFragment"
+            app:destination="@id/dashboardMenusFragment" />
+        <action
+            android:id="@+id/action_homeDashboardFragment_to_medicalBookingListFragment"
+            app:destination="@id/medicalBookingListFragment" >
+            <argument
+                android:name="showAddMedicalBooking"
+                app:argType="boolean"
+                android:defaultValue="true" />
+        </action>
+        <action
+            android:id="@+id/action_homeDashboardFragment_to_addMedicalBookingFragment"
+            app:destination="@id/addMedicalBookingFragment" >
+            <argument
+                android:name="doctorAppointmentId"
+                app:argType="string"
+                app:nullable="true"
+                android:defaultValue="null"/>
+        </action>
+        <action
+            android:id="@+id/action_homeDashboardFragment_to_medicationListFragment"
+            app:destination="@id/medicationListFragment" />
+        <action
+            android:id="@+id/action_homeDashboardFragment_to_purchasedMedicalProductListFragment"
+            app:destination="@id/purchasedMedicalProductListFragment" />
+        <action
+            android:id="@+id/action_homeDashboardFragment_to_educationalOrganizationsFragment"
+            app:destination="@id/educationalOrganizationsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/dashboardMenusFragment"
+        android:name="com.example.medijourney.modules.dashboard.dashboard_menus.DashboardMenusFragment"
+        android:label="@string/dashboard_menus"
+        tools:layout="@layout/fragment_dashboard_menus" >
+        <action
+            android:id="@+id/action_dashboardMenusFragment_to_medicalBookingListFragment"
+            app:destination="@id/medicalBookingListFragment" >
+            <argument
+                android:name="showAddMedicalBooking"
+                app:argType="boolean"
+                android:defaultValue="true" />
+        </action>
+        <action
+            android:id="@+id/action_dashboardMenusFragment_to_medicationListFragment"
+            app:destination="@id/medicationListFragment" />
+        <action
+            android:id="@+id/action_dashboardMenusFragment_to_educationalOrganizationsFragment"
+            app:destination="@id/educationalOrganizationsFragment" />
+    </fragment>
+
+    <!-- Medical Booking -->
+    <fragment
+        android:id="@+id/medicalBookingListFragment"
+        android:name="com.example.medijourney.modules.dashboard.medical_booking_list.MedicalBookingListFragment"
+        android:label="@string/medical_booking_list"
+        tools:layout="@layout/fragment_medical_booking_list" >
+        <argument
+            android:name="showAddMedicalBooking"
+            app:argType="boolean"
+            android:defaultValue="false" />
+        <action
+            android:id="@+id/action_medicalBookingListFragment_to_addMedicalBookingFragment"
+            app:destination="@id/addMedicalBookingFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addMedicalBookingFragment"
+        android:name="com.example.medijourney.modules.dashboard.add_medical_booking.AddMedicalBookingFragment"
+        android:label="@string/add_medical_booking"
+        tools:layout="@layout/fragment_add_medical_booking" >
+        <argument
+            android:name="doctorAppointmentId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="null"/>
+        <action
+            android:id="@+id/action_addMedicalBookingFragment_to_searchHospitalFragment"
+            app:destination="@id/searchHospitalFragment" >
+            <argument
+                android:name="hospitalId"
+                app:argType="string"
+                app:nullable="true"
+                android:defaultValue="null"/>
+        </action>
+        <action
+            android:id="@+id/action_addMedicalBookingFragment_to_searchSubSpecialtiesFragment"
+            app:destination="@id/searchSubSpecialtiesFragment" >
+            <argument
+                android:name="hospitalId"
+                app:argType="string"
+                app:nullable="false"
+                android:defaultValue=""/>
+            <argument
+                android:name="subSpecialtyId"
+                app:argType="string"
+                app:nullable="true"
+                android:defaultValue="null"/>
+        </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/searchHospitalFragment"
+        android:name="com.example.medijourney.modules.dashboard.search_hospital.SearchHospitalFragment"
+        android:label="@string/search_hospital"
+        tools:layout="@layout/fragment_search_hospital" >
+        <argument
+            android:name="hospitalId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="null"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/searchSubSpecialtiesFragment"
+        android:name="com.example.medijourney.modules.dashboard.search_sub_specialties.SearchSubSpecialtiesFragment"
+        android:label="@string/search_specialties"
+        tools:layout="@layout/fragment_search_sub_specialties" >
+        <argument
+            android:name="hospitalId"
+            app:argType="string"
+            app:nullable="false"
+            android:defaultValue=""/>
+        <argument
+            android:name="subSpecialtyId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="null"/>
+    </fragment>
+
+    <!-- Buy Medication -->
+    <fragment
+        android:id="@+id/medicationListFragment"
+        android:name="com.example.medijourney.modules.dashboard.medication_list.MedicationListFragment"
+        android:label="@string/medication_list"
+        tools:layout="@layout/fragment_medication_list" >
+        <action
+            android:id="@+id/action_medicationListFragment_to_medicalProductDetailsFragment"
+            app:destination="@id/medicalProductDetailsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/medicalProductDetailsFragment"
+        android:name="com.example.medijourney.modules.dashboard.medical_product_details.MedicalProductDetailsFragment"
+        android:label="Medical Product Details"
+        tools:layout="@layout/fragment_medical_product_details" >
+        <argument
+            android:name="medicalProductId"
+            app:argType="string"
+            app:nullable="false"
+            android:defaultValue=""/>
+        <argument
+            android:name="isPreview"
+            app:argType="boolean"
+            android:defaultValue="false" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/purchasedMedicalProductListFragment"
+        android:name="com.example.medijourney.modules.dashboard.purchased_medical_product_list.PurchasedMedicalProductListFragment"
+        android:label=""
+        tools:layout="@layout/fragment_purchased_medical_product_list" >
+        <argument
+            android:name="medicalProductStatus"
+            app:argType="string"
+            app:nullable="false"
+            android:defaultValue=""/>
+        <argument
+            android:name="title"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="null"/>
+    </fragment>
+
+    <!-- Medical Knowledge -->
+    <fragment
+        android:id="@+id/educationalOrganizationsFragment"
+        android:name="com.example.medijourney.modules.dashboard.educational_organizations.EducationalOrganizationsFragment"
+        android:label="@string/medical_knowledge"
+        tools:layout="@layout/fragment_educational_organizations" >
+        <action
+            android:id="@+id/action_educationalOrganizationsFragment_to_educationalNutrientFragment"
+            app:destination="@id/educationalNutrientFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/educationalNutrientFragment"
+        android:name="com.example.medijourney.modules.dashboard.educational_nutrient.EducationalNutrientFragment"
+        android:label="@string/educational_nutrient"
+        tools:layout="@layout/fragment_educational_nutrient" >
+    </fragment>
+
+    <!-- Onboarding -->
+    <fragment
+        android:id="@+id/manageOnboardingFragment"
+        android:name="com.example.medijourney.modules.profile.manage_onboarding.ManageOnboardingFragment"
+        android:label="@string/manage_onboarding"
+        tools:layout="@layout/fragment_manage_onboarding" >
+        <action
+            android:id="@+id/action_manageOnboardingFragment_to_navigation_web_view"
+            app:destination="@id/nav_web_view" >
+            <argument
+                android:name="webModel"
+                app:argType="com.example.medijourney.common.models.WebModel"
+                app:nullable="true"
+                android:defaultValue="@null" />
+        </action>
+    </fragment>
+
+    <include app:graph="@navigation/nav_web_view" />
+
+</navigation>

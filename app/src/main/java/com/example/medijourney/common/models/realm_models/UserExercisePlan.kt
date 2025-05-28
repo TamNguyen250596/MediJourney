@@ -1,0 +1,54 @@
+package com.example.medijourney.common.models.realm_models
+
+import com.example.medijourney.common.extensions.getDouble
+import com.example.medijourney.common.extensions.getIntList
+import com.example.medijourney.common.extensions.getIntMap
+import com.example.medijourney.common.extensions.getRealmInstant
+import com.example.medijourney.common.managers.realm.RealmCycle
+import io.realm.kotlin.ext.realmDictionaryOf
+import io.realm.kotlin.ext.realmListOf
+import io.realm.kotlin.types.RealmDictionary
+import io.realm.kotlin.types.RealmInstant
+import io.realm.kotlin.types.RealmList
+import io.realm.kotlin.types.RealmObject
+import io.realm.kotlin.types.annotations.PrimaryKey
+
+class UserExercisePlan:  RealmObject, RealmCycle {
+
+    // Properties
+    @PrimaryKey
+    var id: String = ""
+    var userCode: String = ""
+    var createdAt: RealmInstant? = null
+    var name: String? = null
+    var duration: Double = 0.0
+    var exercises: RealmList<Int> = realmListOf()
+    var levels: RealmDictionary<Int> = realmDictionaryOf()
+
+    // Functions
+    override fun primaryKey(): String {
+        return "id"
+    }
+
+    override fun toRealmObject(map: Map<String, Any>): RealmObject {
+        return UserExercisePlan().apply {
+            id = map["id"] as? String ?: id
+            userCode = map["user_code"] as? String ?: userCode
+            createdAt = map.getRealmInstant("created_at")
+            name = map["name"] as? String ?: name
+            duration = map.getDouble("duration")
+            exercises.addAll(map.getIntList("exercises"))
+            levels.putAll(map.getIntMap("levels"))
+        }
+    }
+
+    override fun updateFromMap(map: Map<String, Any>) {
+        createdAt = map.getRealmInstant("created_at", createdAt)
+        name = map["name"] as? String ?: name
+        duration = map.getDouble("duration", duration)
+        exercises.clear()
+        exercises.addAll(map.getIntList("exercises"))
+        levels.clear()
+        levels.putAll(map.getIntMap("levels"))
+    }
+}

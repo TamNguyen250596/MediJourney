@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigationHealthCenter"
+    app:startDestination="@id/healthCenterFragment">
+
+    <fragment
+        android:id="@+id/healthCenterFragment"
+        android:name="com.example.medijourney.modules.health_center.main.MainHealthCenterFragment"
+        android:label="@string/health_center"
+        tools:layout="@layout/fragment_health_center" >
+        <action
+            android:id="@+id/action_healthCenterFragment_to_addFitnessTrackerFragment"
+            app:destination="@id/addFitnessTrackerFragment" >
+            <argument
+                android:name="userFitnessTrackerId"
+                app:argType="string"
+                app:nullable="true"/>
+            <argument
+                android:name="viewType"
+                app:argType="string"
+                android:defaultValue="" />
+        </action>
+        <action
+            android:id="@+id/action_healthCenterFragment_to_fitnessTrackerDetailFragment"
+            app:destination="@id/fitnessTrackerDetailFragment" >
+            <argument
+                android:name="userFitnessTrackerId"
+                app:argType="string"
+                app:nullable="true"/>
+            <argument
+                android:name="notificationType"
+                app:argType="string"
+                app:nullable="true"/>
+        </action>
+        <action
+            android:id="@+id/action_healthCenterFragment_to_selectExerciseLevelFragment"
+            app:destination="@id/selectExerciseLevelFragment" >
+            <argument
+                android:name="exerciseId"
+                app:argType="integer"
+                android:defaultValue="0"/>
+            <argument
+                android:name="showAppBar"
+                app:argType="boolean"
+                android:defaultValue="true"/>
+        </action>
+        <action
+            android:id="@+id/action_healthCenterFragment_to_addExercisePlanFragment"
+            app:destination="@id/addExercisePlanFragment" />
+        <action
+            android:id="@+id/action_healthCenterFragment_to_videoPlayerFragment"
+            app:destination="@id/nav_video_player_view">
+            <argument
+                android:name="videoModels"
+                app:argType="com.example.medijourney.common.models.VideoModel[]"
+                app:nullable="false"/>
+        </action>
+        <action
+            android:id="@+id/action_healthCenterFragment_to_exercisePlanDetailFragment"
+            app:destination="@id/exercisePlanDetailFragment" >
+            <argument
+                android:name="userExercisePlanId"
+                app:argType="string"
+                app:nullable="false"
+                android:defaultValue=""/>
+        </action>
+        <action
+            android:id="@+id/action_healthCenterFragment_to_recipeVideoFragment"
+            app:destination="@id/recipeVideoFragment" >
+            <argument
+                android:name="recipeId"
+                app:argType="integer"
+                android:defaultValue="0"/>
+        </action>
+    </fragment>
+
+    <!-- Fitness Tracker -->
+    <fragment
+        android:id="@+id/addFitnessTrackerFragment"
+        android:name="com.example.medijourney.modules.health_center.add_fitness_tracker.AddFitnessTrackerFragment"
+        tools:layout="@layout/fragment_add_fitness_tracker" >
+        <action
+            android:id="@+id/action_addFitnessTrackerFragment_to_mediaSelectionFragment"
+            app:destination="@id/mediaSelectionFragment"/>
+        <argument
+            android:name="userFitnessTrackerId"
+            app:argType="string"
+            app:nullable="true"/>
+        <argument
+            android:name="viewType"
+            app:argType="string"
+            android:defaultValue="" />
+    </fragment>
+
+    <dialog
+        android:id="@+id/mediaSelectionFragment"
+        android:name="com.example.medijourney.common.ui_components.fragments.media_selection.MediaSelectionFragment"
+        tools:layout="@layout/fragment_share_app">
+    </dialog>
+
+    <fragment
+        android:id="@+id/fitnessTrackerDetailFragment"
+        android:name="com.example.medijourney.modules.health_center.fitness_tracker_detail.FitnessTrackerDetailFragment"
+        android:label="@string/fitness_tracker_detail"
+        tools:layout="@layout/fragment_fitness_tracker_detail" >
+        <argument
+            android:name="userFitnessTrackerId"
+            app:argType="string"
+            app:nullable="true"/>
+        <argument
+            android:name="notificationType"
+            app:argType="string"
+            app:nullable="true"/>
+        <action
+            android:id="@+id/action_fitnessTrackerDetailFragment_to_addFitnessTrackerFragment"
+            app:destination="@id/addFitnessTrackerFragment" >
+            <argument
+                android:name="userFitnessTrackerId"
+                app:argType="string"
+                app:nullable="true"/>
+            <argument
+                android:name="viewType"
+                app:argType="string"
+                android:defaultValue="" />
+        </action>
+        <action
+            android:id="@+id/action_fitnessTrackerDetailFragment_to_sleepTrackingReportFragment"
+            app:destination="@id/sleepTrackingReportFragment">
+            <argument
+                android:name="userFitnessTrackerId"
+                app:argType="string"
+                app:nullable="true"/>
+        </action>
+        <action
+            android:id="@+id/action_fitnessTrackerDetailFragment_to_nutritionTrackingReportFragment"
+            app:destination="@id/nutritionTrackingReportFragment" >
+            <argument
+                android:name="userFitnessTrackerId"
+                app:argType="string"
+                app:nullable="true"/>
+        </action>
+        <action
+            android:id="@+id/action_fitnessTrackerDetailFragment_to_exerciseTrackingReportFragment"
+            app:destination="@id/exerciseTrackingReportFragment" >
+            <argument
+                android:name="userFitnessTrackerId"
+                app:argType="string"
+                app:nullable="true"/>
+        </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/sleepTrackingReportFragment"
+        android:name="com.example.medijourney.modules.health_center.sleep_tracking_report.SleepTrackingReportFragment"
+        android:label="@string/sleep_tracking_report"
+        tools:layout="@layout/fragment_sleep_tracking_report" >
+        <argument
+            android:name="userFitnessTrackerId"
+            app:argType="string"
+            app:nullable="true"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/nutritionTrackingReportFragment"
+        android:name="com.example.medijourney.modules.health_center.nutrition_tracking_report.NutritionTrackingReportFragment"
+        android:label="@string/nutrition_tracking_report"
+        tools:layout="@layout/fragment_nutrition_tracking_report" >
+        <argument
+            android:name="userFitnessTrackerId"
+            app:argType="string"
+            app:nullable="true"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/exerciseTrackingReportFragment"
+        android:name="com.example.medijourney.modules.health_center.exercise_tracking_report.ExerciseTrackingReportFragment"
+        android:label="@string/exercise_tracking_report"
+        tools:layout="@layout/fragment_exercise_tracking_report" >
+        <argument
+            android:name="userFitnessTrackerId"
+            app:argType="string"
+            app:nullable="true"/>
+        <action
+            android:id="@+id/action_exerciseTrackingReportFragment_to_selectExerciseLevelFragment"
+            app:destination="@id/selectExerciseLevelFragment" >
+            <argument
+                android:name="exerciseId"
+                app:argType="integer"
+                android:defaultValue="0"/>
+            <argument
+                android:name="showAppBar"
+                app:argType="boolean"
+                android:defaultValue="true"/>
+        </action>
+    </fragment>
+
+    <!-- Exercise Plans -->
+    <fragment
+        android:id="@+id/addExercisePlanFragment"
+        android:name="com.example.medijourney.modules.health_center.add_exercise_plan.AddExercisePlanFragment"
+        android:label=""
+        tools:layout="@layout/fragment_add_exercise_plan" >
+        <argument
+            android:name="userExercisePlanId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue=""/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/exercisePlanDetailFragment"
+        android:name="com.example.medijourney.modules.health_center.exercise_plan_detail.ExercisePlanDetailFragment"
+        android:label="@string/exercise_plan_detail"
+        tools:layout="@layout/fragment_exercise_plan_detail" >
+        <argument
+            android:name="userExercisePlanId"
+            app:argType="string"
+            app:nullable="false"
+            android:defaultValue=""/>
+        <action
+            android:id="@+id/action_exercisePlanDetailFragment_to_addExercisePlanFragment"
+            app:destination="@id/addExercisePlanFragment" >
+            <argument
+                android:name="userExercisePlanId"
+                app:argType="string"
+                app:nullable="true"
+                android:defaultValue=""/>
+        </action>
+    </fragment>
+
+    <!-- Recommended Exercise -->
+    <dialog
+        android:id="@+id/selectExerciseLevelFragment"
+        android:name="com.example.medijourney.modules.health_center.select_exercise_level.SelectExerciseLevelFragment"
+        tools:layout="@layout/fragment_select_exercise_level">
+        <argument
+            android:name="exerciseId"
+            app:argType="integer"
+            android:defaultValue="0"/>
+        <argument
+            android:name="showAppBar"
+            app:argType="boolean"
+            android:defaultValue="true"/>
+        <action
+            android:id="@+id/action_selectExerciseLevelFragment_to_videoPlayerFragment"
+            app:destination="@id/nav_video_player_view">
+            <argument
+                android:name="videoModels"
+                app:argType="com.example.medijourney.common.models.VideoModel[]"
+                app:nullable="false"/>
+        </action>
+    </dialog>
+
+    <include app:graph="@navigation/nav_video_player_view" />
+
+    <!-- Recommended Recipes -->
+    <fragment
+        android:id="@+id/recipeVideoFragment"
+        android:name="com.example.medijourney.modules.health_center.recipe_video.RecipeVideoFragment"
+        android:label="@string/recipe_video"
+        tools:layout="@layout/fragment_recipe_video" >
+        <argument
+            android:name="recipeId"
+            app:argType="integer"
+            android:defaultValue="0"/>
+    </fragment>
+
+</navigation>

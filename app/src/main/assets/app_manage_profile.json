@@ -1,0 +1,288 @@
+{
+  "attributes": [
+    {
+      "section_tag": "share_this_app",
+      "section_name_localized": {
+        "ja_JP": "このアプリを共有する",
+        "en_JP": "Share this App",
+        "vi_JP": "Chia sẻ ứng dụng này",
+        "ja_US": "このアプリを共有する",
+        "en_US": "Share this App",
+        "vi_US": "Chia sẻ ứng dụng này",
+        "ja_VN": "このアプリを共有する",
+        "en_VN": "Share this App",
+        "vi_VN": "Chia sẻ ứng dụng này"
+      },
+      "items": [
+        {
+          "item_tag": "tell_a_friend",
+          "title_localized": {
+            "ja_JP": "友達に伝える",
+            "en_JP": "Tell a friend",
+            "vi_JP": "Nói với bạn bè",
+            "ja_US": "友達に伝える",
+            "en_US": "Tell a friend",
+            "vi_US": "Nói với bạn bè",
+            "ja_VN": "友達に伝える",
+            "en_VN": "Tell a friend",
+            "vi_VN": "Nói với bạn bè"
+          },
+          "image_name": "ic_refer",
+          "secondary_image_name": "ic_right_arrow"
+        }
+      ]
+    },
+    {
+      "section_tag": "onboarding",
+      "section_name_localized": {
+        "ja_JP": "オンボーディング",
+        "en_JP": "Onboarding",
+        "vi_JP": "Giới thiệu",
+        "ja_US": "オンボーディング",
+        "en_US": "Onboarding",
+        "vi_US": "Giới thiệu",
+        "ja_VN": "オンボーディング",
+        "en_VN": "Onboarding",
+        "vi_VN": "Giới thiệu"
+      },
+      "items": [
+        {
+          "item_tag": "show_in_dashboard",
+          "title_localized": {
+            "ja_JP": "ダッシュボードに表示",
+            "en_JP": "Show in Dashboard",
+            "vi_JP": "Hiển thị trên bảng điều khiển",
+            "ja_US": "ダッシュボードに表示",
+            "en_US": "Show in Dashboard",
+            "vi_US": "Hiển thị trên bảng điều khiển",
+            "ja_VN": "ダッシュボードに表示",
+            "en_VN": "Show in Dashboard",
+            "vi_VN": "Hiển thị trên bảng điều khiển"
+          },
+          "image_name": "ic_document",
+          "secondary_image_name": "ic_right_arrow"
+        }
+      ]
+    },
+    {
+      "section_tag": "membership",
+      "section_name_localized": {
+        "ja_JP": "メンバーシップ",
+        "en_JP": "Membership",
+        "vi_JP": "Thành viên",
+        "ja_US": "メンバーシップ",
+        "en_US": "Membership",
+        "vi_US": "Thành viên",
+        "ja_VN": "メンバーシップ",
+        "en_VN": "Membership",
+        "vi_VN": "Thành viên"
+      },
+      "items": [
+        {
+          "item_tag": "membership_plan",
+          "title_localized": {
+            "ja_JP": "プラン",
+            "en_JP": "Plan",
+            "vi_JP": "Kế hoạch",
+            "ja_US": "プラン",
+            "en_US": "Plan",
+            "vi_US": "Kế hoạch",
+            "ja_VN": "プラン",
+            "en_VN": "Plan",
+            "vi_VN": "Kế hoạch"
+          },
+          "image_name": "ic_membership",
+          "secondary_image_name": "ic_right_arrow"
+        },
+        {
+          "item_tag": "expiry_date",
+          "title_localized": {
+            "ja_JP": "有効期限",
+            "en_JP": "Expiry Date",
+            "vi_JP": "Ngày hết hạn",
+            "ja_US": "有効期限",
+            "en_US": "Expiry Date",
+            "vi_US": "Ngày hết hạn",
+            "ja_VN": "有効期限",
+            "en_VN": "Expiry Date",
+            "vi_VN": "Ngày hết hạn"
+          },
+          "image_name": "ic_calendar"
+        }
+      ]
+    },
+    {
+      "section_tag": "security_privacy",
+      "section_name_localized": {
+        "ja_JP": "セキュリティ＆プライバシー",
+        "en_JP": "Security & Privacy",
+        "vi_JP": "Bảo mật & Quyền riêng tư",
+        "ja_US": "セキュリティ＆プライバシー",
+        "en_US": "Security & Privacy",
+        "vi_US": "Bảo mật & Quyền riêng tư",
+        "ja_VN": "セキュリティ＆プライバシー",
+        "en_VN": "Security & Privacy",
+        "vi_VN": "Bảo mật & Quyền riêng tư"
+      },
+      "items": [
+        {
+          "item_tag": "change_password",
+          "title_localized": {
+            "ja_JP": "パスワードを変更する",
+            "en_JP": "Change Password",
+            "vi_JP": "Đổi mật khẩu",
+            "ja_US": "パスワードを変更する",
+            "en_US": "Change Password",
+            "vi_US": "Đổi mật khẩu",
+            "ja_VN": "パスワードを変更する",
+            "en_VN": "Change Password",
+            "vi_VN": "Đổi mật khẩu"
+          },
+          "image_name": "ic_password",
+          "secondary_image_name": "ic_right_arrow"
+        },
+        {
+          "item_tag": "advanced_security",
+          "title_localized": {
+            "ja_JP": "高度なセキュリティ",
+            "en_JP": "Advanced Security",
+            "vi_JP": "Bảo mật nâng cao",
+            "ja_US": "高度なセキュリティ",
+            "en_US": "Advanced Security",
+            "vi_US": "Bảo mật nâng cao",
+            "ja_VN": "高度なセキュリティ",
+            "en_VN": "Advanced Security",
+            "vi_VN": "Bảo mật nâng cao"
+          },
+          "image_name": "ic_verified_user",
+          "secondary_image_name": "ic_right_arrow"
+        },
+        {
+          "item_tag": "delete_account",
+          "title_localized": {
+            "ja_JP": "アカウントを削除する",
+            "en_JP": "Delete Account",
+            "vi_JP": "Xóa tài khoản",
+            "ja_US": "アカウントを削除する",
+            "en_US": "Delete Account",
+            "vi_US": "Xóa tài khoản",
+            "ja_VN": "アカウントを削除する",
+            "en_VN": "Delete Account",
+            "vi_VN": "Xóa tài khoản"
+          },
+          "image_name": "ic_delete",
+          "secondary_image_name": "ic_right_arrow"
+        }
+      ]
+    },
+    {
+      "section_tag": "country_language",
+      "section_name_localized": {
+        "ja_JP": "国と言語",
+        "en_JP": "Country & Language",
+        "vi_JP": "Quốc gia và ngôn ngữ",
+        "ja_US": "国と言語",
+        "en_US": "Country & Language",
+        "vi_US": "Quốc gia và ngôn ngữ",
+        "ja_VN": "国と言語",
+        "en_VN": "Country & Language",
+        "vi_VN": "Quốc gia và ngôn ngữ"
+      },
+      "items": [
+        {
+          "item_tag": "country",
+          "title_localized": {
+            "ja_JP": "国",
+            "en_JP": "Country",
+            "vi_JP": "Quốc gia",
+            "ja_US": "国",
+            "en_US": "Country",
+            "vi_US": "Quốc gia",
+            "ja_VN": "国",
+            "en_VN": "Country",
+            "vi_VN": "Quốc gia"
+          },
+          "image_name": "ic_flag",
+          "secondary_image_name": "ic_right_arrow"
+        },
+        {
+          "item_tag": "language",
+          "title_localized": {
+            "ja_JP": "言語",
+            "en_JP": "Language",
+            "vi_JP": "Ngôn ngữ",
+            "ja_US": "言語",
+            "en_US": "Language",
+            "vi_US": "Ngôn ngữ",
+            "ja_VN": "言語",
+            "en_VN": "Language",
+            "vi_VN": "Ngôn ngữ"
+          },
+          "image_name": "ic_language",
+          "secondary_image_name": "ic_right_arrow"
+        }
+      ]
+    },
+    {
+      "section_tag": "about_this_app",
+      "section_name_localized": {
+        "ja_JP": "このアプリについて",
+        "en_JP": "About this App",
+        "vi_JP": "Về ứng dụng này",
+        "ja_US": "このアプリについて",
+        "en_US": "About this App",
+        "vi_US": "Về ứng dụng này",
+        "ja_VN": "このアプリについて",
+        "en_VN": "About this App",
+        "vi_VN": "Về ứng dụng này"
+      },
+      "items": [
+        {
+          "item_tag": "terms_of_service",
+          "title_localized": {
+            "ja_JP": "利用規約",
+            "en_JP": "Terms of Service",
+            "vi_JP": "Điều khoản dịch vụ",
+            "ja_US": "利用規約",
+            "en_US": "Terms of Service",
+            "vi_US": "Điều khoản dịch vụ",
+            "ja_VN": "利用規約",
+            "en_VN": "Terms of Service",
+            "vi_VN": "Điều khoản dịch vụ"
+          },
+          "secondary_image_name": "ic_right_arrow"
+        },
+        {
+          "item_tag": "privacy_policy",
+          "title_localized": {
+            "ja_JP": "プライバシーポリシー",
+            "en_JP": "Privacy Policy",
+            "vi_JP": "Chính sách bảo mật",
+            "ja_US": "プライバシーポリシー",
+            "en_US": "Privacy Policy",
+            "vi_US": "Chính sách bảo mật",
+            "ja_VN": "プライバシーポリシー",
+            "en_VN": "Privacy Policy",
+            "vi_VN": "Chính sách bảo mật"
+          },
+          "secondary_image_name": "ic_right_arrow"
+        },
+        {
+          "item_tag": "version",
+          "title_localized": {
+            "ja_JP": "バージョン",
+            "en_JP": "Version",
+            "vi_JP": "Phiên bản",
+            "ja_US": "バージョン",
+            "en_US": "Version",
+            "vi_US": "Phiên bản",
+            "ja_VN": "バージョン",
+            "en_VN": "Version",
+            "vi_VN": "Phiên bản"
+          },
+          "image_name": "ic_version"
+        }
+      ]
+    }
+  ]
+}

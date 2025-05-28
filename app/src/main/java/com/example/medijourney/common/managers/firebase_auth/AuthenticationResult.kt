@@ -1,0 +1,17 @@
+package com.example.medijourney.common.managers.firebase_auth
+
+enum class AuthenticationResult {
+    SIGN_OUT,
+    OTP_REQUIRED,
+    ACCOUNT_DEACTIVATED,
+    SIGN_UP_SUCCESS,
+    SIGN_UP_FAILED,
+    SIGN_IN_SUCCESS,
+    SIGN_IN_FAILED,
+    DELETE_ACCOUNT_SUCCESS,
+    DELETE_ACCOUNT_FAILED,
+    CHANGE_PASSWORD_SUCCESS,
+    CHANGE_PASSWORD_FAILED,
+    DEACTIVE_ACCOUNT_SUCCESS,
+    DEACTIVE_ACCOUNT_FAILED
+}

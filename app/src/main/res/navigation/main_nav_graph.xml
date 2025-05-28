@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main_nav_graph"
+    app:startDestination="@id/navigationDashboard">
+
+    <!-- Dashboard Tab -->
+    <include app:graph="@navigation/nav_dashboard" />
+
+    <!-- Chat Tab -->
+    <include app:graph="@navigation/nav_chat" />
+
+    <!-- Health Center Tab -->
+    <include app:graph="@navigation/nav_health_center" />
+
+    <!-- Notification Tab -->
+    <include app:graph="@navigation/nav_notification" />
+
+    <!-- Profile Tab -->
+    <include app:graph="@navigation/nav_profile" />
+
+</navigation>

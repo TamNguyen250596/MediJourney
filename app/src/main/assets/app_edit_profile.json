@@ -1,0 +1,140 @@
+{
+  "attributes": [
+    {
+      "item_tag": "display_name",
+      "image_name": "ic_contact",
+      "title_localized": null,
+      "description_localized": {
+        "ja_JP": "ディスプレイ名",
+        "en_JP": "Display name",
+        "vi_JP": "Tên hiển thị",
+        "ja_US": "ディスプレイ名",
+        "en_US": "Display name",
+        "vi_US": "Tên hiển thị",
+        "ja_VN": "ディスプレイ名",
+        "en_VN": "Display name",
+        "vi_VN": "Tên hiển thị"
+      },
+      "secondary_image_name": null
+    },
+    {
+      "item_tag": "bio",
+      "image_name": "ic_quote",
+      "title_localized": null,
+      "description_localized": {
+        "ja_JP": "バイオ",
+        "en_JP": "Bio",
+        "vi_JP": "Tiểu sử",
+        "ja_US": "バイオ",
+        "en_US": "Bio",
+        "vi_US": "Tiểu sử",
+        "ja_VN": "バイオ",
+        "en_VN": "Bio",
+        "vi_VN": "Tiểu sử"
+      },
+      "secondary_image_name": null
+    },
+    {
+      "item_tag": "full_name",
+      "image_name": "ic_profile",
+      "title_localized": null,
+      "description_localized": {
+        "ja_JP": "フルネーム",
+        "en_JP": "Full name",
+        "vi_JP": "Họ và tên",
+        "ja_US": "フルネーム",
+        "en_US": "Full name",
+        "vi_US": "Họ và tên",
+        "ja_VN": "フルネーム",
+        "en_VN": "Full name",
+        "vi_VN": "Họ và tên"
+      },
+      "secondary_image_name": null
+    },
+    {
+      "item_tag": "gender",
+      "image_name": "ic_gender",
+      "title_localized": null,
+      "description_localized": {
+        "ja_JP": "性別",
+        "en_JP": "Gender",
+        "vi_JP": "Giới tính",
+        "ja_US": "性別",
+        "en_US": "Gender",
+        "vi_US": "Giới tính",
+        "ja_VN": "性別",
+        "en_VN": "Gender",
+        "vi_VN": "Giới tính"
+      },
+      "secondary_image_name": "ic_list"
+    },
+    {
+      "item_tag": "birth_date",
+      "image_name": "ic_birthday",
+      "title_localized": null,
+      "description_localized": {
+        "ja_JP": "誕生日",
+        "en_JP": "Birthday",
+        "vi_JP": "Ngày sinh",
+        "ja_US": "誕生日",
+        "en_US": "Birthday",
+        "vi_US": "Ngày sinh",
+        "ja_VN": "誕生日",
+        "en_VN": "Birthday",
+        "vi_VN": "Ngày sinh"
+      },
+      "secondary_image_name": "ic_calendar"
+    },
+    {
+      "item_tag": "email",
+      "image_name": "ic_mail",
+      "title_localized": null,
+      "description_localized": {
+        "ja_JP": "メール",
+        "en_JP": "Email",
+        "vi_JP": "Email",
+        "ja_US": "メール",
+        "en_US": "Email",
+        "vi_US": "Email",
+        "ja_VN": "メール",
+        "en_VN": "Email",
+        "vi_VN": "Email"
+      },
+      "secondary_image_name": null
+    },
+    {
+      "item_tag": "mobile_number",
+      "image_name": "ic_mobile",
+      "title_localized": null,
+      "description_localized": {
+        "ja_JP": "携帯電話番号",
+        "en_JP": "Mobile number",
+        "vi_JP": "Số di động",
+        "ja_US": "携帯電話番号",
+        "en_US": "Mobile number",
+        "vi_US": "Số di động",
+        "ja_VN": "携帯電話番号",
+        "en_VN": "Mobile number",
+        "vi_VN": "Số di động"
+      },
+      "secondary_image_name": null
+    },
+    {
+      "item_tag": "address",
+      "image_name": "ic_home",
+      "title_localized": null,
+      "description_localized": {
+        "ja_JP": "住所",
+        "en_JP": "Address",
+        "vi_JP": "Địa chỉ",
+        "ja_US": "住所",
+        "en_US": "Address",
+        "vi_US": "Địa chỉ",
+        "ja_VN": "住所",
+        "en_VN": "Address",
+        "vi_VN": "Địa chỉ"
+      },
+      "secondary_image_name": null
+    }
+  ]
+}

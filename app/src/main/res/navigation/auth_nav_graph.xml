@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/auth_nav_graph"
+    app:startDestination="@id/launchFragment">
+
+    <!-- Launch Fragment -->
+    <fragment
+        android:id="@+id/launchFragment"
+        android:name="com.example.medijourney.modules.base.auth.LaunchFragment"
+        tools:layout="@layout/fragment_launch">
+        <action
+            android:id="@+id/action_launchFragment_to_signInFragment"
+            app:destination="@id/signInFragment" />
+    </fragment>
+
+    <!-- Sign In Fragment -->
+    <fragment
+        android:id="@+id/signInFragment"
+        android:name="com.example.medijourney.modules.authentication.sign_in.SignInFragment"
+        tools:layout="@layout/fragment_sign_in"
+        android:label="@string/sign_in">
+        <action
+            android:id="@+id/action_signInFragment_to_signUpFragment"
+            app:destination="@id/signUpFragment" />
+        <action
+            android:id="@+id/action_signInFragment_to_fingerPrintSignInFragment"
+            app:destination="@id/fingerPrintSignInFragment" />
+        <action
+            android:id="@+id/action_signInFragment_to_phoneAuthenticationFragment"
+            app:destination="@id/phoneAuthenticationFragment" >
+            <argument
+                android:name="viewType"
+                app:argType="string"
+                android:defaultValue="" />
+        </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/fingerPrintSignInFragment"
+        android:name="com.example.medijourney.modules.authentication.finger_print_sign_in.FingerPrintSignInFragment"
+        tools:layout="@layout/fragment_finger_print_sign_in"
+        android:label="@string/sign_in">
+    </fragment>
+
+    <fragment
+        android:id="@+id/phoneAuthenticationFragment"
+        android:name="com.example.medijourney.modules.authentication.phone_authentication.PhoneAuthenticationFragment"
+        tools:layout="@layout/fragment_phone_authentication">
+        <action
+            android:id="@+id/action_phoneAuthenticationFragment_to_changePasswordFragment"
+            app:destination="@id/changePasswordFragment" >
+            <argument
+                android:name="tempLogInToken"
+                app:argType="string"
+                app:nullable="true"
+                android:defaultValue="@null" />
+        </action>
+        <argument
+            android:name="viewType"
+            app:argType="string"
+            android:defaultValue="" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/changePasswordFragment"
+        android:name="com.example.medijourney.modules.profile.change_password.ChangePasswordFragment"
+        android:label="@string/change_password"
+        tools:layout="@layout/fragment_change_password" >
+        <argument
+            android:name="tempLogInToken"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+    </fragment>
+
+    <!-- Sign Up Fragment -->
+    <fragment
+        android:id="@+id/signUpFragment"
+        android:name="com.example.medijourney.modules.authentication.sign_up.SignUpFragment"
+        tools:layout="@layout/fragment_sign_up"
+        android:label="@string/sign_up">
+    </fragment>
+
+</navigation>

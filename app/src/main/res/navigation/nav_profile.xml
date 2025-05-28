@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigationProfile"
+    app:startDestination="@+id/mainProfileFragment">
+
+    <fragment
+        android:id="@+id/mainProfileFragment"
+        android:name="com.example.medijourney.modules.profile.main.MainProfileFragment"
+        android:label="@string/profile"
+        tools:layout="@layout/fragment_main_profile" >
+        <action
+            android:id="@+id/action_mainProfileFragment_to_editProfileFragment"
+            app:destination="@id/editProfileFragment" />
+        <action
+            android:id="@+id/action_mainProfileFragment_to_manageProfileFragment"
+            app:destination="@id/manageProfileFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/editProfileFragment"
+        android:name="com.example.medijourney.modules.profile.edit_profile.EditProfileFragment"
+        android:label="@string/edit_profile"
+        tools:layout="@layout/fragment_edit_profile" >
+        <action
+            android:id="@+id/action_editProfileFragment_to_mediaSelectionFragment"
+            app:destination="@id/mediaSelectionFragment" />
+    </fragment>
+
+    <dialog
+        android:id="@+id/mediaSelectionFragment"
+        android:name="com.example.medijourney.common.ui_components.fragments.media_selection.MediaSelectionFragment"
+        tools:layout="@layout/fragment_share_app">
+    </dialog>
+
+    <fragment
+        android:id="@+id/manageProfileFragment"
+        android:name="com.example.medijourney.modules.profile.manage_profile.ManageProfileFragment"
+        android:label="@string/manage_profile"
+        tools:layout="@layout/fragment_manage_profile" >
+        <action
+            android:id="@+id/action_manageProfileFragment_to_webViewFragment"
+            app:destination="@id/nav_web_view" >
+            <argument
+                android:name="webModel"
+                app:argType="com.example.medijourney.common.models.WebModel"
+                app:nullable="true"
+                android:defaultValue="@null" />
+        </action>
+        <action
+            android:id="@+id/action_manageProfileFragment_to_manageOnboardingFragment"
+            app:destination="@id/manageOnboardingFragment" />
+        <action
+            android:id="@+id/action_manageProfileFragment_to_deleteAccountFragment"
+            app:destination="@id/deleteAccountFragment" />
+        <action
+            android:id="@+id/action_manageProfileFragment_to_advancedSecurityFragment"
+            app:destination="@id/advancedSecurityFragment" />
+        <action
+            android:id="@+id/action_manageProfileFragment_to_changePasswordFragment"
+            app:destination="@id/changePasswordFragment" />
+        <action
+            android:id="@+id/action_manageProfileFragment_to_membershipPlanFragment"
+            app:destination="@id/membershipPlanFragment" />
+        <action
+            android:id="@+id/action_manageProfileFragment_to_shareAppFragment"
+            app:destination="@id/shareAppFragment" />
+    </fragment>
+
+    <dialog
+        android:id="@+id/shareAppFragment"
+        android:name="com.example.medijourney.modules.profile.share_app.ShareAppFragment"
+        tools:layout="@layout/fragment_share_app">
+    </dialog>
+
+    <fragment
+        android:id="@+id/manageOnboardingFragment"
+        android:name="com.example.medijourney.modules.profile.manage_onboarding.ManageOnboardingFragment"
+        android:label="@string/manage_onboarding"
+        tools:layout="@layout/fragment_manage_onboarding" >
+        <action
+            android:id="@+id/action_manageOnboardingFragment_to_navigation_web_view"
+            app:destination="@id/nav_web_view" >
+            <argument
+                android:name="webModel"
+                app:argType="com.example.medijourney.common.models.WebModel"
+                app:nullable="true"
+                android:defaultValue="@null" />
+        </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/membershipPlanFragment"
+        android:name="com.example.medijourney.modules.profile.membership_plan.MembershipPlanFragment"
+        android:label="@string/membership_plan"
+        tools:layout="@layout/fragment_membership_plan" >
+    </fragment>
+
+    <fragment
+        android:id="@+id/changePasswordFragment"
+        android:name="com.example.medijourney.modules.profile.change_password.ChangePasswordFragment"
+        android:label="@string/change_password"
+        tools:layout="@layout/fragment_change_password" >
+    </fragment>
+
+    <fragment
+        android:id="@+id/advancedSecurityFragment"
+        android:name="com.example.medijourney.modules.profile.advanced_security.AdvancedSecurityFragment"
+        android:label="@string/advanced_security"
+        tools:layout="@layout/fragment_advanced_security" >
+        <action
+            android:id="@+id/action_advancedSecurityFragment_to_phoneAuthenticationFragment"
+            app:destination="@id/phoneAuthenticationFragment" >
+            <argument
+                android:name="viewType"
+                app:argType="string"
+                android:defaultValue="" />
+        </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/phoneAuthenticationFragment"
+        android:name="com.example.medijourney.modules.authentication.phone_authentication.PhoneAuthenticationFragment"
+        tools:layout="@layout/fragment_phone_authentication">
+        <argument
+            android:name="viewType"
+            app:argType="string"
+            android:defaultValue="" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/deleteAccountFragment"
+        android:name="com.example.medijourney.modules.profile.delete_account.DeleteAccountFragment"
+        android:label="@string/delete_account"
+        tools:layout="@layout/fragment_delete_account" >
+    </fragment>
+
+    <include app:graph="@navigation/nav_web_view" />
+
+</navigation>

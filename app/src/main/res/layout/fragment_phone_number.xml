@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="8dp"
+    tools:context=".common.ui_components.fragments.phone_number_view.PhoneNumberFragment">
+
+    <LinearLayout
+        android:layout_gravity="center_vertical"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="6"
+        >
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/phoneNoTextInputLayout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="4"
+            android:hint="@string/enter_your_mobile_phone"
+            android:theme="@style/ThemeOverlay.AppTheme.TextInputEditText.Outlined"
+            app:boxStrokeColor="@color/deep_turquoise_blue_color"
+            app:endIconTint="@color/deep_turquoise_blue_color"
+            app:errorEnabled="true"
+            app:hintTextColor="@color/deep_turquoise_blue_color"
+            app:startIconTint="@color/deep_turquoise_blue_color">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/phoneNoTextInputEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="phone"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/sendButton"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="2"
+            android:text="@string/send"
+            android:textSize="16sp"
+            app:backgroundTint="@color/deep_turquoise_blue_color"
+            app:cornerRadius="24dp" />
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

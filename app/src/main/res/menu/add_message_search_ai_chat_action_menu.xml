@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <item
+        android:id="@+id/action_add"
+        android:icon="@drawable/ic_add_plus"
+        app:showAsAction="ifRoom"
+        tools:ignore="MenuTitle,UnusedAttribute" />
+    <item
+        android:id="@+id/action_search_message"
+        android:icon="@drawable/ic_message_search"
+        app:showAsAction="ifRoom"
+        tools:ignore="MenuTitle,UnusedAttribute" />
+    <item
+        android:id="@+id/action_ai_chat"
+        android:icon="@drawable/ic_ai_check_up"
+        app:showAsAction="ifRoom"
+        tools:ignore="MenuTitle,UnusedAttribute" />
+
+</menu>

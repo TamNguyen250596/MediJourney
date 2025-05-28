@@ -1,0 +1,52 @@
+{
+  "attributes": [
+    {
+      "item_tag": "edit_profile",
+      "image_name": "ic_profile",
+      "title_localized": {
+        "ja_JP": "プロフィールを編集",
+        "en_JP": "Edit Profile",
+        "vi_JP": "Chỉnh sửa hồ sơ",
+        "ja_US": "プロフィールを編集",
+        "en_US": "Edit Profile",
+        "vi_US": "Chỉnh sửa hồ sơ",
+        "ja_VN": "プロフィールを編集",
+        "en_VN": "Edit Profile",
+        "vi_VN": "Chỉnh sửa hồ sơ"
+      },
+      "secondary_image_name": "ic_right_arrow"
+    },
+    {
+      "item_tag": "settings",
+      "image_name": "ic_setting",
+      "title_localized": {
+        "ja_JP": "設定",
+        "en_JP": "Settings",
+        "vi_JP": "Cài đặt",
+        "ja_US": "設定",
+        "en_US": "Settings",
+        "vi_US": "Cài đặt",
+        "ja_VN": "設定",
+        "en_VN": "Settings",
+        "vi_VN": "Cài đặt"
+      },
+      "secondary_image_name": "ic_right_arrow"
+    },
+    {
+      "item_tag": "log_out",
+      "image_name": "ic_log_out",
+      "title_localized": {
+        "ja_JP": "ログアウト",
+        "en_JP": "Logout",
+        "vi_JP": "Đăng xuất",
+        "ja_US": "ログアウト",
+        "en_US": "Logout",
+        "vi_US": "Đăng xuất",
+        "ja_VN": "ログアウト",
+        "en_VN": "Logout",
+        "vi_VN": "Đăng xuất"
+      },
+      "secondary_image_name": null
+    }
+  ]
+}
