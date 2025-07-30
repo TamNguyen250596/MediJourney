@@ -1,6 +1,27 @@
 package com.example.medijourney.modules.base.main
 
-ˆ
+import android.os.Bundle
+import android.view.View
+import android.view.ViewGroup.MarginLayoutParams
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.Insets
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
+import androidx.navigation.NavController
+import androidx.navigation.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.navigateUp
+import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.navigation.ui.setupWithNavController
+import com.example.medijourney.R
+import com.example.medijourney.databinding.ActivityMainBinding
+import com.example.medijourney.modules.ad.FullScreenAdFragment
+import io.realm.kotlin.ext.isValid
+
 class MainActivity : AppCompatActivity() {
 
     // Properties
