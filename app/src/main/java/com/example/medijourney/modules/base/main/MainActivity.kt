@@ -1,23 +1,6 @@
 package com.example.medijourney.modules.base.main
 
-import android.os.Bundle
-import android.view.View
-import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.lifecycleScope
-import androidx.navigation.NavController
-import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.navigation.ui.setupWithNavController
-import com.example.medijourney.R
-import com.example.medijourney.common.managers.InternationManager
-import com.example.medijourney.databinding.ActivityMainBinding
-import kotlinx.coroutines.launch
-
+ˆ
 class MainActivity : AppCompatActivity() {
 
     // Properties
@@ -25,6 +8,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration
     private val viewModel: MainActivityViewModel by viewModels()
+    private var didUpdateBottomNav = false
 
     // Life cycle
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,17 +16,18 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        lifecycleScope.launch {
-            InternationManager.config()
-        }
         setUpView()
-        viewModel.onCreate()
         observeViewModel()
     }
 
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.navHostFragmentContentMain)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.updateShowSplashAd(true)
     }
 
     // Functions
@@ -52,7 +37,44 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.appBarLayout.toolbar)
         setupActionBarWithNavController(navController, appBarConfiguration)
         binding.bottomNavView.setupWithNavController(navController)
+        observeWindowInsets()
+        observeDestinationChanged()
+    }
 
+    private fun observeWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            updateViewTopMargin(v, insets)
+            updateBottomNavView(insets)
+            WindowInsetsCompat.CONSUMED
+        }
+    }
+
+    private fun updateViewTopMargin(view: View, insets: Insets) {
+        val destination = navController.currentDestination ?: return
+        val top = when(destination.id) {
+            R.id.homeDashboardFragment, R.id.mainProfileFragment -> {
+                0
+            }
+            else -> insets.top
+        }
+        view.updateLayoutParams<MarginLayoutParams> {
+            topMargin = top
+        }
+    }
+
+    private fun updateBottomNavView(insets: Insets) {
+        if (!didUpdateBottomNav && insets.bottom > 0) {
+            val additionalHeight = insets.bottom / 3
+            binding.bottomNavView.updateLayoutParams {
+                height += additionalHeight
+            }
+            binding.bottomNavView.setPadding(0, 0, 0, additionalHeight)
+            didUpdateBottomNav = true
+        }
+    }
+
+    private fun observeDestinationChanged() {
         navController.addOnDestinationChangedListener { _, destination, bundle ->
             binding.appBarLayout.toolbar.setNavigationIcon(R.drawable.ic_back)
             setRootViewColor(R.color.white)
@@ -72,7 +94,7 @@ class MainActivity : AppCompatActivity() {
                     binding.appBarLayout.toolbar.navigationIcon = null
                 }
                 R.id.selectExerciseLevelFragment -> {
-                    val showAppBar = bundle?.getBoolean("showAppBar") ?: false
+                    val showAppBar = bundle?.getBoolean("showAppBar") == true
                     toggleAppBar(showAppBar)
                 }
                 R.id.videoPlayerFragment -> {
@@ -129,12 +151,27 @@ class MainActivity : AppCompatActivity() {
                 binding.bottomNavView.getOrCreateBadge(R.id.notificationFragment).number = it
             }
         }
+        viewModel.showPlashAd.observe(this) {
+            if (!it) return@observe
+            showFullScreenAd()
+        }
     }
 
     fun switchToTab(id: Int, data: Map<String, Any>? = null) {
+        val currentBackStackEntry = navController.currentBackStackEntry ?: return
+
         binding.bottomNavView.selectedItemId = id
         data?.forEach {
-            navController.currentBackStackEntry?.savedStateHandle?.set(it.key, it.value)
+            currentBackStackEntry.savedStateHandle[it.key] = it.value
         }
+    }
+
+    private fun showFullScreenAd() {
+        val ad = viewModel.getSplashAd() ?: return
+        if (!ad.isValid()) return
+        val fragment = FullScreenAdFragment()
+        fragment.imageUrlString = "images/advertisements/${ad.imageName}.png"
+        fragment.actionUrlString = ad.actionUrl
+        fragment.show(supportFragmentManager, FullScreenAdFragment::class.java.simpleName)
     }
 }

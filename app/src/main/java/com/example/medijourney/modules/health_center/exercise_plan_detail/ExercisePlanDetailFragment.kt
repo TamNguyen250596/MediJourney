@@ -33,15 +33,14 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.medijourney.R
 import com.example.medijourney.common.constants.proximaNovaFamily
+import com.example.medijourney.common.helpers.FragmentHelper
 import com.example.medijourney.common.ui_components.composes.HorizontalRow
 import com.example.medijourney.common.ui_components.dialogs.IndicatorHandler
-import com.example.medijourney.databinding.FragmentExercisePlanDetailBinding
 
 class ExercisePlanDetailFragment : Fragment(), MenuProvider {
 
     // Properties
     private val viewModel: ExercisePlanDetailViewModel by viewModels()
-    private lateinit var binding: FragmentExercisePlanDetailBinding
     private val args : ExercisePlanDetailFragmentArgs by navArgs()
     private val userExercisePlanId: String by lazy { args.userExercisePlanId }
 
@@ -49,15 +48,10 @@ class ExercisePlanDetailFragment : Fragment(), MenuProvider {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentExercisePlanDetailBinding.inflate(inflater, container, false)
-        binding.composeView.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                ExercisePlanDetail(viewModel)
-            }
+    ): View? {
+        return FragmentHelper.createBaseComposeView(inflater, container) {
+            ExercisePlanDetail(viewModel)
         }
-        return binding.root
     }
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {

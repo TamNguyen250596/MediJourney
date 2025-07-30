@@ -32,7 +32,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -45,30 +44,24 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.medijourney.R
 import com.example.medijourney.common.constants.proximaNovaFamily
+import com.example.medijourney.common.helpers.FragmentHelper
 import com.example.medijourney.common.ui_components.composes.CIndicator
 import com.example.medijourney.common.ui_components.composes.EmptyPlaceholder
 import com.example.medijourney.common.ui_components.composes.HorizontalRow
-import com.example.medijourney.databinding.FragmentEducationalNutrientBinding
 
 class EducationalNutrientFragment : Fragment() {
 
     // Properties
     private val viewModel: EducationalNutrientViewModel by viewModels()
-    private lateinit var binding: FragmentEducationalNutrientBinding
 
     // Life cycle
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentEducationalNutrientBinding.inflate(inflater, container, false)
-        binding.composeView.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                EducationalNutrientScreen(viewModel)
-            }
+    ): View? {
+        return FragmentHelper.createBaseComposeView(inflater, container) {
+            EducationalNutrientScreen(viewModel)
         }
-        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

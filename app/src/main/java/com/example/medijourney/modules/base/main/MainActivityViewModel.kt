@@ -38,21 +38,20 @@ class MainActivityViewModel: ViewModel() {
 
     // Properties
     var unreadNotificationCount = MutableLiveData(0)
-    private var userSettingResult: RealmResults<UserSetting>? = null
+    var showPlashAd = MutableLiveData(false)
+    private var userSettingResults: RealmResults<UserSetting>? = null
+    private var adResults: RealmResults<Advertisement>? = null
 
     // Life cycle
-    fun onCreate() {
+    init {
         syncFireStore()
-        viewModelScope.launch {
-            getData()
-            observeData()
-        }
+        getData()
     }
 
     // FireStore
     private fun syncFireStore() {
-        syncHighFSPriority()
-        CoroutineScope(Dispatchers.IO).launch {
+        viewModelScope.launch {
+            syncHighFSPriority()
             delay(5000L)
             syncMediumFSPriority()
             delay(5000L)
@@ -139,27 +138,44 @@ class MainActivityViewModel: ViewModel() {
     }
 
     // Get data
-    private suspend fun getData() {
-        getUserSettingResult()
+    private fun getData() {
+        viewModelScope.launch {
+            getUserSettingResults()
+            getSplashAdResults()
+        }.invokeOnCompletion {
+            observeData()
+        }
     }
 
-    private suspend fun getUserSettingResult() {
+    private suspend fun getUserSettingResults() {
         val currentUserCode = FirebaseAuthManager.getCurrentUserCode() ?: return
 
-        userSettingResult = RealmManager.read(UserSetting::class.java,
+        userSettingResults = RealmManager.read(UserSetting::class.java,
             realmQuery = RQuery.Where(UserSetting::userCode.name, Operator.EQUAL, currentUserCode))
     }
 
-    // Observe data
-    private suspend fun observeData() {
-        observeUserSettingResult()
+    private suspend fun getSplashAdResults() {
+        adResults = RealmManager.read(Advertisement::class.java,
+            realmQuery = RQuery.Where(Advertisement::location.name, Operator.EQUAL, "splash_ad"))
     }
 
-    private suspend fun observeUserSettingResult() {
-        val userSettingResult = userSettingResult ?: return
+    // Observe data
+    private fun observeData() {
+        viewModelScope.launch {
+            launch {
+                observeUserSettingResults()
+            }
+            launch {
+                observeAdResults()
+            }
+        }
+    }
+
+    private suspend fun observeUserSettingResults() {
+        val userSettingResult = userSettingResults ?: return
 
         userSettingResult.asFlow().collect {
-            this.userSettingResult = it.list
+            this.userSettingResults = it.list
 
             withContext(Dispatchers.Main) {
                 unreadNotificationCount.postValue(getUnreadNotificationCount())
@@ -167,9 +183,21 @@ class MainActivityViewModel: ViewModel() {
         }
     }
 
+    private suspend fun observeAdResults() {
+        val adResult = adResults ?: return
+
+        adResult.asFlow().collect {
+            this.adResults = it.list
+
+            withContext(Dispatchers.Main) {
+                updateShowSplashAd(it.list.isNotEmpty())
+            }
+        }
+    }
+
     // Functions
     private fun getUnreadNotificationCount(): Int {
-        val userSettingResult = userSettingResult ?: return 0
+        val userSettingResult = userSettingResults ?: return 0
         val userSetting = userSettingResult.firstOrNull() ?: return 0
         if (!userSetting.isValid()) return 0
 
@@ -178,7 +206,7 @@ class MainActivityViewModel: ViewModel() {
 
     fun updateUnreadNotificationCount(count: Int) {
         if (unreadNotificationCount.value == 0) return
-        val userSettingResult = userSettingResult ?: return
+        val userSettingResult = userSettingResults ?: return
         val userSetting = userSettingResult.firstOrNull() ?: return
         if (!userSetting.isValid()) return
 
@@ -192,5 +220,14 @@ class MainActivityViewModel: ViewModel() {
                     unreadNotificationCount.postValue(count)
                 }
             }
+    }
+
+    fun updateShowSplashAd(show: Boolean) {
+        showPlashAd.postValue(show)
+    }
+
+    fun getSplashAd(): Advertisement? {
+        val adResults = adResults ?: return null
+        return adResults.firstOrNull()
     }
 }

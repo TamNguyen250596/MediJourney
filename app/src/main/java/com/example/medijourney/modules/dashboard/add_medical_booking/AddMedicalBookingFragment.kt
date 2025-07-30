@@ -25,18 +25,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
 import androidx.core.view.MenuProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.medijourney.R
 import com.example.medijourney.common.constants.Constants
+import com.example.medijourney.common.helpers.FragmentHelper
 import com.example.medijourney.common.models.item_models.DynamicUIItem
 import com.example.medijourney.common.ui_components.composes.CIndicator
 import com.example.medijourney.common.ui_components.composes.DatePickerModal
 import com.example.medijourney.common.ui_components.composes.SaveButton
-import com.example.medijourney.databinding.FragmentAddMedicalBookingBinding
 import com.example.medijourney.modules.dashboard.add_medical_booking.sub_views.AddMedicalBookingItem
 import com.example.medijourney.common.ui_components.composes.SelectionBottomSheet
 
@@ -44,7 +43,6 @@ class AddMedicalBookingFragment : Fragment(), MenuProvider {
 
     // Properties
     private val viewModel: AddMedicalBookingViewModel by viewModels()
-    private lateinit var binding: FragmentAddMedicalBookingBinding
     private val args: AddMedicalBookingFragmentArgs by navArgs()
     private val doctorAppointmentId: String? by lazy { args.doctorAppointmentId }
 
@@ -52,23 +50,18 @@ class AddMedicalBookingFragment : Fragment(), MenuProvider {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentAddMedicalBookingBinding.inflate(inflater, container, false)
-        binding.composeView.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                AddMedicalBookingScreen(
-                    viewModel = viewModel,
-                    onFieldClick = {
-                        handleFieldClick(it)
-                    },
-                    onSaveClick = {
-                        handleAddMedicalBooking()
-                    }
-                )
-            }
+    ): View? {
+        return FragmentHelper.createBaseComposeView(inflater, container) {
+            AddMedicalBookingScreen(
+                viewModel = viewModel,
+                onFieldClick = {
+                    handleFieldClick(it)
+                },
+                onSaveClick = {
+                    handleAddMedicalBooking()
+                }
+            )
         }
-        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

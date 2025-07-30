@@ -31,9 +31,9 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.medijourney.R
 import com.example.medijourney.common.constants.Constants
+import com.example.medijourney.common.helpers.FragmentHelper
 import com.example.medijourney.common.ui_components.composes.CIndicator
 import com.example.medijourney.common.ui_components.composes.MessageInputField
-import com.example.medijourney.databinding.FragmentMessageBinding
 import com.example.medijourney.modules.chat.message.sub_views.MessageListView
 import com.example.medijourney.modules.chat.message.sub_views.PinnedMessageItem
 import kotlinx.coroutines.delay
@@ -42,7 +42,6 @@ class MessageFragment : Fragment(), MenuProvider {
 
     // Properties
     private val viewModel: MessageViewModel by viewModels()
-    private lateinit var binding: FragmentMessageBinding
     private val args: MessageFragmentArgs by navArgs()
     private val conversationId: String by lazy { args.conversationId }
     private val searchUserMessageId: String? by lazy { args.searchUserMessageId }
@@ -51,15 +50,10 @@ class MessageFragment : Fragment(), MenuProvider {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentMessageBinding.inflate(inflater, container, false)
-        binding.composeView.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                MessageScreen(viewModel)
-            }
+    ): View? {
+        return FragmentHelper.createBaseComposeView(inflater, container) {
+            MessageScreen(viewModel)
         }
-        return binding.root
     }
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {

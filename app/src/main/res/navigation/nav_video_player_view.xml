@@ -9,7 +9,7 @@
         android:id="@+id/videoPlayerFragment"
         android:name="com.example.medijourney.modules.health_center.exercise_video.VideoPlayerFragment"
         android:label=""
-        tools:layout="@layout/fragment_video_player" >
+        tools:layout="@layout/fragment_base_compose" >
         <argument
             android:name="videoModels"
             app:argType="com.example.medijourney.common.models.VideoModel[]"

@@ -1,11 +1,13 @@
 package com.example.medijourney.modules.health_center.main.sub_ui.fitness_trackers
 
 import android.content.res.Resources
+import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.medijourney.R
 import com.example.medijourney.common.constants.Constants
+import com.example.medijourney.common.extensions.replaceAllValueOf
 import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
 import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.item_models.BaseItemInterface
@@ -27,15 +29,16 @@ class FitnessTrackersViewModel : ViewModel() {
 
     // Properties
     private var userFitnessTrackers: RealmResults<UserFitnessTracker>? = null
-    var itemModels = MutableLiveData<MutableList<DynamicUIItem>>()
+    var itemModels = mutableStateListOf<DynamicUIItem>()
+    private set
 
     // Life cycle
-    fun onViewCreated() {
+    init {
         viewModelScope.launch {
             getData()
             observeRealms()
         }
-        itemModels.postValue(generateItemModels())
+        itemModels.replaceAllValueOf(generateItemModels())
     }
 
     // Get data
@@ -52,10 +55,7 @@ class FitnessTrackersViewModel : ViewModel() {
             .debounce(500)
             .collect {
                 this.userFitnessTrackers = it.list
-                val models = generateItemModels()
-                withContext(Dispatchers.Main) {
-                    itemModels.postValue(models)
-                }
+                itemModels.replaceAllValueOf(generateItemModels())
             }
     }
 
@@ -71,7 +71,7 @@ class FitnessTrackersViewModel : ViewModel() {
             val item = DynamicUIItem(
                 type = Constants.ITEM,
                 groupIndex = 0,
-                itemTag = "",
+                itemTag = tracker.id,
                 data = tracker,
                 padding = EdgePadding(0, 0, 0, 32),
                 backgroundColor = R.color.white

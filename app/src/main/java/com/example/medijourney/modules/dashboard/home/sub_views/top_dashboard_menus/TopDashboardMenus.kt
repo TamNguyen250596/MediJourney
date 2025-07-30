@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.sp
 import com.example.medijourney.R
 import com.example.medijourney.common.constants.proximaNovaFamily
 import com.example.medijourney.common.models.item_models.ImageItemModel
+import com.example.medijourney.common.models.ui_models.MFont
+import com.example.medijourney.common.ui_components.composes.MText
 import com.example.medijourney.common.ui_components.composes.VImageItem
 
 @SuppressLint("ConfigurationScreenWidthHeight")
@@ -84,13 +86,10 @@ fun TopDashboardMenus(viewModel: TopDashboardMenusViewModel,
                 modifier = Modifier.fillMaxWidth(),
                 onClick = onClickShowMore
             ) {
-                Text(
-                    text = stringResource(R.string.show_more),
-                    fontFamily = proximaNovaFamily,
-                    fontStyle = FontStyle.Normal,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 12.sp,
-                    color = colorResource(id = R.color.deep_turquoise_blue_color)
+                MText(
+                    text = stringResource(R.string.onboarding),
+                    font = MFont.bold(12f),
+                    colorId = R.color.deep_turquoise_blue_color
                 )
             }
         }

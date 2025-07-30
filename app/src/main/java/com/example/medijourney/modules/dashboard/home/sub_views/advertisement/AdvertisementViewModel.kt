@@ -2,6 +2,8 @@ package com.example.medijourney.modules.dashboard.home.sub_views.advertisement
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.medijourney.common.managers.realm.Operator
+import com.example.medijourney.common.managers.realm.RQuery
 import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.WebModel
 import com.example.medijourney.common.models.item_models.ImageItemModel
@@ -37,6 +39,7 @@ class AdvertisementViewModel: ViewModel() {
     private suspend fun getAdvertisements() {
         advertisementResults = RealmManager.read(
             clazz = Advertisement::class.java,
+            realmQuery = RQuery.Where(Advertisement::location.name, Operator.EQUAL, "banner"),
             sort = listOf(
                 Pair(Advertisement::position.name, Sort.DESCENDING)
             )

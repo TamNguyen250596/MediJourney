@@ -13,6 +13,7 @@ class Advertisement:  RealmObject, RealmCycle {
     var position: Int = 0
     var imageName: String? = null
     var actionUrl: String? = null
+    var location: String? = null
 
     // Functions
     override fun primaryKey(): String {
@@ -25,6 +26,7 @@ class Advertisement:  RealmObject, RealmCycle {
             position = map.getInt("position")
             imageName = map["image_name"] as? String
             actionUrl = map["action_url"] as? String
+            location = map["location"] as? String
         }
     }
 
@@ -32,5 +34,6 @@ class Advertisement:  RealmObject, RealmCycle {
         position = map.getInt("position", position)
         imageName = map["image_name"] as? String ?: imageName
         actionUrl = map["action_url"] as? String ?: actionUrl
+        location = map["location"] as? String ?: location
     }
 }

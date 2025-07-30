@@ -31,6 +31,7 @@ import com.example.medijourney.R
 import com.example.medijourney.common.constants.proximaNovaFamily
 import com.example.medijourney.common.models.item_models.ImageItemModel
 import com.example.medijourney.common.ui_components.composes.EmptyPlaceholder
+import com.example.medijourney.common.ui_components.composes.LTitleRButtonView
 import com.example.medijourney.common.ui_components.composes.VGlideImageItem
 
 @Composable
@@ -43,58 +44,21 @@ fun HomeOnboardingList(viewModel: HomeOnboardingViewModel,
 
     // Content
     Column {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.onboarding),
-                modifier = Modifier
-                    .weight(1f)
-                    .wrapContentWidth(Alignment.Start),
-                fontFamily = proximaNovaFamily,
-                fontStyle = FontStyle.Normal,
-                fontWeight = FontWeight.Bold,
-                fontSize = TextUnit(16f, TextUnitType.Sp)
-            )
-
-            OutlinedButton(
-                onClick = { onShowMore() },
-                modifier = Modifier
-                    .weight(1f)
-                    .wrapContentWidth(Alignment.End),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = colorResource(id = R.color.light_blue_color)
-                ),
-                border = BorderStroke(1.dp, colorResource(id = R.color.deep_turquoise_blue_color)),
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = stringResource(R.string.show_more),
-                        fontFamily = proximaNovaFamily,
-                        fontStyle = FontStyle.Normal,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 16.sp,
-                        color = colorResource(id = R.color.deep_turquoise_blue_color)
-                    )
-                }
-            }
-        }
+        LTitleRButtonView(
+            title = stringResource(R.string.onboarding),
+            buttonTitle = stringResource(R.string.show_more),
+            onClick = onShowMore
+        )
 
         if (items.isEmpty()) {
             EmptyPlaceholder(
-                modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp),
+                modifier = Modifier.padding(16.dp),
                 text = stringResource(R.string.there_is_no_appointment)
             )
         } else {
 
             LazyRow(
-                modifier = Modifier.padding(top = 16.dp),
+                modifier = Modifier.padding(top = 16.dp, bottom = 16.dp),
                 contentPadding = PaddingValues(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {

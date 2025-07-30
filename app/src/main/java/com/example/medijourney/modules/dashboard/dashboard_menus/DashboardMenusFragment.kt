@@ -37,7 +37,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -51,36 +50,32 @@ import androidx.navigation.fragment.findNavController
 import com.example.medijourney.R
 import com.example.medijourney.common.constants.Constants
 import com.example.medijourney.common.constants.proximaNovaFamily
+import com.example.medijourney.common.helpers.FragmentHelper
 import com.example.medijourney.common.models.item_models.ImageItemModel
+import com.example.medijourney.common.models.ui_models.MFont
 import com.example.medijourney.common.ui_components.composes.EmptyPlaceholder
+import com.example.medijourney.common.ui_components.composes.MText
 import com.example.medijourney.common.ui_components.composes.VImageItem
-import com.example.medijourney.databinding.FragmentDashboardMenusBinding
 import kotlinx.coroutines.delay
 
 class DashboardMenusFragment : Fragment() {
 
     // Properties
     private val viewModel: DashboardMenusViewModel by viewModels()
-    private lateinit var binding: FragmentDashboardMenusBinding
 
     // Life cycle
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentDashboardMenusBinding.inflate(inflater, container, false)
-        binding.composeView.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                DashboardMenusScreen(
-                    viewModel = viewModel,
-                    onItemClick = {
-                        handleCLickOnTopMenu(it)
-                    }
-                )
-            }
+    ): View? {
+        return FragmentHelper.createBaseComposeView(inflater, container) {
+            DashboardMenusScreen(
+                viewModel = viewModel,
+                onItemClick = {
+                    handleCLickOnTopMenu(it)
+                }
+            )
         }
-        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -199,13 +194,10 @@ fun DashboardMenusScreen(viewModel: DashboardMenusViewModel, onItemClick: (Image
                 ) {
                     if (it.type == Constants.HEADER) {
                         it.title?.text?.let {
-                            Text(
+                            MText(
                                 text = it,
-                                fontFamily = proximaNovaFamily,
-                                fontStyle = FontStyle.Normal,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp,
-                                color = colorResource(id = R.color.deep_turquoise_blue_color),
+                                font = MFont.bold(16f),
+                                colorId = R.color.deep_turquoise_blue_color,
                                 textAlign = TextAlign.Start
                             )
                         }

@@ -57,13 +57,13 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.medijourney.R
 import com.example.medijourney.common.constants.proximaNovaFamily
+import com.example.medijourney.common.helpers.FragmentHelper
 import com.example.medijourney.common.managers.firebase_storage.FirebaseStorageManager
 import com.example.medijourney.common.models.item_models.DynamicUIItem
 import com.example.medijourney.common.models.ui_models.MTextStyle
 import com.example.medijourney.common.ui_components.composes.SaveButton
 import com.example.medijourney.common.ui_components.composes.TextFieldItem
 import com.example.medijourney.common.ui_components.dialogs.IndicatorHandler
-import com.example.medijourney.databinding.FragmentAddExercisePlanBinding
 import com.example.medijourney.modules.health_center.add_exercise_plan.sub_views.ElevatedButtonItem
 import com.example.medijourney.modules.health_center.add_exercise_plan.sub_views.ExerciseSequenceItem
 
@@ -71,7 +71,6 @@ class AddExercisePlanFragment : Fragment() {
 
    // Properties
     private val viewModel: AddExercisePlanViewModel by viewModels()
-    private lateinit var binding: FragmentAddExercisePlanBinding
     private val args: AddExercisePlanFragmentArgs by navArgs()
     private val userExercisePlanId: String? by lazy { args.userExercisePlanId }
 
@@ -79,17 +78,12 @@ class AddExercisePlanFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentAddExercisePlanBinding.inflate(inflater, container, false)
-        binding.composeView.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                AddExercisePlanForm(viewModel) {
-                    addExercisePlan()
-                }
+    ): View? {
+        return FragmentHelper.createBaseComposeView(inflater, container) {
+            AddExercisePlanForm(viewModel) {
+                addExercisePlan()
             }
         }
-        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

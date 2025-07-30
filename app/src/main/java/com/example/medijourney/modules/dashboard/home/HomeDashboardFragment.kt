@@ -1,22 +1,29 @@
 package com.example.medijourney.modules.dashboard.home
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.medijourney.R
+import com.example.medijourney.common.helpers.FragmentHelper
 import com.example.medijourney.common.models.WebModel
 import com.example.medijourney.common.models.item_models.DynamicUIItem
 import com.example.medijourney.common.models.item_models.ImageItemModel
-import com.example.medijourney.databinding.FragmentHomeDashboardBinding
-import com.example.medijourney.modules.dashboard.home.sub_views.home_doctor_appointments.HomeDoctorAppointmentList
-import com.example.medijourney.modules.dashboard.home.sub_views.home_doctor_appointments.HomeDoctorAppointmentViewModel
 import com.example.medijourney.modules.dashboard.home.sub_views.advertisement.AdvertisementList
 import com.example.medijourney.modules.dashboard.home.sub_views.advertisement.AdvertisementViewModel
+import com.example.medijourney.modules.dashboard.home.sub_views.home_doctor_appointments.HomeDoctorAppointmentList
+import com.example.medijourney.modules.dashboard.home.sub_views.home_doctor_appointments.HomeDoctorAppointmentViewModel
 import com.example.medijourney.modules.dashboard.home.sub_views.medical_purchase_progress.MedicalPurchaseProgressView
 import com.example.medijourney.modules.dashboard.home.sub_views.medical_purchase_progress.MedicalPurchaseProgressViewModel
 import com.example.medijourney.modules.dashboard.home.sub_views.onboarding.HomeOnboardingList
@@ -27,7 +34,6 @@ import com.example.medijourney.modules.dashboard.home.sub_views.top_dashboard_me
 class HomeDashboardFragment : Fragment() {
 
     // Properties
-    private lateinit var binding: FragmentHomeDashboardBinding
     private val advertisementViewModel: AdvertisementViewModel by viewModels()
     private val topDashboardMenusViewModel: TopDashboardMenusViewModel by viewModels()
     private val homeDoctorAppointmentViewModel: HomeDoctorAppointmentViewModel by viewModels()
@@ -38,10 +44,17 @@ class HomeDashboardFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentHomeDashboardBinding.inflate(inflater, container, false)
-        setupComposes()
-        return binding.root
+    ): View? {
+        return FragmentHelper.createBaseComposeView(inflater, container) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                HomeDashboardSubViews()
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -54,78 +67,54 @@ class HomeDashboardFragment : Fragment() {
     }
 
     // Functions
-    private fun setupComposes() {
-        binding.advertisementComposeView.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                AdvertisementList(
-                    viewModel = advertisementViewModel,
-                    onClickItem = {
-                        val webModel = advertisementViewModel.getWebViewModel(it) ?: return@AdvertisementList
-                        openWebView(webModel)
-                    }
-                )
+    @Composable
+    private fun HomeDashboardSubViews() {
+        AdvertisementList(
+            viewModel = advertisementViewModel,
+            onClickItem = {
+                val webModel = advertisementViewModel.getWebViewModel(it) ?: return@AdvertisementList
+                openWebView(webModel)
             }
-        }
+        )
 
-        binding.topDashboardMenusComposeView.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                TopDashboardMenus(
-                    viewModel = topDashboardMenusViewModel,
-                    onClickShowMore = {
-                        openDashboardMenusView()
-                    },
-                    onClickItem = {
-                        handleCLickOnTopMenu(it)
-                    }
-                )
+        TopDashboardMenus(
+            viewModel = topDashboardMenusViewModel,
+            onClickShowMore = {
+                openDashboardMenusView()
+            },
+            onClickItem = {
+                handleCLickOnTopMenu(it)
             }
-        }
+        )
 
-        binding.homeDoctorAppointmentComposeView.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                HomeDoctorAppointmentList(
-                    viewModel = homeDoctorAppointmentViewModel,
-                    onShowMore = {
-                        openMedicalBookingList(false)
-                    },
-                    onClickItem = {
-                        val id = homeDoctorAppointmentViewModel.getDoctorAppointmentId(it) ?: return@HomeDoctorAppointmentList
-                        openAddMedicalBookingView(id)
-                    }
-                )
+        HomeDoctorAppointmentList(
+            viewModel = homeDoctorAppointmentViewModel,
+            onShowMore = {
+                openMedicalBookingList(false)
+            },
+            onClickItem = {
+                val id = homeDoctorAppointmentViewModel.getDoctorAppointmentId(it) ?: return@HomeDoctorAppointmentList
+                openAddMedicalBookingView(id)
             }
-        }
+        )
 
-        binding.medicalPurchaseProgressComposeView.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                MedicalPurchaseProgressView(
-                    viewModel = medicalPurchaseProgressViewModel,
-                    onSelectedItem = {
-                        openPurchasedMedicalProductList(it)
-                    }
-                )
+        MedicalPurchaseProgressView(
+            viewModel = medicalPurchaseProgressViewModel,
+            onSelectedItem = {
+                openPurchasedMedicalProductList(it)
             }
-        }
+        )
 
-        binding.homeOnboardingComposeView.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                HomeOnboardingList(
-                    viewModel = homeOnboardingViewModel,
-                    onShowMore = {
-                        openManageOnboardingView()
-                    },
-                    onClickItem = {
-                        val webModel = homeOnboardingViewModel.getWebViewModel(it) ?: return@HomeOnboardingList
-                        openWebView(webModel)
-                    }
-                )
+        HomeOnboardingList(
+            viewModel = homeOnboardingViewModel,
+            onShowMore = {
+                openManageOnboardingView()
+            },
+            onClickItem = {
+                val webModel = homeOnboardingViewModel.getWebViewModel(it) ?: return@HomeOnboardingList
+                openWebView(webModel)
             }
-        }
+        )
     }
 
     private fun handleCLickOnTopMenu(itemModel: ImageItemModel) {

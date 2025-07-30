@@ -41,10 +41,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.medijourney.R
+import com.example.medijourney.common.helpers.FragmentHelper
 import com.example.medijourney.common.models.item_models.DynamicUIItem
 import com.example.medijourney.common.ui_components.composes.CIndicator
 import com.example.medijourney.common.ui_components.composes.EmptyPlaceholder
-import com.example.medijourney.databinding.FragmentMedicationListBinding
 import com.example.medijourney.modules.dashboard.medication_list.sub_views.MedicalItem
 import kotlinx.coroutines.delay
 
@@ -52,26 +52,20 @@ class MedicationListFragment : Fragment() {
 
     // Properties
     private val viewModel: MedicationListViewModel by viewModels()
-    private lateinit var binding: FragmentMedicationListBinding
 
     // Life cycle
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentMedicationListBinding.inflate(inflater, container, false)
-        binding.composeView.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                MedicationListScreen(
-                    viewModel = viewModel,
-                    onSelectedItem = {
-                        handleSelectedItem(it)
-                    }
-                )
-            }
+    ): View? {
+        return FragmentHelper.createBaseComposeView(inflater, container) {
+            MedicationListScreen(
+                viewModel = viewModel,
+                onSelectedItem = {
+                    handleSelectedItem(it)
+                }
+            )
         }
-        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

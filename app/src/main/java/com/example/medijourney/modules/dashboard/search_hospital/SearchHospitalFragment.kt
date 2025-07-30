@@ -16,9 +16,9 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.medijourney.R
 import com.example.medijourney.common.constants.Constants
+import com.example.medijourney.common.helpers.FragmentHelper
 import com.example.medijourney.common.models.item_models.DynamicUIItem
 import com.example.medijourney.common.ui_components.composes.SearchScreen
-import com.example.medijourney.databinding.FragmentSearchHospitalBinding
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.getValue
@@ -27,7 +27,6 @@ class SearchHospitalFragment : Fragment() {
 
     // Properties
     private val viewModel: SearchHospitalViewModel by viewModels()
-    private lateinit var binding: FragmentSearchHospitalBinding
     private val args: SearchHospitalFragmentArgs by navArgs()
     private val hospitalId: String? by lazy { args.hospitalId }
 
@@ -35,20 +34,15 @@ class SearchHospitalFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentSearchHospitalBinding.inflate(inflater, container, false)
-        binding.composeView.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                SearchHospitalScreen(
-                    viewModel = viewModel,
-                    onItemClicked = {
-                        handleItemClicked(it)
-                    }
-                )
-            }
+    ): View? {
+        return FragmentHelper.createBaseComposeView(inflater, container) {
+            SearchHospitalScreen(
+                viewModel = viewModel,
+                onItemClicked = {
+                    handleItemClicked(it)
+                }
+            )
         }
-        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

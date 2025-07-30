@@ -15,7 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
@@ -23,15 +22,14 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.medijourney.R
+import com.example.medijourney.common.helpers.FragmentHelper
 import com.example.medijourney.common.models.item_models.DynamicUIItem
-import com.example.medijourney.common.ui_components.composes.ConversationItem
-import com.example.medijourney.databinding.FragmentMedicalBookingListBinding
+import com.example.medijourney.common.ui_components.composes.LImage3TextsRButtonView
 
 class MedicalBookingListFragment : Fragment(), MenuProvider {
 
     // Properties
     private val viewModel: MedicalBookingListViewModel by viewModels()
-    private lateinit var binding: FragmentMedicalBookingListBinding
     private val args: MedicalBookingListFragmentArgs by navArgs()
     private val showAddMedicalBooking: Boolean by lazy { args.showAddMedicalBooking }
 
@@ -39,21 +37,16 @@ class MedicalBookingListFragment : Fragment(), MenuProvider {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentMedicalBookingListBinding.inflate(inflater, container, false)
-        binding.composeView.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                MedicalBookingListScreen(
-                    viewModel = viewModel,
-                    onClickItem = {
-                        val doctorAppointmentId = viewModel.getDoctorAppointmentId(it) ?: return@MedicalBookingListScreen
-                        openAddMedicalBookingFragment(doctorAppointmentId)
-                    }
-                )
-            }
+    ): View? {
+        return FragmentHelper.createBaseComposeView(inflater, container) {
+            MedicalBookingListScreen(
+                viewModel = viewModel,
+                onClickItem = {
+                    val doctorAppointmentId = viewModel.getDoctorAppointmentId(it) ?: return@MedicalBookingListScreen
+                    openAddMedicalBookingFragment(doctorAppointmentId)
+                }
+            )
         }
-        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -112,12 +105,13 @@ fun MedicalBookingListScreen(viewModel: MedicalBookingListViewModel,
             items = itemModels,
             key = { it.itemTag }
         ) { item ->
-            ConversationItem(
+            LImage3TextsRButtonView(
                 modifier = Modifier.fillMaxWidth(),
                 itemModel = item,
-                showAddButton = false,
-                onAddClick = {},
-                onSelect = onClickItem
+                onClickRightButton = {},
+                onClickItem = {
+                    onClickItem(item)
+                }
             )
         }
     }

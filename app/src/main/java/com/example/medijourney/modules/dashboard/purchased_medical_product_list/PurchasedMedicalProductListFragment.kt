@@ -23,16 +23,15 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
+import com.example.medijourney.common.helpers.FragmentHelper
 import com.example.medijourney.common.models.item_models.DynamicUIItem
 import com.example.medijourney.common.ui_components.composes.CIndicator
-import com.example.medijourney.databinding.FragmentPurchasedMedicalProductListBinding
 import com.example.medijourney.modules.dashboard.purchased_medical_product_list.sub_views.PurchasedMedicalProductItem
 
 class PurchasedMedicalProductListFragment : Fragment() {
 
     // Properties
     private val viewModel: PurchasedMedicalProductListViewModel by viewModels()
-    private lateinit var binding: FragmentPurchasedMedicalProductListBinding
     private val args: PurchasedMedicalProductListFragmentArgs by navArgs()
     private val medicalProductStatus: String by lazy { args.medicalProductStatus }
     private val title: String? by lazy { args.title }
@@ -41,19 +40,14 @@ class PurchasedMedicalProductListFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentPurchasedMedicalProductListBinding.inflate(inflater, container, false)
-        binding.composeView.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                PurchasedMedicalProductListScreen(
-                    viewModel = viewModel,
-                    onSelectedItem = {
-                    }
-                )
-            }
+    ): View? {
+        return FragmentHelper.createBaseComposeView(inflater, container) {
+            PurchasedMedicalProductListScreen(
+                viewModel = viewModel,
+                onSelectedItem = {
+                }
+            )
         }
-        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

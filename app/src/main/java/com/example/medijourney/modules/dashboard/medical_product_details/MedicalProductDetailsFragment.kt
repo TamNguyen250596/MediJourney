@@ -49,16 +49,15 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.medijourney.R
 import com.example.medijourney.common.constants.proximaNovaFamily
+import com.example.medijourney.common.helpers.FragmentHelper
 import com.example.medijourney.common.ui_components.composes.CIndicator
 import com.example.medijourney.common.ui_components.composes.SelectionBottomSheet
-import com.example.medijourney.databinding.FragmentMedicalProductDetailsBinding
 import com.example.medijourney.modules.dashboard.medical_product_details.sub_views.ItemNumberView
 
 class MedicalProductDetailsFragment : Fragment() {
 
     // Properties
     private val viewModel: MedicalProductDetailsViewModel by viewModels()
-    private lateinit var binding: FragmentMedicalProductDetailsBinding
     private val args: MedicalProductDetailsFragmentArgs by navArgs()
     private val medicalProductId: String by lazy { args.medicalProductId }
     private val isPreview: Boolean by lazy { args.isPreview }
@@ -67,21 +66,16 @@ class MedicalProductDetailsFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentMedicalProductDetailsBinding.inflate(inflater, container, false)
-        binding.composeView.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                MedicalProductDetailsScreen(
-                    viewModel = viewModel,
-                    isPreview = isPreview,
-                    onSelectedPayment = {
-                        handleBuyMedicalProduct()
-                    }
-                )
-            }
+    ): View? {
+        return FragmentHelper.createBaseComposeView(inflater, container) {
+            MedicalProductDetailsScreen(
+                viewModel = viewModel,
+                isPreview = isPreview,
+                onSelectedPayment = {
+                    handleBuyMedicalProduct()
+                }
+            )
         }
-        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

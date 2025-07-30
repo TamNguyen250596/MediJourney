@@ -42,19 +42,18 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.medijourney.R
 import com.example.medijourney.common.constants.Constants
+import com.example.medijourney.common.helpers.FragmentHelper
 import com.example.medijourney.common.models.item_models.DynamicUIItem
 import com.example.medijourney.common.ui_components.composes.CIndicator
 import com.example.medijourney.common.ui_components.composes.EmptyPlaceholder
 import com.example.medijourney.common.ui_components.composes.SearchMessageItem
 import com.example.medijourney.common.ui_components.dialogs.IndicatorHandler
-import com.example.medijourney.databinding.FragmentSearchMessageBinding
 import kotlinx.coroutines.delay
 
 class SearchMessageFragment : Fragment() {
 
     // Properties
     private val viewModel: SearchMessageViewModel by viewModels()
-    private lateinit var binding: FragmentSearchMessageBinding
     private val args: SearchMessageFragmentArgs by navArgs()
     private val conversationId: String? by lazy { args.conversationId }
 
@@ -62,17 +61,12 @@ class SearchMessageFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentSearchMessageBinding.inflate(inflater, container, false)
-        binding.composeView.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                SearchMessageScreen(viewModel = viewModel) {
-                    goBackThePreviousFragment(it)
-                }
+    ): View? {
+        return FragmentHelper.createBaseComposeView(inflater, container) {
+            SearchMessageScreen(viewModel = viewModel) {
+                goBackThePreviousFragment(it)
             }
         }
-        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

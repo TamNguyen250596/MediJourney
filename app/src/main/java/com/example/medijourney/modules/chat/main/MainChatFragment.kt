@@ -37,7 +37,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -49,35 +48,29 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.medijourney.R
 import com.example.medijourney.common.constants.Constants
+import com.example.medijourney.common.helpers.FragmentHelper
 import com.example.medijourney.common.models.item_models.DynamicUIItem
 import com.example.medijourney.common.ui_components.composes.CIndicator
-import com.example.medijourney.common.ui_components.composes.ConversationItem
+import com.example.medijourney.common.ui_components.composes.LImage3TextsRButtonView
 import com.example.medijourney.common.ui_components.composes.EmptyPlaceholder
-import com.example.medijourney.databinding.FragmentMainChatBinding
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MainChatFragment : Fragment(), MenuProvider {
 
     // Properties
-    private lateinit var binding: FragmentMainChatBinding
     private val viewModel: MainChatViewModel by viewModels()
 
     // Life cycle
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentMainChatBinding.inflate(inflater, container, false)
-        binding.composeView.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                UserConversationScreen(viewModel) {
-                    openMessageFragment(it)
-                }
+    ): View? {
+        return FragmentHelper.createBaseComposeView(inflater, container) {
+            UserConversationScreen(viewModel) {
+                openMessageFragment(it)
             }
         }
-        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -230,7 +223,9 @@ fun UserConversationScreen(viewModel: MainChatViewModel, onSelect: (DynamicUIIte
                                 modifier = Modifier.fillMaxSize(),
                             ) {
                                 Box(
-                                    Modifier.fillMaxSize().padding(horizontal = 20.dp),
+                                    Modifier
+                                        .fillMaxSize()
+                                        .padding(horizontal = 20.dp),
                                     contentAlignment = Alignment.CenterEnd
                                 ) {
                                     Icon(
@@ -243,12 +238,14 @@ fun UserConversationScreen(viewModel: MainChatViewModel, onSelect: (DynamicUIIte
                         },
                         enableDismissFromStartToEnd = false,
                         content = {
-                            ConversationItem(
+                            LImage3TextsRButtonView(
                                 modifier = Modifier.fillMaxWidth(),
                                 itemModel = item,
-                                showAddButton = false,
-                                onAddClick = {},
-                                onSelect = onSelect
+                                rightButtonIconId = R.drawable.ic_plus_circle,
+                                onClickRightButton = {},
+                                onClickItem = {
+                                    onSelect(item)
+                                }
                             )
                         }
                     )

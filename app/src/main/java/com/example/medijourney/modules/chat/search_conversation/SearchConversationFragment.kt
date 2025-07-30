@@ -32,7 +32,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -40,39 +39,33 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.medijourney.R
+import com.example.medijourney.common.helpers.FragmentHelper
 import com.example.medijourney.common.models.item_models.DynamicUIItem
 import com.example.medijourney.common.ui_components.composes.CIndicator
-import com.example.medijourney.common.ui_components.composes.ConversationItem
+import com.example.medijourney.common.ui_components.composes.LImage3TextsRButtonView
 import com.example.medijourney.common.ui_components.composes.EmptyPlaceholder
 import com.example.medijourney.common.ui_components.dialogs.IndicatorHandler
-import com.example.medijourney.databinding.FragmentSearchConversationBinding
 import kotlinx.coroutines.delay
 
 class SearchConversationFragment : Fragment() {
 
     // Properties
     private val viewModel: SearchConversationViewModel by viewModels()
-    private lateinit var binding: FragmentSearchConversationBinding
 
     // Life cycle
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentSearchConversationBinding.inflate(inflater, container, false)
-        binding.composeView.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                SearchConversationScreen(viewModel) {
-                    IndicatorHandler.show(requireContext())
-                    viewModel.addUserConversation(it) {
-                        IndicatorHandler.hide()
-                        findNavController().popBackStack()
-                    }
+    ): View? {
+        return FragmentHelper.createBaseComposeView(inflater, container) {
+            SearchConversationScreen(viewModel) {
+                IndicatorHandler.show(requireContext())
+                viewModel.addUserConversation(it) {
+                    IndicatorHandler.hide()
+                    findNavController().popBackStack()
                 }
             }
         }
-        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -161,12 +154,14 @@ fun SearchConversationScreen(viewModel: SearchConversationViewModel, onAddClick:
                     items = itemModels,
                     key = { it.itemTag }
                 ) { item ->
-                    ConversationItem(
+                    LImage3TextsRButtonView(
                         modifier = Modifier.fillMaxWidth(),
                         itemModel = item,
-                        showAddButton = true,
-                        onAddClick = onAddClick,
-                        onSelect = {}
+                        rightButtonIconId = R.drawable.ic_plus_circle,
+                        onClickRightButton = {
+                            onAddClick(item)
+                        },
+                        onClickItem = {}
                     )
                 }
             }

@@ -18,27 +18,24 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.example.medijourney.common.helpers.FragmentHelper
 import com.example.medijourney.common.ui_components.composes.CIndicator
 import com.example.medijourney.common.ui_components.composes.MessageInputField
-import com.example.medijourney.databinding.FragmentAiChatBinding
 import com.example.medijourney.modules.chat.message.sub_views.MessageListView
 
 class AIChatFragment : Fragment() {
 
     // Properties
     private val viewModel: AIChatViewModel by viewModels()
-    private lateinit var binding: FragmentAiChatBinding
 
     // Life cycle
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentAiChatBinding.inflate(inflater, container, false)
-        binding.composeView.setContent {
+    ): View? {
+        return FragmentHelper.createBaseComposeView(inflater, container) {
             AIChatScreen(viewModel)
         }
-        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

@@ -9,7 +9,7 @@
         android:id="@+id/healthCenterFragment"
         android:name="com.example.medijourney.modules.health_center.main.MainHealthCenterFragment"
         android:label="@string/health_center"
-        tools:layout="@layout/fragment_health_center" >
+        tools:layout="@layout/fragment_base_compose" >
         <action
             android:id="@+id/action_healthCenterFragment_to_addFitnessTrackerFragment"
             app:destination="@id/addFitnessTrackerFragment" >
@@ -201,7 +201,7 @@
         android:id="@+id/addExercisePlanFragment"
         android:name="com.example.medijourney.modules.health_center.add_exercise_plan.AddExercisePlanFragment"
         android:label=""
-        tools:layout="@layout/fragment_add_exercise_plan" >
+        tools:layout="@layout/fragment_base_compose" >
         <argument
             android:name="userExercisePlanId"
             app:argType="string"
@@ -213,7 +213,7 @@
         android:id="@+id/exercisePlanDetailFragment"
         android:name="com.example.medijourney.modules.health_center.exercise_plan_detail.ExercisePlanDetailFragment"
         android:label="@string/exercise_plan_detail"
-        tools:layout="@layout/fragment_exercise_plan_detail" >
+        tools:layout="@layout/fragment_base_compose" >
         <argument
             android:name="userExercisePlanId"
             app:argType="string"
@@ -234,7 +234,7 @@
     <dialog
         android:id="@+id/selectExerciseLevelFragment"
         android:name="com.example.medijourney.modules.health_center.select_exercise_level.SelectExerciseLevelFragment"
-        tools:layout="@layout/fragment_select_exercise_level">
+        tools:layout="@layout/fragment_base_compose">
         <argument
             android:name="exerciseId"
             app:argType="integer"
@@ -260,7 +260,7 @@
         android:id="@+id/recipeVideoFragment"
         android:name="com.example.medijourney.modules.health_center.recipe_video.RecipeVideoFragment"
         android:label="@string/recipe_video"
-        tools:layout="@layout/fragment_recipe_video" >
+        tools:layout="@layout/fragment_base_compose" >
         <argument
             android:name="recipeId"
             app:argType="integer"

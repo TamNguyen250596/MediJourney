@@ -39,15 +39,13 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.fragment.navArgs
 import com.example.medijourney.R
 import com.example.medijourney.common.constants.proximaNovaFamily
+import com.example.medijourney.common.helpers.FragmentHelper
 import com.example.medijourney.common.ui_components.composes.VideoPlayer
-import com.example.medijourney.databinding.FragmentRecipeVideoBinding
-import com.example.medijourney.modules.health_center.exercise_video.VideoPlayerFragmentArgs
 
 class RecipeVideoFragment : Fragment() {
 
     // Properties
     private val viewModel: RecipeVideoViewModel by viewModels()
-    private lateinit var binding: FragmentRecipeVideoBinding
     private val args : RecipeVideoFragmentArgs by navArgs()
     private val recipeId: Int by lazy { args.recipeId }
 
@@ -55,15 +53,10 @@ class RecipeVideoFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentRecipeVideoBinding.inflate(inflater, container, false)
-        binding.composeView.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                RecipeVideo(viewModel)
-            }
+    ): View? {
+        return FragmentHelper.createBaseComposeView(inflater, container) {
+            RecipeVideo(viewModel)
         }
-        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

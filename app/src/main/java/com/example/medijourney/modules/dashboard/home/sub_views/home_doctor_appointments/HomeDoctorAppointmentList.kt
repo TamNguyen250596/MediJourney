@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.sp
 import com.example.medijourney.R
 import com.example.medijourney.common.constants.proximaNovaFamily
 import com.example.medijourney.common.models.item_models.DynamicUIItem
-import com.example.medijourney.common.ui_components.composes.ConversationItem
+import com.example.medijourney.common.ui_components.composes.LImage3TextsRButtonView
 import com.example.medijourney.common.ui_components.composes.EmptyPlaceholder
 
 @SuppressLint("ConfigurationScreenWidthHeight")
@@ -113,12 +113,13 @@ fun HomeDoctorAppointmentList(viewModel: HomeDoctorAppointmentViewModel,
                     items = itemModels,
                     key = { it.itemTag }
                 ) { item ->
-                    ConversationItem(
+                    LImage3TextsRButtonView(
                         modifier = modifier,
                         itemModel = item,
-                        showAddButton = false,
-                        onAddClick = {},
-                        onSelect = onClickItem
+                        onClickRightButton = {},
+                        onClickItem = {
+                            onClickItem(item)
+                        }
                     )
                 }
             }

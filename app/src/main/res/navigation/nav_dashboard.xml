@@ -9,7 +9,7 @@
         android:id="@+id/homeDashboardFragment"
         android:name="com.example.medijourney.modules.dashboard.home.HomeDashboardFragment"
         android:label="@string/home"
-        tools:layout="@layout/fragment_home_dashboard" >
+        tools:layout="@layout/fragment_base_compose" >
         <action
             android:id="@+id/action_homeDashboardFragment_to_webViewFragment"
             app:destination="@id/nav_web_view" >
@@ -57,7 +57,7 @@
         android:id="@+id/dashboardMenusFragment"
         android:name="com.example.medijourney.modules.dashboard.dashboard_menus.DashboardMenusFragment"
         android:label="@string/dashboard_menus"
-        tools:layout="@layout/fragment_dashboard_menus" >
+        tools:layout="@layout/fragment_base_compose" >
         <action
             android:id="@+id/action_dashboardMenusFragment_to_medicalBookingListFragment"
             app:destination="@id/medicalBookingListFragment" >
@@ -79,7 +79,7 @@
         android:id="@+id/medicalBookingListFragment"
         android:name="com.example.medijourney.modules.dashboard.medical_booking_list.MedicalBookingListFragment"
         android:label="@string/medical_booking_list"
-        tools:layout="@layout/fragment_medical_booking_list" >
+        tools:layout="@layout/fragment_base_compose" >
         <argument
             android:name="showAddMedicalBooking"
             app:argType="boolean"
@@ -93,7 +93,7 @@
         android:id="@+id/addMedicalBookingFragment"
         android:name="com.example.medijourney.modules.dashboard.add_medical_booking.AddMedicalBookingFragment"
         android:label="@string/add_medical_booking"
-        tools:layout="@layout/fragment_add_medical_booking" >
+        tools:layout="@layout/fragment_base_compose" >
         <argument
             android:name="doctorAppointmentId"
             app:argType="string"
@@ -128,7 +128,7 @@
         android:id="@+id/searchHospitalFragment"
         android:name="com.example.medijourney.modules.dashboard.search_hospital.SearchHospitalFragment"
         android:label="@string/search_hospital"
-        tools:layout="@layout/fragment_search_hospital" >
+        tools:layout="@layout/fragment_base_compose" >
         <argument
             android:name="hospitalId"
             app:argType="string"
@@ -140,7 +140,7 @@
         android:id="@+id/searchSubSpecialtiesFragment"
         android:name="com.example.medijourney.modules.dashboard.search_sub_specialties.SearchSubSpecialtiesFragment"
         android:label="@string/search_specialties"
-        tools:layout="@layout/fragment_search_sub_specialties" >
+        tools:layout="@layout/fragment_base_compose" >
         <argument
             android:name="hospitalId"
             app:argType="string"
@@ -158,7 +158,7 @@
         android:id="@+id/medicationListFragment"
         android:name="com.example.medijourney.modules.dashboard.medication_list.MedicationListFragment"
         android:label="@string/medication_list"
-        tools:layout="@layout/fragment_medication_list" >
+        tools:layout="@layout/fragment_base_compose" >
         <action
             android:id="@+id/action_medicationListFragment_to_medicalProductDetailsFragment"
             app:destination="@id/medicalProductDetailsFragment" />
@@ -168,7 +168,7 @@
         android:id="@+id/medicalProductDetailsFragment"
         android:name="com.example.medijourney.modules.dashboard.medical_product_details.MedicalProductDetailsFragment"
         android:label="Medical Product Details"
-        tools:layout="@layout/fragment_medical_product_details" >
+        tools:layout="@layout/fragment_base_compose" >
         <argument
             android:name="medicalProductId"
             app:argType="string"
@@ -184,7 +184,7 @@
         android:id="@+id/purchasedMedicalProductListFragment"
         android:name="com.example.medijourney.modules.dashboard.purchased_medical_product_list.PurchasedMedicalProductListFragment"
         android:label=""
-        tools:layout="@layout/fragment_purchased_medical_product_list" >
+        tools:layout="@layout/fragment_base_compose" >
         <argument
             android:name="medicalProductStatus"
             app:argType="string"
@@ -202,7 +202,7 @@
         android:id="@+id/educationalOrganizationsFragment"
         android:name="com.example.medijourney.modules.dashboard.educational_organizations.EducationalOrganizationsFragment"
         android:label="@string/medical_knowledge"
-        tools:layout="@layout/fragment_educational_organizations" >
+        tools:layout="@layout/fragment_base_compose" >
         <action
             android:id="@+id/action_educationalOrganizationsFragment_to_educationalNutrientFragment"
             app:destination="@id/educationalNutrientFragment" />
@@ -212,7 +212,7 @@
         android:id="@+id/educationalNutrientFragment"
         android:name="com.example.medijourney.modules.dashboard.educational_nutrient.EducationalNutrientFragment"
         android:label="@string/educational_nutrient"
-        tools:layout="@layout/fragment_educational_nutrient" >
+        tools:layout="@layout/fragment_base_compose" >
     </fragment>
 
     <!-- Onboarding -->
