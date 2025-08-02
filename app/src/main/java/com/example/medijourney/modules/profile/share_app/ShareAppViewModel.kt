@@ -2,7 +2,7 @@ package com.example.medijourney.modules.profile.share_app
 
 import android.content.res.Resources
 import android.net.Uri
-import androidx.compose.ui.util.fastFlatMap
+import androidx.core.net.toUri
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.medijourney.common.managers.InternationManager
@@ -25,8 +25,8 @@ class ShareAppViewModel : ViewModel() {
 
     // Functions
     fun getShareUri(map: Map<String, Any>): Uri {
-        val shareUrl = map["share_url"] as? String ?: return Uri.EMPTY
-        return Uri.parse(shareUrl)
+        val shareUrlString = map["share_url"] as? String ?: return Uri.EMPTY
+        return shareUrlString.toUri()
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -37,7 +37,7 @@ class ShareAppViewModel : ViewModel() {
 
     @Suppress("UNCHECKED_CAST")
     fun getTelegramShareContent(map: Map<String, Any>): String {
-        val shareUrl = map["share_url"] as? String ?: return ""
+        map["share_url"] as? String ?: return ""
         val shareContent = map["share_content"] as? Map<String, String> ?: return ""
         val content = shareContent[InternationManager.currentLocale] ?: ""
         return content + shareContent

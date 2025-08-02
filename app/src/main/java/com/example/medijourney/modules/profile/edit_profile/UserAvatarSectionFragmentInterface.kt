@@ -1,4 +1,4 @@
-package com.example.medijourney.common.ui_components.fragments.user_avatar_section
+package com.example.medijourney.modules.profile.edit_profile
 
 interface UserAvatarSectionFragmentInterface {
     fun selectedEditProfileBGButton()

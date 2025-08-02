@@ -43,7 +43,7 @@ class EditProfileViewModel: ViewModel() {
     private var currentAppEditProfile: Map<String, Any> = mutableMapOf()
 
     // Life cycle
-    fun onViewCreated() {
+    init {
         currentAppEditProfile = InternationManager.getCurrentAppEditProfile()
         viewModelScope.launch {
             getCurrentUser()

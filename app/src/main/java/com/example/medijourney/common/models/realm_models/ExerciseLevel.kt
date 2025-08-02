@@ -26,7 +26,7 @@ class ExerciseLevel: RealmObject, RealmCycle {
         return ExerciseLevel().apply {
             id = map.getInt("id")
             name = map.getLocalizedString("name")
-            enable = map["enable"] as? Boolean ?: false
+            enable = map["enable"] as? Boolean == true
             level = map["level"] as? String ?: ""
             duration = map.getDouble("duration")
         }

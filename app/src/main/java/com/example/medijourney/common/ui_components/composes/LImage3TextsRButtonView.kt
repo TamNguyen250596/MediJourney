@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedCard
@@ -35,7 +34,6 @@ import com.example.medijourney.common.helpers.ImageHelper
 import com.example.medijourney.common.managers.firebase_storage.FirebaseStorageManager
 import com.example.medijourney.common.models.item_models.DynamicUIItem
 import com.example.medijourney.common.models.ui_models.MFont
-
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable

@@ -30,7 +30,7 @@ class Exercise: RealmObject, RealmCycle {
         return Exercise().apply {
             id = map.getInt("id")
             tag = map["tag"] as? String ?: ""
-            enable = map["enable"] as? Boolean ?: false
+            enable = map["enable"] as? Boolean == true
             position = map.getInt("position")
             name = map.getLocalizedString("name_localized")
             description = map.getLocalizedString("description_localized")

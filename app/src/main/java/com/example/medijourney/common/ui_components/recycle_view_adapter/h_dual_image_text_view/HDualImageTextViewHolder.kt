@@ -113,7 +113,7 @@ class HDualImageTextViewHolder(binding: ItemHDualImageTextViewBinding) :
 
         itemModel.additionalData?.let {
             (it as? Map<String, Any>)?.let { additionalData ->
-                val isHideSeparator = additionalData[IS_HIDE_SEPARATOR_KEY] as? Boolean ?: false
+                val isHideSeparator = additionalData[IS_HIDE_SEPARATOR_KEY] as? Boolean == true
                 separatorView.visibility = if (isHideSeparator) View.INVISIBLE else View.VISIBLE
             }
         }

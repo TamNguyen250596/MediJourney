@@ -43,7 +43,7 @@ class Message: RealmObject, RealmCycle {
             senderImageName = map["sender_image_name"] as? String
             createdAt = map.getRealmInstant("created_at")
             conversationId = map["conversation_id"] as? String ?: ""
-            isPinned = map["is_pinned"] as? Boolean ?: false
+            isPinned = map["is_pinned"] as? Boolean == true
             keywords.addAll(map.getStringSet("keywords"))
         }
     }

@@ -49,7 +49,7 @@ class MainProfileViewModel: ViewModel() {
     private var currentAppMainProfile: Map<String, Any> = mutableMapOf()
 
     // Life cycle
-    fun onCreateView() {
+    init {
         currentAppMainProfile = InternationManager.getCurrentAppMainProfile()
         syncFireStore()
         viewModelScope.launch {

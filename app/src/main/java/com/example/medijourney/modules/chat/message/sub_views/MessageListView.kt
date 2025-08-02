@@ -48,8 +48,8 @@ fun MessageListView(modifier: Modifier,
         ) { index, it ->
 
             // Properties
-            val isComingMessage = it.getAdditionalValue(Constants.IS_INCOMING_MESSAGE) as? Boolean ?: false
-            val isFirstConsecutiveFromUser = it.getAdditionalValue(Constants.IS_FIRST_CONSECUTIVE_FROM_USER) as? Boolean ?: false
+            val isComingMessage = it.getAdditionalValue(Constants.IS_INCOMING_MESSAGE) as? Boolean == true
+            val isFirstConsecutiveFromUser = it.getAdditionalValue(Constants.IS_FIRST_CONSECUTIVE_FROM_USER) as? Boolean == true
             var isHighlight by remember { mutableStateOf(false) }
             val color by animateColorAsState(
                 targetValue = if (isHighlight) colorResource(R.color.sky_blue_color) else colorResource(R.color.white),
@@ -89,7 +89,7 @@ fun MessageListView(modifier: Modifier,
                 }
 
                 IncomingMessageItem(
-                    itemModifier = itemModifier,
+                    modifier = itemModifier,
                     contentRowModifier = contentRowModifier,
                     boxModifier = boxModifier,
                     itemModel = it,

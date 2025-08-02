@@ -2,6 +2,7 @@ package com.example.medijourney.modules.profile.edit_profile
 
 import android.app.AlertDialog
 import android.app.DatePickerDialog
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -19,9 +20,6 @@ import com.example.medijourney.common.constants.EditProfileField
 import com.example.medijourney.common.models.item_models.BaseItemInterface
 import com.example.medijourney.common.ui_components.dialogs.IndicatorHandler
 import com.example.medijourney.common.ui_components.fragments.media_selection.MediaSelectionViewModel
-import com.example.medijourney.common.ui_components.fragments.user_avatar_section.UserAvatarSectionFragment
-import com.example.medijourney.common.ui_components.fragments.user_avatar_section.UserAvatarSectionFragmentInterface
-import com.example.medijourney.common.ui_components.fragments.user_avatar_section.UserAvatarSectionViewModel
 import com.example.medijourney.databinding.FragmentEditProfileBinding
 import com.example.medijourney.modules.profile.edit_profile.adapter.EditProfileAdapter
 import com.example.medijourney.modules.profile.edit_profile.adapter.EditProfileAdapterInterface
@@ -33,7 +31,6 @@ class EditProfileFragment : Fragment(), EditProfileAdapterInterface,
     private lateinit var binding: FragmentEditProfileBinding
     private val viewModel: EditProfileViewModel by viewModels()
     private val mediaSelectionViewModel: MediaSelectionViewModel by activityViewModels()
-    private val userAvatarSectionViewModel: UserAvatarSectionViewModel by viewModels()
     private var openMediaField: EditProfileField? = null
 
     // Life cycle
@@ -50,34 +47,30 @@ class EditProfileFragment : Fragment(), EditProfileAdapterInterface,
         setupView()
         observeViewModel()
         observeUIComponents()
-        viewModel.onViewCreated()
     }
 
     // Functions
     private fun setupView() {
-        val userAvatarSectionFragmentTag = UserAvatarSectionFragment::class.simpleName
-        val userAvatarSectionFragment = childFragmentManager.findFragmentByTag(userAvatarSectionFragmentTag)
-                as? UserAvatarSectionFragment ?: UserAvatarSectionFragment.newInstance(
-            displayEditProfileBGButton = false,
-            displayUserNameTextView = true,
-            displayEditAvatarButton = false,
-            displayMembershipLinearLayout = true
-        )
-        if (userAvatarSectionFragment.isDetached.not()) {
-            childFragmentManager.beginTransaction()
-                .replace(R.id.fragment_user_avatar_section, userAvatarSectionFragment, userAvatarSectionFragmentTag)
-                .commit()
+        binding.userAvatarView.editAvatarButton.setOnClickListener {
+            selectedEditAvatarButton()
+        }
+        binding.userAvatarView.editProfileBGButton.setOnClickListener {
+            selectedEditProfileBGButton()
         }
         binding.profileRecyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
     }
 
     private fun observeViewModel() {
         viewModel.bgImageUri.observe(viewLifecycleOwner) { uri ->
-            userAvatarSectionViewModel.bgImageUri.postValue(uri)
+            if (uri == null) return@observe
+
+            updateProfileBGImageView(uri)
         }
 
         viewModel.avatarImageUri.observe(viewLifecycleOwner) { uri ->
-            userAvatarSectionViewModel.avatarImageUri.postValue(uri)
+            if (uri == null) return@observe
+
+            binding.userAvatarView.avatarImageView.setImageURI(uri)
         }
 
         mediaSelectionViewModel.uri.observe(viewLifecycleOwner) {
@@ -85,8 +78,8 @@ class EditProfileFragment : Fragment(), EditProfileAdapterInterface,
             val openMediaField = openMediaField ?: return@observe
 
             when (openMediaField) {
-                EditProfileField.BACKGROUND -> userAvatarSectionViewModel.bgImageUri.postValue(uri)
-                EditProfileField.AVATAR -> userAvatarSectionViewModel.avatarImageUri.postValue(uri)
+                EditProfileField.BACKGROUND -> updateProfileBGImageView(uri)
+                EditProfileField.AVATAR -> updateAvatarImageView(uri)
                 else -> return@observe
             }
             IndicatorHandler.show(requireContext())
@@ -115,6 +108,16 @@ class EditProfileFragment : Fragment(), EditProfileAdapterInterface,
                 adapter.updateItem(model, index)
             }
         }
+    }
+
+    private fun updateProfileBGImageView(uri: Uri) {
+        binding.userAvatarView.profileBGImageView.setImageURI(uri)
+        binding.userAvatarView.profileBGImageView.background = null
+    }
+
+    private fun updateAvatarImageView(uri: Uri) {
+        binding.userAvatarView.avatarImageView.setImageURI(uri)
+        binding.userAvatarView.avatarImageView.background = null
     }
 
     private fun observeUIComponents() {

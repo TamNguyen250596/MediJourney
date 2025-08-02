@@ -24,7 +24,7 @@ class MedicalSpecialty: RealmObject, RealmCycle {
         return MedicalSpecialty().apply {
             id = map["id"] as? String ?: id
             name = map.getLocalizedString("name_localized")
-            enable = map["enable"] as? Boolean ?: false
+            enable = map["enable"] as? Boolean == true
             position = map.getInt("position")
         }
     }

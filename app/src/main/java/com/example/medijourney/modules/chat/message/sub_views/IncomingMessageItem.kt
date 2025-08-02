@@ -29,6 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.medijourney.R
@@ -42,7 +43,7 @@ import java.text.StringCharacterIterator
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun IncomingMessageItem(itemModifier: Modifier,
+fun IncomingMessageItem(modifier: Modifier,
                         contentRowModifier: Modifier,
                         boxModifier: Modifier,
                         itemModel: DynamicUIItem,
@@ -53,7 +54,7 @@ fun IncomingMessageItem(itemModifier: Modifier,
     var expanded by remember { mutableStateOf(false) }
     val date by remember { mutableStateOf(itemModel.getAdditionalValue(Constants.MESSAGE_DATE) as? String) }
     var enableTypeAnimation by rememberSaveable {
-        mutableStateOf(itemModel.getAdditionalValue(Constants.ENABLE_TYPED_ANIMATION) as? Boolean ?: false)
+        mutableStateOf(itemModel.getAdditionalValue(Constants.ENABLE_TYPED_ANIMATION) as? Boolean == true)
     }
     val breakIterator = remember(itemModel.description?.text) { BreakIterator.getCharacterInstance() }
     val typingDelayInMs = 50L
@@ -67,7 +68,7 @@ fun IncomingMessageItem(itemModifier: Modifier,
 
         FirebaseStorageManager.downloadImage(secondaryImageUri) { downloadedBitmap ->
             secondaryImageBitmap = downloadedBitmap ?: run {
-                Uri.parse(secondaryImageUri)
+                secondaryImageUri.toUri()
             }
         }
     }
@@ -89,7 +90,7 @@ fun IncomingMessageItem(itemModifier: Modifier,
 
     // Content
     Column(
-        modifier = itemModifier,
+        modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         itemModel.secondaryDescription?.let {
