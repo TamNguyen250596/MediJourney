@@ -70,8 +70,12 @@ class MessageViewModel : ViewModel() {
     private var observeCurrentPageJob: Job? = null
 
     // Life cycle
-    fun onViewCreated(conversationId: String) {
+    fun inputConversationId(conversationId: String) {
         this.conversationId = conversationId
+        setUpViewModel()
+    }
+
+    private fun setUpViewModel() {
         viewModelScope.launch {
             getData()
             viewTitle.postValue(getViewTitle(conversation))
@@ -151,7 +155,7 @@ class MessageViewModel : ViewModel() {
     }
 
     private fun observePinnedMessages() {
-        FireStoreManager.buildCollectionRef(FireStoreCollection.MESSAGES)
+        FireStoreManager.buildCollection(FireStoreCollection.MESSAGES)
             .whereEqualTo("conversation_id", conversationId)
             .whereEqualTo("is_pinned", true)
             .orderBy(Constants.CREATED_AT, Query.Direction.DESCENDING)
@@ -367,7 +371,7 @@ class MessageViewModel : ViewModel() {
 
     // Send Message
     fun sendMessage(text: String, imageUri: Uri?) {
-        val messageDocRef = FireStoreManager.buildDocRef(Pair(FireStoreCollection.MESSAGES, null))
+        val messageDocRef = FireStoreManager.buildDoc(Pair(FireStoreCollection.MESSAGES, null))
         val userMessageDocRef = FireStoreManager.buildUserDocRef(Pair(FireStoreCollection.USER_MESSAGES, null))
         val messageMap = generateMessageMap(messageDocRef.id, text, imageUri)
         val userMessageMap = generateUserMessageMap(userMessageDocRef.id, messageDocRef.id, messageMap)
@@ -391,7 +395,7 @@ class MessageViewModel : ViewModel() {
 
         val user = user
         if (user != null && user.isValid()) {
-            messageMap["sender_id"] = user.userCode
+            messageMap["sender_id"] = user.id
             messageMap["sender_image_name"] = "avatar"
             user.displayName?.let {
                 messageMap["sender_name"] = it
@@ -466,7 +470,7 @@ class MessageViewModel : ViewModel() {
         val message = userMessage.message ?: return
         if (!message.isValid()) return
 
-        FireStoreManager.buildDocRef(Pair(FireStoreCollection.MESSAGES, message.id))
+        FireStoreManager.buildDoc(Pair(FireStoreCollection.MESSAGES, message.id))
             .update("is_pinned", isPinned)
             .addOnSuccessListener {
                 viewModelScope.launch {

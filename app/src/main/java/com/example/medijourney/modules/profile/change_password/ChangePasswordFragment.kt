@@ -23,7 +23,8 @@ class ChangePasswordFragment : Fragment() {
     // Properties
     private lateinit var binding: FragmentChangePasswordBinding
     private val viewModel: ChangePasswordViewModel by viewModels()
-    private val tempLogInToken: String? by navArgs()
+    private val args: ChangePasswordFragmentArgs by navArgs()
+    private val tempLogInToken: String? by lazy { args.tempLogInToken }
 
     // Life cycle
     override fun onCreateView(
@@ -36,7 +37,6 @@ class ChangePasswordFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.onViewCreated(view)
         setupUI()
         observeViewModel()
     }
@@ -74,15 +74,13 @@ class ChangePasswordFragment : Fragment() {
                 binding.confirmButton.setTextColor(ContextCompat.getColor(it, white))
             }
         }
-        viewModel.errorMessages.observe(viewLifecycleOwner) {
-            it?.let {
-                showDialog(getString(R.string.error), it)
+        viewModel.isSuccessMessages.observe(viewLifecycleOwner) {
+            val message = if (it) {
+                getString(R.string.change_password_success_message)
+            } else {
+                getString(R.string.error_user_deactivation_failed)
             }
-        }
-        viewModel.successMessages.observe(viewLifecycleOwner) {
-            it?.let {
-                showDialog(getString(R.string.success), it)
-            }
+            showDialog(getString(R.string.error), message)
         }
     }
 

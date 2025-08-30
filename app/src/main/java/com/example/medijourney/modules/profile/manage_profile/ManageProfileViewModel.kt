@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
-import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -40,9 +39,9 @@ class ManageProfileViewModel: ViewModel() {
     private var currentAppManageProfile: Map<String, Any> = mutableMapOf()
 
     // Life cycle
-    fun onViewCreated(view: View) {
+    init {
         currentAppManageProfile = InternationManager.getCurrentAppManageProfile()
-        appVersion = getAppVersion(view.context)
+        appVersion = getAppVersion(MediJourney.getAppContext())
         viewModelScope.launch {
             getData()
         }
@@ -55,7 +54,7 @@ class ManageProfileViewModel: ViewModel() {
         val currentUserCode = FirebaseAuthManager.getCurrentUserCode() ?: return
 
         userMembershipResult = RealmManager.read(UserMembership::class.java,
-            realmQuery = where(UserMedicalSpecialty::userCode.name, Operator.EQUAL, currentUserCode)
+            realmQuery = where(UserMedicalSpecialty::userId.name, Operator.EQUAL, currentUserCode)
         )
     }
 

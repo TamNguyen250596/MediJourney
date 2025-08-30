@@ -71,7 +71,7 @@ class MedicationListViewModel : ViewModel() {
     }
 
     private fun observeFS(keyword: String?) {
-        observeFistPageQuery = FireStoreManager.buildCollectionRef(FireStoreCollection.MEDICAL_PRODUCTS)
+        observeFistPageQuery = FireStoreManager.buildCollection(FireStoreCollection.MEDICAL_PRODUCTS)
             .apply {
                 if (!keyword.isNullOrEmpty()) {
                     whereArrayContains("keywords", keyword)
@@ -184,7 +184,7 @@ class MedicationListViewModel : ViewModel() {
     }
 
     private fun getCurrentPage(cursorPosition: Int) {
-        FireStoreManager.buildCollectionRef(FireStoreCollection.MEDICAL_PRODUCTS)
+        FireStoreManager.buildCollection(FireStoreCollection.MEDICAL_PRODUCTS)
             .apply {
                 if (!searchTextFlow.value.isNullOrEmpty()) {
                     whereArrayContains("keywords", searchTextFlow.value.toString())
@@ -206,7 +206,7 @@ class MedicationListViewModel : ViewModel() {
             delay(10_000)
             cursorPosition?.let { position ->
 
-                FireStoreManager.buildCollectionRef(FireStoreCollection.MEDICAL_PRODUCTS)
+                FireStoreManager.buildCollection(FireStoreCollection.MEDICAL_PRODUCTS)
                     .apply {
                         if (!searchTextFlow.value.isNullOrEmpty()) {
                             whereArrayContains("keywords", searchTextFlow.value.toString())
@@ -223,7 +223,7 @@ class MedicationListViewModel : ViewModel() {
                         }
                     }
 
-                FireStoreManager.buildCollectionRef(FireStoreCollection.MEDICAL_PRODUCTS)
+                FireStoreManager.buildCollection(FireStoreCollection.MEDICAL_PRODUCTS)
                     .apply {
                         if (!searchTextFlow.value.isNullOrEmpty()) {
                             whereArrayContains("keywords", searchTextFlow.value.toString())

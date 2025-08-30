@@ -46,7 +46,7 @@ class MainChatViewModel: ViewModel() {
     private var observeCurrentPageJob: Job? = null
 
     // Life cycle
-    fun onViewCreated() {
+    init {
         viewModelScope.launch {
             getData()
             _itemModels.value = generateDynamicUIItemModels(userConversationResults, conversationResults)

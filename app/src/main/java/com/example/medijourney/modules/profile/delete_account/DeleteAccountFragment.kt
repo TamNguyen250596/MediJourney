@@ -30,7 +30,6 @@ class DeleteAccountFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         observeUIComponents()
         observeViewModel()
-        viewModel.onViewCreated(view)
     }
 
     // Functions
@@ -53,6 +52,16 @@ class DeleteAccountFragment : Fragment() {
         viewModel.shouldLogout.observe(viewLifecycleOwner) {
             if (it) {
                 FirebaseAuthManager.logOut(requireActivity())
+            }
+        }
+        viewModel.isFailToDeactivate.observe(viewLifecycleOwner) {
+            if (it) {
+                showDialog(getString(R.string.error), getString(R.string.error_user_deactivation_failed))
+            }
+        }
+        viewModel.isFailToDelete.observe(viewLifecycleOwner) {
+            if (it) {
+                showDialog(getString(R.string.error), getString(R.string.error_user_deletion_failed))
             }
         }
     }

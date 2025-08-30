@@ -43,7 +43,6 @@ class AdvancedSecurityFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.onViewCreated()
         setupView()
         observeViewModel()
         observeUIComponents()

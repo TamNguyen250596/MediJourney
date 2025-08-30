@@ -72,7 +72,7 @@ class HomeOnboardingViewModel: ViewModel() {
         FirebaseAuthManager.getCurrentUserCode()?.let {
             userMedicalSpecialtyResult = RealmManager.read(
                 UserMedicalSpecialty::class.java,
-                realmQuery = where(UserMedicalSpecialty::userCode.name, Operator.EQUAL, it)
+                realmQuery = where(UserMedicalSpecialty::userId.name, Operator.EQUAL, it)
             )
         }
     }

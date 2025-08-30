@@ -11,7 +11,7 @@ class UserSetting: RealmObject, RealmCycle {
     // Properties
     @PrimaryKey
     var id: String = ""
-    var userCode: String = ""
+    var userId: String = ""
     var enableOTPAuth: Boolean = false
     var unreadNotificationCount: Int = 0
 
@@ -20,16 +20,16 @@ class UserSetting: RealmObject, RealmCycle {
         return "id"
     }
 
-    override fun toRealmObject(map: Map<String, Any>): RealmObject {
+    override fun create(map: Map<String, Any>): RealmObject {
         return UserSetting().apply {
             id = map.getUserObjectKey(id)
-            userCode = map["user_code"] as? String ?: userCode
+            userId = map["user_id"] as? String ?: userId
             enableOTPAuth = map["enable_otp_auth"] as? Boolean ?: enableOTPAuth
             unreadNotificationCount = map.getInt("unread_notification_count")
         }
     }
 
-    override fun updateFromMap(map: Map<String, Any>) {
+    override fun update(map: Map<String, Any>) {
         enableOTPAuth = map["enable_otp_auth"] as? Boolean ?: enableOTPAuth
         unreadNotificationCount = map.getInt("unread_notification_count", unreadNotificationCount)
     }

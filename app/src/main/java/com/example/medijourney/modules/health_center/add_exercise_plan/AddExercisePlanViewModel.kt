@@ -57,7 +57,7 @@ class AddExercisePlanViewModel : ViewModel() {
     }
 
     // Lifecycle
-    fun onViewCreated(userExercisePlanId: String?) {
+    fun inputUserExercisePlanId(userExercisePlanId: String?) {
         if (!userExercisePlanId.isNullOrEmpty()) {
             this.userExercisePlanId = userExercisePlanId
         }

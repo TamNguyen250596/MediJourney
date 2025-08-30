@@ -21,7 +21,7 @@ class Recipe: RealmObject, RealmCycle {
         return "id"
     }
 
-    override fun toRealmObject(map: Map<String, Any>): RealmObject {
+    override fun create(map: Map<String, Any>): RealmObject {
         return Recipe().apply {
             id = map.getInt("id")
             tag = map["tag"] as? String ?: ""
@@ -33,7 +33,7 @@ class Recipe: RealmObject, RealmCycle {
         }
     }
 
-    override fun updateFromMap(map: Map<String, Any>) {
+    override fun update(map: Map<String, Any>) {
         enable = map["enable"] as? Boolean ?: enable
         position = map["position"] as? Int ?: position
         name = map.getLocalizedString("name_localized", name)

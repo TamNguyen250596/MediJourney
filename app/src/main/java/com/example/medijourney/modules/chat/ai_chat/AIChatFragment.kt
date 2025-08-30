@@ -37,11 +37,6 @@ class AIChatFragment : Fragment() {
             AIChatScreen(viewModel)
         }
     }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        viewModel.onViewCreated()
-    }
 }
 
 @Composable

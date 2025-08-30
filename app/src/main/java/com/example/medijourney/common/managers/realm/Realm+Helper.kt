@@ -1,12 +1,14 @@
 package com.example.medijourney.common.managers.realm
 
 import io.realm.kotlin.types.RealmObject
+import kotlinx.coroutines.CoroutineScope
 
 interface RealmCycle {
     fun primaryKey(): String
-    fun toRealmObject(map: Map<String, Any>): RealmObject
-    fun updateFromMap(map: Map<String, Any>)
-    fun handleDependencies(map: Map<String, Any>) {}
+    fun create(map: Map<String, Any>): RealmObject
+    fun didInit(map: Map<String, Any>) {}
+    fun update(map: Map<String, Any>)
+    fun handleNestedObjects(map: Map<String, Any>, coroutine: CoroutineScope) {}
     fun removeDependencies() {}
 }
 

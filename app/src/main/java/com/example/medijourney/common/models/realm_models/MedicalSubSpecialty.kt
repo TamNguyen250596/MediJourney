@@ -1,13 +1,18 @@
 package com.example.medijourney.common.models.realm_models
 
+import com.example.medijourney.common.extensions.RFilter
 import com.example.medijourney.common.extensions.getInt
 import com.example.medijourney.common.extensions.getLocalizedString
 import com.example.medijourney.common.extensions.getStringSet
 import com.example.medijourney.common.managers.realm.RealmCycle
+import com.example.medijourney.common.managers.realm.RealmManager
 import io.realm.kotlin.ext.realmSetOf
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.RealmSet
 import io.realm.kotlin.types.annotations.PrimaryKey
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MedicalSubSpecialty: RealmObject, RealmCycle {
 
@@ -27,7 +32,7 @@ class MedicalSubSpecialty: RealmObject, RealmCycle {
         return "id"
     }
 
-    override fun toRealmObject(map: Map<String, Any>): RealmObject {
+    override fun create(map: Map<String, Any>): RealmObject {
         return MedicalSubSpecialty().apply {
             id = map["id"] as? String ?: id
             imageName = map["image_name"] as? String
@@ -40,7 +45,22 @@ class MedicalSubSpecialty: RealmObject, RealmCycle {
         }
     }
 
-    override fun updateFromMap(map: Map<String, Any>) {
+    override fun didInit(map: Map<String, Any>) {
+        super.didInit(map)
+        val id = map["id"] as? String ?: return
+
+        CoroutineScope(Dispatchers.IO).launch {
+            RealmManager.update(
+                DoctorAppointment::class,
+                filterBuilder = RFilter()
+                    .equalTo(DoctorAppointment::medicalSubSpecialtyId.name, id)
+                    .equalTo(DoctorAppointment::medicalSubSpecialty.name, null),
+                mapOf("medical_sub_specialty_id" to id)
+            )
+        }
+    }
+
+    override fun update(map: Map<String, Any>) {
         imageName = map["image_name"] as? String ?: imageName
         medicalSpecialityId = map["medical_speciality_id"] as? String ?: medicalSpecialityId
         tag = map["tag"] as? String ?: tag

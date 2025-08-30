@@ -50,14 +50,12 @@ class PhoneAuthenticationViewModel : ViewModel() {
             if (!userSetting.isValid()) return@launch completion.invoke(false)
             if (otp?.count() != 6) return@launch completion.invoke(false)
 
-            FireStoreManager.buildDocRef(
-                Pair(FireStoreCollection.USER_MEMBER, uid),
-                Pair(FireStoreCollection.USER_SETTINGS, userSetting.id)
+            val result = FireStoreManager.updateDoc(
+                FireStoreCollection.USER_SETTINGS,
+                userSetting.id,
+                mapOf("enable_otp_auth" to true)
             )
-                .update(mapOf("enable_otp_auth" to true))
-                .addOnCompleteListener {
-                    completion.invoke(it.isSuccessful)
-                }
+            completion.invoke(result)
         }
     }
 

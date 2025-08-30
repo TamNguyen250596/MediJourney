@@ -140,8 +140,9 @@ class PurchasedMedicalProductListViewModel : ViewModel() {
                 "is_read" to true
             )
 
-            FireStoreManager.buildUserDocRef(FireStoreCollection.USER_MEDICAL_PRODUCTS to data.id)
-                .update(map)
+            viewModelScope.launch {
+                FireStoreManager.updateDoc(FireStoreCollection.USER_MEDICAL_PRODUCTS, data.id, map)
+            }
         }
     }
 
@@ -154,11 +155,10 @@ class PurchasedMedicalProductListViewModel : ViewModel() {
             "status" to UserMedicalProductStatus.TO_RATE.name.lowercase()
         )
 
-        FireStoreManager.buildUserDocRef(FireStoreCollection.USER_MEDICAL_PRODUCTS to data.id)
-            .update(map)
-            .addOnCompleteListener {
-                _isLoading.value = false
-            }
+        viewModelScope.launch {
+            FireStoreManager.updateDoc(FireStoreCollection.USER_MEDICAL_PRODUCTS, data.id, map)
+            _isLoading.value = false
+        }
     }
 
     fun rateProduct(itemModel: DynamicUIItem, rate: Int) {
@@ -173,16 +173,9 @@ class PurchasedMedicalProductListViewModel : ViewModel() {
             "is_rated" to true
         )
 
-        FireStoreManager.buildUserDocRef(FireStoreCollection.USER_MEDICAL_PRODUCTS to id)
-            .update(map)
-            .addOnSuccessListener {
-                viewModelScope.launch {
-                    RealmManager.update(clazz = UserMedicalProduct::class.java, primaryKey = id, data = map)
-                    _isLoading.value = false
-                }
-            }
-            .addOnFailureListener {
-                _isLoading.value = false
-            }
+        viewModelScope.launch {
+            FireStoreManager.updateDoc(FireStoreCollection.USER_MEDICAL_PRODUCTS, id, map)
+            _isLoading.value = false
+        }
     }
 }

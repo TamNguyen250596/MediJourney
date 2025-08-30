@@ -84,7 +84,7 @@ class SearchHospitalViewModel : ViewModel() {
     }
 
     private fun observeFS(keywords: String? = null) {
-        firstPageQuery = FireStoreManager.buildCollectionRef(FireStoreCollection.HOSPITALS)
+        firstPageQuery = FireStoreManager.buildCollection(FireStoreCollection.HOSPITALS)
             .apply {
                 if (!keywords.isNullOrEmpty()) {
                     whereArrayContains(Hospital::keywords.name, keywords)
@@ -201,7 +201,7 @@ class SearchHospitalViewModel : ViewModel() {
     }
 
     private fun getCurrentPage(hospitalTag: String) {
-        FireStoreManager.buildCollectionRef(FireStoreCollection.HOSPITALS)
+        FireStoreManager.buildCollection(FireStoreCollection.HOSPITALS)
             .whereGreaterThan(Hospital::tag.name, hospitalTag)
             .orderBy(Hospital::tag.name)
             .limit(Constants.DEFAULT_LIMIT)
@@ -218,7 +218,7 @@ class SearchHospitalViewModel : ViewModel() {
             delay(10_000)
             cursorTag?.let { tag ->
 
-                FireStoreManager.buildCollectionRef(FireStoreCollection.HOSPITALS)
+                FireStoreManager.buildCollection(FireStoreCollection.HOSPITALS)
                     .whereGreaterThan(Hospital::tag.name, tag)
                     .orderBy(Hospital::tag.name)
                     .limit(Constants.DEFAULT_LIMIT)
@@ -230,7 +230,7 @@ class SearchHospitalViewModel : ViewModel() {
                         }
                     }
 
-                FireStoreManager.buildCollectionRef(FireStoreCollection.HOSPITALS)
+                FireStoreManager.buildCollection(FireStoreCollection.HOSPITALS)
                     .whereLessThanOrEqualTo(Hospital::tag.name, tag)
                     .orderBy(Hospital::tag.name)
                     .limit(Constants.DEFAULT_LIMIT)

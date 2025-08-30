@@ -1,7 +1,6 @@
 package com.example.medijourney.modules.profile.change_password
 
 import android.content.Context
-import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.medijourney.R
@@ -14,32 +13,23 @@ class ChangePasswordViewModel: ViewModel() {
 
     // Properties
     var enableConfirmButton = MutableLiveData<Boolean>(false)
-    var errorMessages = MutableLiveData<String?>(null)
-    var successMessages = MutableLiveData<String?>(null)
+    var isSuccessMessages = MutableLiveData<Boolean>(null)
     private var validTextViews: MutableMap<String, Boolean> = mutableMapOf()
     private var currentPassword: String? = null
     private val disposables = CompositeDisposable()
 
     // Life cycle
-    fun onViewCreated(view: View) {
+    init {
         validTextViews = getValidTextViews()
-        observeUserAuthenticationResult(view)
+        observeUserAuthenticationResult()
     }
 
     // Functions
-    private fun observeUserAuthenticationResult(view: View) {
+    private fun observeUserAuthenticationResult() {
         FirebaseAuthManager.userAuthenticationResult
             .distinctUntilChanged()
             .subscribe {
-                when (it) {
-                    AuthenticationResult.CHANGE_PASSWORD_SUCCESS -> {
-                        successMessages.postValue(view.context.getString(R.string.change_password_success_message))
-                    }
-                    AuthenticationResult.CHANGE_PASSWORD_FAILED -> {
-                        errorMessages.postValue(view.context.getString(R.string.error_user_deactivation_failed))
-                    }
-                    else -> {}
-                }
+                isSuccessMessages.postValue(it == AuthenticationResult.CHANGE_PASSWORD_SUCCESS)
             }.disposeBy(disposables)
     }
 

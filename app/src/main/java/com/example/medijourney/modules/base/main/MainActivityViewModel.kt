@@ -3,231 +3,89 @@ package com.example.medijourney.modules.base.main
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.medijourney.common.constants.Constants
 import com.example.medijourney.common.managers.fire_store.FireStoreCollection
 import com.example.medijourney.common.managers.fire_store.FireStoreManager
-import com.example.medijourney.common.managers.fire_store.addListener
-import com.example.medijourney.common.managers.fire_store.observe
-import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
-import com.example.medijourney.common.managers.realm.Operator
-import com.example.medijourney.common.managers.realm.RQuery
-import com.example.medijourney.common.managers.realm.RealmManager
-import com.example.medijourney.common.models.realm_models.Advertisement
-import com.example.medijourney.common.models.realm_models.Conversation
-import com.example.medijourney.common.models.realm_models.DoctorAppointment
-import com.example.medijourney.common.models.realm_models.MedicalSpecialty
-import com.example.medijourney.common.models.realm_models.MedicalSubSpecialty
-import com.example.medijourney.common.models.realm_models.Message
-import com.example.medijourney.common.models.realm_models.User
-import com.example.medijourney.common.models.realm_models.UserConversation
-import com.example.medijourney.common.models.realm_models.UserMedicalProduct
-import com.example.medijourney.common.models.realm_models.UserMedicalSpecialty
-import com.example.medijourney.common.models.realm_models.UserMessage
-import com.example.medijourney.common.models.realm_models.UserNotification
-import com.example.medijourney.common.models.realm_models.UserSetting
-import com.google.firebase.installations.FirebaseInstallations
+import com.example.medijourney.common.respository.AdvertisementRepository
+import com.example.medijourney.common.respository.UserSettingRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.ext.isValid
-import io.realm.kotlin.query.RealmResults
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class MainActivityViewModel: ViewModel() {
+@HiltViewModel
+class MainActivityViewModel @Inject constructor(
+    advertisementRepository: AdvertisementRepository,
+    userSettingRepository: UserSettingRepository,
+    mainActivityListener: MainActivityListener
+): ViewModel() {
 
     // Properties
+    var splashAdInfo = MutableLiveData<Pair<String, String?>>()
     var unreadNotificationCount = MutableLiveData(0)
-    var showPlashAd = MutableLiveData(false)
-    private var userSettingResults: RealmResults<UserSetting>? = null
-    private var adResults: RealmResults<Advertisement>? = null
+    private val advertisementsFlow = advertisementRepository.getAdvertisements(listOf("splash_ad"))
+    private val userSettingsFlow = userSettingRepository.getUserSettings()
+    private var userSettingId: String? = null
 
     // Life cycle
     init {
-        syncFireStore()
-        getData()
-    }
-
-    // FireStore
-    private fun syncFireStore() {
-        viewModelScope.launch {
-            syncHighFSPriority()
-            delay(5000L)
-            syncMediumFSPriority()
-            delay(5000L)
-            syncLowFSPriority()
-        }
-    }
-
-    private fun syncHighFSPriority() {
-        val currentUserCode = FirebaseAuthManager.getCurrentUserCode() ?: return
-
-        FireStoreManager.buildDocRef(Pair(FireStoreCollection.USER_MEMBER, currentUserCode))
-            .observe(User::class.java)
-        FireStoreManager.buildUserCollectionRef(FireStoreCollection.USER_SETTINGS)
-            .observe(UserSetting::class.java)
-        FireStoreManager.buildCollectionRef(FireStoreCollection.ADVERTISEMENTS)
-            .observe(Advertisement::class.java)
-    }
-
-    private fun syncMediumFSPriority() {
-        val currentUserCode = FirebaseAuthManager.getCurrentUserCode() ?: return
-
-        FireStoreManager.buildUserCollectionRef(FireStoreCollection.USER_MEDICAL_PRODUCTS)
-            .observe(UserMedicalProduct::class.java, this::class.java)
-        FireStoreManager.buildCollectionRef(FireStoreCollection.DOCTORS_APPOINTMENTS)
-            .whereEqualTo("patient_id", currentUserCode)
-            .observe(DoctorAppointment::class.java, this::class.java)
-        FirebaseInstallations.getInstance().id.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                syncUserRedundantData(task.result)
-            }
-        }
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    private fun syncUserRedundantData(fid: String) {
-        FireStoreManager.buildUserCollectionRef(FireStoreCollection.USER_REDUNDANT_DATA)
-            .whereEqualTo(Constants.FID, fid)
-            .addListener {
-                viewModelScope.launch {
-                    it.documents.forEach { doc ->
-                        val data = doc.data ?: return@forEach
-                        val dataType = data["data_type"] as? String ?: return@forEach
-                        val dataIds = data["data_ids"] as? List<String> ?: return@forEach
-
-                        val clazz = when (dataType) {
-                            UserNotification::class.simpleName -> {
-                                UserNotification::class.java
-                            }
-                            UserMessage::class.simpleName -> {
-                                UserMessage::class.java
-                            }
-                            Message::class.simpleName -> {
-                                Message::class.java
-                            }
-                            UserConversation::class.simpleName -> {
-                                UserConversation::class.java
-                            }
-                            Conversation::class.simpleName -> {
-                                Conversation::class.java
-                            }
-                            else -> {
-                                null
-                            }
-                        }
-                        if (clazz != null) {
-                            RealmManager.delete(
-                                clazz = clazz,
-                                realmQuery = RQuery.Where(UserNotification::id.name, Operator.IN, dataIds)
-                            )
-                            FireStoreManager.buildUserDocRef(Pair(FireStoreCollection.USER_REDUNDANT_DATA, doc.id)).delete()
-                        }
-                    }
-                }
-            }
-    }
-
-    private fun syncLowFSPriority() {
-        FireStoreManager.buildCollectionRef(FireStoreCollection.MEDICAL_SPECIALTIES)
-            .observe(MedicalSpecialty::class.java, this::class.java)
-        FireStoreManager.buildCollectionRef(FireStoreCollection.MEDICAL_SUB_SPECIALTIES)
-            .observe(MedicalSubSpecialty::class.java, this::class.java)
-        FireStoreManager.buildUserCollectionRef(FireStoreCollection.USER_MEDICAL_SPECIALTIES)
-            .observe(UserMedicalSpecialty::class.java, this::class.java)
-    }
-
-    // Get data
-    private fun getData() {
-        viewModelScope.launch {
-            getUserSettingResults()
-            getSplashAdResults()
-        }.invokeOnCompletion {
-            observeData()
-        }
-    }
-
-    private suspend fun getUserSettingResults() {
-        val currentUserCode = FirebaseAuthManager.getCurrentUserCode() ?: return
-
-        userSettingResults = RealmManager.read(UserSetting::class.java,
-            realmQuery = RQuery.Where(UserSetting::userCode.name, Operator.EQUAL, currentUserCode))
-    }
-
-    private suspend fun getSplashAdResults() {
-        adResults = RealmManager.read(Advertisement::class.java,
-            realmQuery = RQuery.Where(Advertisement::location.name, Operator.EQUAL, "splash_ad"))
+        mainActivityListener.observe(viewModelScope)
+        observeFlows()
     }
 
     // Observe data
-    private fun observeData() {
+    private fun observeFlows() {
         viewModelScope.launch {
-            launch {
-                observeUserSettingResults()
-            }
-            launch {
-                observeAdResults()
-            }
+            observeUserSettingsFlow()
+        }
+        viewModelScope.launch {
+            observeAdvertisementsFlow()
         }
     }
 
-    private suspend fun observeUserSettingResults() {
-        val userSettingResult = userSettingResults ?: return
+    private suspend fun observeUserSettingsFlow() {
+        userSettingsFlow
+            .collect {
+                val userSettingResult = it.firstOrNull() ?: return@collect
+                if (!userSettingResult.isValid()) return@collect
 
-        userSettingResult.asFlow().collect {
-            this.userSettingResults = it.list
-
-            withContext(Dispatchers.Main) {
-                unreadNotificationCount.postValue(getUnreadNotificationCount())
+                userSettingId = userSettingResult.id
+                unreadNotificationCount.postValue(userSettingResult.unreadNotificationCount)
             }
-        }
     }
 
-    private suspend fun observeAdResults() {
-        val adResult = adResults ?: return
+    private suspend fun observeAdvertisementsFlow() {
+        advertisementsFlow
+            .conflate()
+            .onEach { delay(2000) }
+            .collect {
+                val ad = it.firstOrNull() ?: return@collect
+                if (!ad.isValid()) return@collect
+                val adInfo = Pair(
+                    "images/advertisements/${ad.imageName}.png",
+                    ad.actionUrl
+                )
 
-        adResult.asFlow().collect {
-            this.adResults = it.list
-
-            withContext(Dispatchers.Main) {
-                updateShowSplashAd(it.list.isNotEmpty())
+                splashAdInfo.postValue(adInfo)
             }
-        }
     }
 
     // Functions
-    private fun getUnreadNotificationCount(): Int {
-        val userSettingResult = userSettingResults ?: return 0
-        val userSetting = userSettingResult.firstOrNull() ?: return 0
-        if (!userSetting.isValid()) return 0
-
-        return userSetting.unreadNotificationCount
-    }
-
     fun updateUnreadNotificationCount(count: Int) {
         if (unreadNotificationCount.value == 0) return
-        val userSettingResult = userSettingResults ?: return
-        val userSetting = userSettingResult.firstOrNull() ?: return
-        if (!userSetting.isValid()) return
+        val userSettingId = userSettingId ?: return
 
-        FireStoreManager.buildDocRef(
-            Pair(FireStoreCollection.USER_MEMBER, userSetting.userCode),
-            Pair(FireStoreCollection.USER_SETTINGS, userSetting.id)
-        )
-            .update("unread_notification_count", count)
-            .addOnSuccessListener {
-                CoroutineScope(Dispatchers.Main).launch {
-                    unreadNotificationCount.postValue(count)
-                }
+        viewModelScope.launch {
+            val result = FireStoreManager.updateDoc(
+                FireStoreCollection.USER_SETTINGS,
+                userSettingId,
+                mapOf("unread_notification_count" to count)
+            )
+            if (result) {
+                unreadNotificationCount.postValue(count)
             }
-    }
-
-    fun updateShowSplashAd(show: Boolean) {
-        showPlashAd.postValue(show)
-    }
-
-    fun getSplashAd(): Advertisement? {
-        val adResults = adResults ?: return null
-        return adResults.firstOrNull()
+        }
     }
 }

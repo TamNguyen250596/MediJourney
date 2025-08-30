@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.realm.kotlin) apply false
     alias(libs.plugins.navigation.safeargs) apply false
     alias(libs.plugins.compose.compiler) apply false
+    alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.hilt.android) apply false
 }
 
 buildscript {

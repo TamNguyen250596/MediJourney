@@ -46,7 +46,7 @@ class SearchConversationViewModel : ViewModel() {
     private var observeCurrentPageJob: Job? = null
 
     // Life cycle
-    fun onViewCreated() {
+    init {
         viewModelScope.launch {
             getData()
             _itemModels.value = generateDynamicUIItemModels(conversationResults)
@@ -77,7 +77,7 @@ class SearchConversationViewModel : ViewModel() {
     }
 
     private fun observeFS(keywords: String? = null, completion: (Boolean) -> Unit) {
-        firstPageQuery = FireStoreManager.buildCollectionRef(FireStoreCollection.CONVERSATIONS)
+        firstPageQuery = FireStoreManager.buildCollection(FireStoreCollection.CONVERSATIONS)
             .apply {
                 if (!keywords.isNullOrEmpty()) {
                     whereArrayContains(Conversation::keywords.name, keywords)
@@ -195,7 +195,7 @@ class SearchConversationViewModel : ViewModel() {
     }
 
     private fun getCurrentPage(conversationTag: String) {
-        FireStoreManager.buildCollectionRef(FireStoreCollection.CONVERSATIONS)
+        FireStoreManager.buildCollection(FireStoreCollection.CONVERSATIONS)
             .whereGreaterThan(Conversation::tag.name, conversationTag)
             .orderBy(Conversation::tag.name)
             .limit(Constants.DEFAULT_LIMIT)
@@ -212,7 +212,7 @@ class SearchConversationViewModel : ViewModel() {
             delay(10_000)
             cursorTag?.let { tag ->
 
-                FireStoreManager.buildCollectionRef(FireStoreCollection.CONVERSATIONS)
+                FireStoreManager.buildCollection(FireStoreCollection.CONVERSATIONS)
                     .whereGreaterThan(Conversation::tag.name, tag)
                     .orderBy(Conversation::tag.name)
                     .limit(Constants.DEFAULT_LIMIT)
@@ -224,7 +224,7 @@ class SearchConversationViewModel : ViewModel() {
                         }
                     }
 
-                FireStoreManager.buildCollectionRef(FireStoreCollection.CONVERSATIONS)
+                FireStoreManager.buildCollection(FireStoreCollection.CONVERSATIONS)
                     .whereLessThanOrEqualTo(Conversation::tag.name, tag)
                     .orderBy(Conversation::tag.name)
                     .limit(Constants.DEFAULT_LIMIT)

@@ -22,7 +22,7 @@ class ExerciseLevel: RealmObject, RealmCycle {
         return "id"
     }
 
-    override fun toRealmObject(map: Map<String, Any>): RealmObject {
+    override fun create(map: Map<String, Any>): RealmObject {
         return ExerciseLevel().apply {
             id = map.getInt("id")
             name = map.getLocalizedString("name")
@@ -32,7 +32,7 @@ class ExerciseLevel: RealmObject, RealmCycle {
         }
     }
 
-    override fun updateFromMap(map: Map<String, Any>) {
+    override fun update(map: Map<String, Any>) {
         name = map.getLocalizedString("name", name)
         enable = map["enable"] as? Boolean ?: enable
         level = map["level"] as? String ?: level

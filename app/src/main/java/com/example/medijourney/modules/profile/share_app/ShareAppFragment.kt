@@ -38,7 +38,6 @@ class ShareAppFragment : BottomSheetDialogFragment(), BaseAdapterInterface {
         super.onViewCreated(view, savedInstanceState)
         setupView()
         observeViewModel()
-        viewModel.onViewCreated()
     }
 
     // Functions

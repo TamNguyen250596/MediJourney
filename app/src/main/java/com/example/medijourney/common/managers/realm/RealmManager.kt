@@ -1,11 +1,16 @@
 package com.example.medijourney.common.managers.realm
 
+import com.example.medijourney.common.extensions.RFilter
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.UpdatePolicy
+import io.realm.kotlin.query.RealmQuery
 import io.realm.kotlin.query.RealmResults
 import io.realm.kotlin.query.Sort
 import io.realm.kotlin.types.RealmObject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlin.reflect.KClass
 
 object RealmManager {
 
@@ -25,13 +30,67 @@ object RealmManager {
 
         realm.write {
             val realmEntryInstance = clazz.getConstructor().newInstance()
-            val realmObject = realmEntryInstance.toRealmObject(data)
-            realmEntryInstance.handleDependencies(data)
+            val realmObject = realmEntryInstance.create(data)
+            realmEntryInstance.didInit(data)
 
             try {
                 copyToRealm(realmObject, UpdatePolicy.ERROR)
             } catch (e: Exception) {
-                realmEntryInstance.updateFromMap(data)
+                realmEntryInstance.update(data)
+            }
+        }
+    }
+
+    suspend fun write(
+        realmObject: RealmObject,
+        data: Map<String, Any>,
+        configuration: RealmConfiguration? = null
+    ) {
+        if (realmObject !is RealmCycle) return
+        val realm = createRealm(configuration)
+
+        realm.write {
+            val primaryKey = data["id"]
+            val kClass = realmObject.javaClass.kotlin
+            val primaryKeyName = realmObject.primaryKey()
+            val existingEntity = query(kClass, "$primaryKeyName == $0", primaryKey).find().firstOrNull()
+            if (existingEntity != null) {
+                existingEntity.update(data)
+            } else {
+                val unmanagedEntity = realmObject.create(data)
+                val entity = copyToRealm(unmanagedEntity, UpdatePolicy.ALL)
+                if (entity is RealmCycle) {
+                    entity.didInit(data)
+                }
+            }
+        }
+    }
+
+    suspend fun write(
+        realmObject: RealmObject,
+        dataList: List<Map<String, Any>>,
+        configuration: RealmConfiguration? = null
+    ) {
+        if (realmObject !is RealmCycle) return
+        val realm = createRealm(configuration)
+
+        realm.write {
+            for (data in dataList) {
+                val primaryKey = data["id"]
+                val kClass = realmObject.javaClass.kotlin
+                val primaryKeyName = realmObject.primaryKey()
+                val existingEntity = query(kClass, "$primaryKeyName == $0", primaryKey).find().firstOrNull()
+                if (existingEntity != null) {
+                    existingEntity.update(data)
+                    existingEntity.handleNestedObjects(data, CoroutineScope(Dispatchers.IO))
+                } else {
+                    val unmanagedEntity = realmObject.create(data)
+                    val entity = copyToRealm(unmanagedEntity, UpdatePolicy.ALL)
+                    if (entity is RealmCycle) {
+                        entity.didInit(data)
+                        entity.handleNestedObjects(data, CoroutineScope(Dispatchers.IO))
+                    }
+                }
             }
         }
     }
@@ -46,13 +105,13 @@ object RealmManager {
         realm.write {
             val realmEntryInstance = clazz.getConstructor().newInstance()
             for (data in dataList) {
-                val realmObject = realmEntryInstance.toRealmObject(data)
-                realmEntryInstance.handleDependencies(data)
+                val realmObject = realmEntryInstance.create(data)
+                realmEntryInstance.didInit(data)
 
                 try {
                     copyToRealm(realmObject, UpdatePolicy.ERROR)
                 } catch (e: Exception) {
-                    realmEntryInstance.updateFromMap(data)
+                    realmEntryInstance.update(data)
                 }
             }
         }
@@ -108,7 +167,29 @@ object RealmManager {
             val realmEntryInstance = clazz.getConstructor().newInstance()
             val primaryKeyName = realmEntryInstance.primaryKey()
             val entity = query(clazz.kotlin, "$primaryKeyName == $0", primaryKey).find().firstOrNull()
-            entity?.updateFromMap(data)
+            entity?.update(data)
+        }
+    }
+
+    suspend fun <T> update(
+        kClass: KClass<T>,
+        filterBuilder: RFilter? = null,
+        data: Map<String, Any>,
+        configuration: RealmConfiguration? = null
+    ) where T : RealmCycle, T : RealmObject {
+        val realm = createRealm(configuration)
+
+        realm.write {
+            var entities = query(kClass)
+            filterBuilder?.let {
+                for (filter in it.build()) {
+                    entities = entities.query(filter.key, filter.value)
+                }
+            }
+            for (entity in entities.find()) {
+                entity.update(data)
+                entity.handleNestedObjects(data, CoroutineScope(Dispatchers.IO))
+            }
         }
     }
 
@@ -120,7 +201,7 @@ object RealmManager {
         val realm = createRealm(configuration)
 
         realm.write {
-            findLatest(entity)?.updateFromMap(data)
+            findLatest(entity)?.update(data)
         }
     }
 
@@ -138,7 +219,7 @@ object RealmManager {
             for (data in dataList) {
                 val primaryKey = data[primaryKeyName] ?: continue
                 val entity = query(clazz.kotlin, "$primaryKeyName == $0", primaryKey).find().firstOrNull()
-                entity?.updateFromMap(data)
+                entity?.update(data)
             }
         }
     }
@@ -159,6 +240,44 @@ object RealmManager {
                 it.removeDependencies()
                 delete(it)
             }
+        }
+    }
+
+    suspend fun delete(
+        realmObject: RealmObject,
+        primaryKey: String,
+        configuration: RealmConfiguration? = null
+    ) {
+        if (realmObject !is RealmCycle) return
+        val realm = createRealm(configuration)
+
+        realm.write {
+            val primaryKeyName = realmObject.primaryKey()
+            val entity = query(realmObject.javaClass.kotlin, "$primaryKeyName == $0", primaryKey).find().firstOrNull()
+            if (entity is RealmCycle) {
+                entity.removeDependencies()
+            }
+            entity?.let {
+                delete(it)
+            }
+        }
+    }
+
+    suspend fun delete(
+        realmObject: RealmObject,
+        primaryKeys: List<*>,
+        configuration: RealmConfiguration? = null
+    ) {
+        if (realmObject !is RealmCycle) return
+        val realm = createRealm(configuration)
+
+        realm.write {
+            val primaryKeyName = realmObject.primaryKey()
+            val entities = query(realmObject.javaClass.kotlin, "$primaryKeyName IN $0", primaryKeys).find()
+            for (entity in entities) {
+                entity.removeDependencies()
+            }
+            delete(entities)
         }
     }
 
@@ -237,6 +356,15 @@ object RealmManager {
         realm.write {
             deleteAll()
         }
+    }
+
+    // Query
+    fun <T : RealmObject> query(
+        clazz: Class<T>,
+        configuration: RealmConfiguration? = null
+    ): RealmQuery<T> {
+        val realm = createRealm(configuration)
+        return realm.query(clazz.kotlin)
     }
 
     // Functions

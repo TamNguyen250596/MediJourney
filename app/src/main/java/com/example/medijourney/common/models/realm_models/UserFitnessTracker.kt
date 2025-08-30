@@ -32,7 +32,7 @@ class UserFitnessTracker: RealmObject, RealmCycle {
         return "id"
     }
 
-    override fun toRealmObject(map: Map<String, Any>): RealmObject {
+    override fun create(map: Map<String, Any>): RealmObject {
         return UserFitnessTracker().apply {
             id = map.getUserObjectKey(id)
             userCode = map["user_code"] as? String ?: userCode
@@ -50,7 +50,7 @@ class UserFitnessTracker: RealmObject, RealmCycle {
         }
     }
 
-    override fun updateFromMap(map: Map<String, Any>) {
+    override fun update(map: Map<String, Any>) {
         imageName = map["image_name"] as? String ?: imageName
         name = map["name"] as? String ?: name
         batteryPercentage = map.getDouble("battery_percentage", batteryPercentage)

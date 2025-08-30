@@ -37,7 +37,6 @@ class ManageProfileFragment : Fragment(), BaseAdapterInterface {
         super.onViewCreated(view, savedInstanceState)
         setupView()
         observeViewModel()
-        viewModel.onViewCreated(view)
     }
 
     // Functions

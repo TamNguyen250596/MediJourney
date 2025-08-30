@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.medijourney.R
 import com.example.medijourney.common.constants.proximaNovaFamily
+import com.example.medijourney.common.models.ui_models.MFont
 
 @Composable
 fun EmptyPlaceholder(modifier: Modifier, text: String) {
@@ -26,15 +27,12 @@ fun EmptyPlaceholder(modifier: Modifier, text: String) {
         ),
         modifier = modifier
     ) {
-        Text(
+        MText(
             text = text,
+            font = MFont.semiBold(16f),
+            colorId = R.color.white,
             modifier = Modifier.padding(16.dp).fillMaxWidth(),
-            textAlign = TextAlign.Center,
-            color = colorResource(R.color.white),
-            fontFamily = proximaNovaFamily,
-            fontStyle = FontStyle.Normal,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 16.sp
+            textAlign = TextAlign.Center
         )
     }
 }

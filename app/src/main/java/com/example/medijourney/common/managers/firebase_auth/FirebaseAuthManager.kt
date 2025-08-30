@@ -6,6 +6,7 @@ import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
 import com.example.medijourney.common.constants.Constants
 import com.example.medijourney.common.helpers.DataStoreHelper
+import com.example.medijourney.common.managers.fire_store.FSFilterBuilder
 import com.example.medijourney.common.managers.fire_store.FireStoreCollection
 import com.example.medijourney.common.managers.fire_store.FireStoreManager
 import com.example.medijourney.common.managers.realm.RealmManager
@@ -65,7 +66,11 @@ object FirebaseAuthManager {
         context?.let { IndicatorHandler.show(context) }
         auth.signInWithEmailAndPassword(email, password)
             .addOnSuccessListener {
-                auth.currentUser?.let { handleAvailableUser(it) }
+                auth.currentUser?.let {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        handleAvailableUser(it)
+                    }
+                }
             }
             .addOnFailureListener {
                 handleError(email)
@@ -190,7 +195,7 @@ object FirebaseAuthManager {
         context?.let { IndicatorHandler.show(it) }
         currentFirebaseUser.delete()
             .addOnSuccessListener {
-                FireStoreManager.buildDocRef(Pair(FireStoreCollection.USER_MEMBER, currentFirebaseUser.uid))
+                FireStoreManager.buildDoc(FireStoreCollection.USER_MEMBERS, currentFirebaseUser.uid)
                     .update(mapOf("de_active" to true))
                     .addOnSuccessListener {
                         updateUserAuthenticationResult(AuthenticationResult.DEACTIVE_ACCOUNT_SUCCESS)
@@ -210,7 +215,7 @@ object FirebaseAuthManager {
         IndicatorHandler.show(activity)
         currentFirebaseUser.delete()
             .addOnSuccessListener {
-                FireStoreManager.buildDocRef(Pair(FireStoreCollection.USER_MEMBER, currentFirebaseUser.uid))
+                FireStoreManager.buildDoc(Pair(FireStoreCollection.USER_MEMBERS, currentFirebaseUser.uid))
                     .delete()
                     .addOnSuccessListener {
                         updateUserAuthenticationResult(AuthenticationResult.DELETE_ACCOUNT_SUCCESS)
@@ -277,40 +282,39 @@ object FirebaseAuthManager {
         context?.let { IndicatorHandler.show(context) }
         auth.signInWithCredential(credential)
             .addOnSuccessListener {
-                auth.currentUser?.let { handleAvailableUser(it) }
+                auth.currentUser?.let {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        handleAvailableUser(it)
+                    }
+                }
             }
             .addOnFailureListener {
                 updateUserAuthenticationResult(AuthenticationResult.SIGN_IN_FAILED)
             }
     }
 
-    private fun handleAvailableUser(user: FirebaseUser) {
-        FireStoreManager.buildUserCollectionRef(FireStoreCollection.USER_SETTINGS)
-            .get()
-            .addOnSuccessListener {
-                val document = it.documents.firstOrNull()
-                if (document != null && document.exists() &&
-                    document.data?.get("enable_otp_auth") as? Boolean == true) {
-                    updateUserAuthenticationResult(AuthenticationResult.OTP_REQUIRED)
-                } else {
-                    FireStoreManager.buildDocRef(Pair(FireStoreCollection.USER_MEMBER, user.uid))
-                        .get()
-                        .addOnSuccessListener { response ->
-                            response.data?.let {
-                                CoroutineScope(Dispatchers.IO).launch {
-                                    RealmManager.create(User::class.java, it)
-                                }
-                                updateUserAuthenticationResult(AuthenticationResult.SIGN_IN_SUCCESS)
-                            }
-                        }
-                        .addOnFailureListener {
-                            updateUserAuthenticationResult(AuthenticationResult.SIGN_IN_FAILED)
-                        }
-                }
+    private suspend fun handleAvailableUser(user: FirebaseUser) {
+        try {
+            val snapshot = FireStoreManager.getCollection(
+                FireStoreCollection.USER_SETTINGS,
+                filterBuilder = FSFilterBuilder().equalTo("user_id", user.uid)
+            )
+            val document = snapshot.documents.firstOrNull()
+            if (document != null && document.exists() &&
+                document.data?.get("enable_otp_auth") as? Boolean == true) {
+                updateUserAuthenticationResult(AuthenticationResult.OTP_REQUIRED)
+            } else {
+                val docSnapshot = FireStoreManager.getDoc(
+                    FireStoreCollection.USER_MEMBERS,
+                    user.uid
+                )
+                val data = docSnapshot.data ?: return
+                RealmManager.create(User::class.java, data)
+                updateUserAuthenticationResult(AuthenticationResult.SIGN_IN_SUCCESS)
             }
-            .addOnFailureListener {
-                updateUserAuthenticationResult(AuthenticationResult.SIGN_IN_FAILED)
-            }
+        } catch (e: Exception) {
+            updateUserAuthenticationResult(AuthenticationResult.SIGN_IN_FAILED)
+        }
     }
 
     private fun handleNewUser(user: FirebaseUser, additionalUserInfo: Map<String, Any>? = null) {
@@ -324,7 +328,7 @@ object FirebaseAuthManager {
         user.email?.let { email ->
             map["email"] = email
         }
-        FireStoreManager.buildDocRef(Pair(FireStoreCollection.USER_MEMBER, user.uid))
+        FireStoreManager.buildDoc(Pair(FireStoreCollection.USER_MEMBERS, user.uid))
             .set(map)
             .addOnCompleteListener {
                 if (!it.isSuccessful) {
@@ -340,7 +344,7 @@ object FirebaseAuthManager {
     }
 
     private fun handleError(email: String) {
-        FireStoreManager.buildCollectionRef(FireStoreCollection.USER_MEMBER)
+        FireStoreManager.buildCollection(FireStoreCollection.USER_MEMBERS)
             .whereEqualTo("email", email)
             .get()
             .addOnSuccessListener {

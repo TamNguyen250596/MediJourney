@@ -17,7 +17,7 @@ class ShareAppViewModel : ViewModel() {
     private var width: Int = 0
 
     // Life cycle
-    fun onViewCreated() {
+    init {
         appShareJson = InternationManager.getCurrentAppShare()
         width = getScreenWidth()
         items.postValue(generateItems())

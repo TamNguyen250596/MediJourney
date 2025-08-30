@@ -6,9 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.medijourney.common.constants.Constants
 import com.example.medijourney.common.helpers.DateHelper
 import com.example.medijourney.common.managers.InternationManager
+import com.example.medijourney.common.managers.fire_store.FSFilterBuilder
 import com.example.medijourney.common.managers.fire_store.FireStoreCollection
 import com.example.medijourney.common.managers.fire_store.FireStoreManager
-import com.example.medijourney.common.managers.fire_store.awaitGet
 import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
 import com.example.medijourney.common.managers.realm.Operator
 import com.example.medijourney.common.managers.realm.RQuery
@@ -196,11 +196,13 @@ class AddMedicalBookingViewModel : ViewModel() {
         val subSpecialtyId = getObjectId("medical_specialty") ?: return
 
         try {
-            val snapshot = FireStoreManager.buildCollectionRef(FireStoreCollection.DOCTORS_APPOINTMENTS)
-                .whereEqualTo("patient_id", "")
-                .whereEqualTo("hospital_id", hospitalId)
-                .whereEqualTo("medical_sub_specialty_id", subSpecialtyId)
-                .awaitGet()
+            val snapshot = FireStoreManager.getCollection(
+                FireStoreCollection.DOCTORS_APPOINTMENTS,
+                filterBuilder = FSFilterBuilder()
+                    .equalTo("patient_id", "")
+                    .equalTo("hospital_id", hospitalId)
+                    .equalTo("medical_sub_specialty_id", subSpecialtyId)
+            )
 
             snapshot.documents.forEach {
                 val data = it.data ?: return@forEach
@@ -361,19 +363,11 @@ class AddMedicalBookingViewModel : ViewModel() {
         val id = doctorAndTimeItem.data as String? ?: return completion.invoke(false)
         _isLoading.value = true
 
-        FireStoreManager.buildDocRef(FireStoreCollection.DOCTORS_APPOINTMENTS to id)
-            .update("patient_id", userCode)
-            .addOnSuccessListener {
-                viewModelScope.launch {
-                    RealmManager.update(DoctorAppointment::class.java, id, mapOf("patient_id" to userCode))
-                    completion.invoke(true)
-                    _isLoading.value = false
-                }
-            }
-            .addOnFailureListener {
-                completion.invoke(false)
-                _isLoading.value = false
-            }
+        viewModelScope.launch {
+            val result = FireStoreManager.updateDoc(FireStoreCollection.DOCTORS_APPOINTMENTS, id, mapOf("patient_id" to userCode))
+            completion.invoke(result)
+            _isLoading.value = false
+        }
     }
 
     // Delete Medical Booking
@@ -381,18 +375,10 @@ class AddMedicalBookingViewModel : ViewModel() {
         _isLoading.value = true
         val id = doctorAppointmentId ?: return
 
-        FireStoreManager.buildDocRef(FireStoreCollection.DOCTORS_APPOINTMENTS to id)
-            .update("patient_id", "")
-            .addOnSuccessListener {
-                viewModelScope.launch {
-                    RealmManager.update(DoctorAppointment::class.java, id, mapOf("patient_id" to ""))
-                    completion.invoke(true)
-                    _isLoading.value = false
-                }
-            }
-            .addOnFailureListener {
-                completion.invoke(false)
-                _isLoading.value = false
-            }
+        viewModelScope.launch {
+            val result = FireStoreManager.updateDoc(FireStoreCollection.DOCTORS_APPOINTMENTS, id, mapOf("patient_id" to ""))
+            completion.invoke(result)
+            _isLoading.value = false
+        }
     }
 }

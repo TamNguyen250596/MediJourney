@@ -37,7 +37,7 @@ class DoctorAppointment: RealmObject, RealmCycle {
         return "id"
     }
 
-    override fun toRealmObject(map: Map<String, Any>): RealmObject {
+    override fun create(map: Map<String, Any>): RealmObject {
         return DoctorAppointment().apply {
             id = map["id"] as? String ?: ""
             hospitalId = map["hospital_id"] as? String ?: ""
@@ -51,7 +51,7 @@ class DoctorAppointment: RealmObject, RealmCycle {
         }
     }
 
-    override fun updateFromMap(map: Map<String, Any>) {
+    override fun update(map: Map<String, Any>) {
         patientId = map["patient_id"] as? String ?: patientId
         appointmentDateString = map["appointment_date_string"] as? String ?: appointmentDateString
         appointmentDate = map.getRealmInstant("appointment_date", appointmentDate)
@@ -59,10 +59,9 @@ class DoctorAppointment: RealmObject, RealmCycle {
         endTime = map["end_time"] as? String ?: endTime
     }
 
-    override fun handleDependencies(map: Map<String, Any>) {
-        super.handleDependencies(map)
+    override fun didInit(map: Map<String, Any>) {
+        super.didInit(map)
         handleToSaveHospital(map)
-        handleToSaveMedicalSubSpecialty(map)
         handleToSaveDoctor(map)
     }
 
@@ -81,7 +80,7 @@ class DoctorAppointment: RealmObject, RealmCycle {
             }
         }
 
-        FireStoreManager.buildDocRef(FireStoreCollection.HOSPITALS to hospitalId)
+        FireStoreManager.buildDoc(FireStoreCollection.HOSPITALS to hospitalId)
             .addListener {
                 val data = it.data
                 if (data != null) {
@@ -89,52 +88,14 @@ class DoctorAppointment: RealmObject, RealmCycle {
                         RealmManager.createRealm().write {
                             val existingHospital = query(Hospital::class, "${Hospital::id.name} == $0", hospitalId).find().firstOrNull()
                             if (existingHospital == null) {
-                                val hospital = Hospital().toRealmObject(data) as? Hospital ?: return@write
+                                val hospital = Hospital().create(data) as? Hospital ?: return@write
                                 query(
                                     DoctorAppointment::class,
                                     "${DoctorAppointment::hospitalId.name} == $0 AND ${DoctorAppointment::hospital.name} == $1", hospitalId, null)
                                     .find()
                                     .forEach { it.hospital = copyToRealm(hospital) }
                             } else {
-                                existingHospital.updateFromMap(data)
-                            }
-                        }
-                    }
-                }
-            }
-    }
-
-    private fun handleToSaveMedicalSubSpecialty(map: Map<String, Any>) {
-        val medicalSubSpecialtyId = map["medical_sub_specialty_id"] as? String ?: return
-
-        CoroutineScope(Dispatchers.IO).launch {
-            RealmManager.createRealm().write {
-                val medicalSubSpecialty = query(MedicalSubSpecialty::class, "${MedicalSubSpecialty::id.name} == $0", medicalSubSpecialtyId).find().firstOrNull()
-                query(
-                    DoctorAppointment::class,
-                    "${DoctorAppointment::medicalSubSpecialtyId.name} == $0 AND ${DoctorAppointment::medicalSubSpecialty.name} == $1", medicalSubSpecialtyId, null)
-                    .find()
-                    .forEach { it.medicalSubSpecialty = medicalSubSpecialty }
-            }
-        }
-
-        FireStoreManager.buildDocRef(FireStoreCollection.MEDICAL_SUB_SPECIALTIES to medicalSubSpecialtyId)
-            .addListener {
-                val data = it.data
-                if (data != null) {
-                    CoroutineScope(Dispatchers.IO).launch {
-                        RealmManager.createRealm().write {
-                            val existingMedicalSubSpecialty = query(MedicalSubSpecialty::class, "${MedicalSubSpecialty::id.name} == $0", medicalSubSpecialtyId).find().firstOrNull()
-                            if (existingMedicalSubSpecialty == null) {
-                                val medicalSubSpecialty = MedicalSubSpecialty().toRealmObject(data) as? MedicalSubSpecialty ?: return@write
-                                query(
-                                    DoctorAppointment::class,
-                                    "${DoctorAppointment::medicalSubSpecialtyId.name} == $0 AND ${DoctorAppointment::medicalSubSpecialty.name} == $1", medicalSubSpecialtyId, null)
-                                    .find()
-                                    .forEach { it.medicalSubSpecialty = copyToRealm(medicalSubSpecialty) }
-                            }
-                            else {
-                                existingMedicalSubSpecialty.updateFromMap(data)
+                                existingHospital.update(data)
                             }
                         }
                     }
@@ -156,7 +117,7 @@ class DoctorAppointment: RealmObject, RealmCycle {
             }
         }
 
-        FireStoreManager.buildDocRef(FireStoreCollection.DOCTORS to doctorId)
+        FireStoreManager.buildDoc(FireStoreCollection.DOCTORS to doctorId)
             .addListener {
                 val data = it.data
                 if (data != null) {
@@ -164,14 +125,14 @@ class DoctorAppointment: RealmObject, RealmCycle {
                         RealmManager.createRealm().write {
                             val existingDoctor = query(Doctor::class, "${Doctor::id.name} == $0", doctorId).find().firstOrNull()
                             if (existingDoctor == null) {
-                                val doctor = Doctor().toRealmObject(data) as? Doctor ?: return@write
+                                val doctor = Doctor().create(data) as? Doctor ?: return@write
                                 query(
                                     DoctorAppointment::class,
                                     "${DoctorAppointment::doctorId.name} == $0 AND ${DoctorAppointment::doctor.name} == $1", doctorId, null)
                                     .find()
                                     .forEach { it.doctor = copyToRealm(doctor) }
                             } else {
-                                existingDoctor.updateFromMap(data)
+                                existingDoctor.update(data)
                             }
                         }
                     }
@@ -183,8 +144,29 @@ class DoctorAppointment: RealmObject, RealmCycle {
         super.removeDependencies()
         if (!isValid()) return
 
-        FireStoreManager.buildDocRef(FireStoreCollection.HOSPITALS to hospitalId).remove()
-        FireStoreManager.buildDocRef(FireStoreCollection.MEDICAL_SUB_SPECIALTIES to medicalSubSpecialtyId).remove()
-        FireStoreManager.buildDocRef(FireStoreCollection.DOCTORS to doctorId).remove()
+        FireStoreManager.buildDoc(FireStoreCollection.HOSPITALS to hospitalId).remove()
+        FireStoreManager.buildDoc(FireStoreCollection.MEDICAL_SUB_SPECIALTIES to medicalSubSpecialtyId).remove()
+        FireStoreManager.buildDoc(FireStoreCollection.DOCTORS to doctorId).remove()
+    }
+
+    override fun handleNestedObjects(
+        map: Map<String, Any>,
+        coroutine: CoroutineScope
+    ) {
+        coroutine.launch {
+            val medicalSubSpecialtyId = map["medical_sub_specialty_id"] as? String
+            if (medicalSubSpecialtyId != null) {
+                if (medicalSubSpecialty == null) {
+                    medicalSubSpecialty = RealmManager.read(
+                        MedicalSubSpecialty::class.java,
+                        medicalSubSpecialtyId
+                    )
+                }
+                FireStoreManager.observeDoc(
+                    FireStoreCollection.MEDICAL_SUB_SPECIALTIES,
+                    medicalSubSpecialtyId
+                )
+            }
+        }
     }
 }

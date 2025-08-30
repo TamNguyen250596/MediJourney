@@ -1,21 +1,18 @@
 package com.example.medijourney.modules.profile.membership_plan
 
-import androidx.fragment.app.viewModels
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.lifecycleScope
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.medijourney.common.managers.InternationManager
 import com.example.medijourney.common.models.item_models.BaseItemInterface
-import com.example.medijourney.common.ui_components.recycle_view_adapter.check_box.CheckBoxAdapter
 import com.example.medijourney.common.ui_components.dialogs.IndicatorHandler
-import com.example.medijourney.databinding.FragmentMembershipPlanBinding
 import com.example.medijourney.common.ui_components.item_decoration.ItemBorderDecoration
+import com.example.medijourney.common.ui_components.recycle_view_adapter.check_box.CheckBoxAdapter
 import com.example.medijourney.common.ui_components.recycle_view_adapter.check_box.CheckBoxAdapterInterface
-import kotlinx.coroutines.launch
+import com.example.medijourney.databinding.FragmentMembershipPlanBinding
 
 class MembershipPlanFragment : Fragment(), CheckBoxAdapterInterface {
 
@@ -24,13 +21,6 @@ class MembershipPlanFragment : Fragment(), CheckBoxAdapterInterface {
     private val viewModel: MembershipPlanViewModel by viewModels()
 
     // Life cycle
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        lifecycleScope.launch {
-            viewModel.inputData(InternationManager.getCurrentLanguageCode(requireContext()))
-        }
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -41,7 +31,6 @@ class MembershipPlanFragment : Fragment(), CheckBoxAdapterInterface {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.onCreateView()
         setupView()
         observeViewModel()
     }

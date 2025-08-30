@@ -1,21 +1,18 @@
 package com.example.medijourney.modules.profile.manage_onboarding
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.medijourney.common.managers.InternationManager
 import com.example.medijourney.common.models.item_models.BaseItemInterface
 import com.example.medijourney.common.ui_components.dialogs.IndicatorHandler
 import com.example.medijourney.common.ui_components.item_decoration.GroupedSectionBorderDecoration
 import com.example.medijourney.common.ui_components.recycle_view_adapter.SwitchButtonItemHolderInterface
 import com.example.medijourney.databinding.FragmentManageOnboardingBinding
 import com.example.medijourney.modules.profile.manage_onboarding.adapter.ManageOnboardingAdapter
-import kotlinx.coroutines.launch
 
 class ManageOnboardingFragment : Fragment(), SwitchButtonItemHolderInterface {
 
@@ -24,13 +21,6 @@ class ManageOnboardingFragment : Fragment(), SwitchButtonItemHolderInterface {
     private val viewModel: ManageOnboardingViewModel by viewModels()
 
     // Life cycle
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        lifecycleScope.launch {
-            viewModel.inputData(InternationManager.getCurrentLanguageCode(requireContext()))
-        }
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -42,7 +32,6 @@ class ManageOnboardingFragment : Fragment(), SwitchButtonItemHolderInterface {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupView()
-        viewModel.onViewCreated()
         observeViewModel()
     }
 

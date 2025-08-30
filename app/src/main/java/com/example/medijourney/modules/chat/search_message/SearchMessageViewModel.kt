@@ -54,7 +54,11 @@ class SearchMessageViewModel : ViewModel() {
     }
 
     // View cycle
-    fun onViewCreated(userConversationId: String?) {
+    fun inputUserConversationId(userConversationId: String?) {
+        setUpViewModel(userConversationId)
+    }
+
+    private fun setUpViewModel(userConversationId: String?) {
         viewModelScope.launch {
             getData(userConversationId)
             _itemModels.value = generateDynamicUIItemModels(messages)
@@ -107,7 +111,7 @@ class SearchMessageViewModel : ViewModel() {
     }
 
     private fun getFSMessage(keywords: String? = null, userConversation: UserConversation?, conversationIds: List<String>) {
-        FireStoreManager.buildCollectionRef(FireStoreCollection.MESSAGES)
+        FireStoreManager.buildCollection(FireStoreCollection.MESSAGES)
             .apply {
                 if (userConversation != null && userConversation.isValid()) {
                     whereEqualTo("conversation_id", userConversation.id)
@@ -246,7 +250,7 @@ class SearchMessageViewModel : ViewModel() {
         val dateLong = DateHelper.convertRealmInstantToMillis(createdAt)
         if (dateLong >= cursorCreatedAt) return
 
-        FireStoreManager.buildCollectionRef(FireStoreCollection.MESSAGES)
+        FireStoreManager.buildCollection(FireStoreCollection.MESSAGES)
             .apply {
                 val userConversation = userConversation
                 if (userConversation != null && userConversation.isValid()) {
@@ -316,7 +320,7 @@ class SearchMessageViewModel : ViewModel() {
             RealmManager.update(Conversation::class.java, existing.id, mapOf("is_added" to true))
         } else {
             val snapshot = try {
-                FireStoreManager.buildDocRef(Pair(FireStoreCollection.CONVERSATIONS, conversationId))
+                FireStoreManager.buildDoc(Pair(FireStoreCollection.CONVERSATIONS, conversationId))
                     .awaitGet()
             } catch (e: Exception) {
                 return

@@ -104,7 +104,7 @@ class NutritionTrackingReportViewModel : ViewModel() {
 
         FireStoreManager.buildSubCollectionRef(
             FireStoreCollection.USER_NUTRITION_TRACKING_REPORTS,
-            Pair(FireStoreCollection.USER_MEMBER, userFitnessTracker.ownerUserCode))
+            Pair(FireStoreCollection.USER_MEMBERS, userFitnessTracker.ownerUserCode))
             .whereEqualTo("device_id", deviceId)
             .observe(UserNutritionTrackingReport::class.java, this::class.java)
     }

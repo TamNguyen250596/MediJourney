@@ -1,6 +1,6 @@
 [versions]
 # Kotlin, Android, and Google Services
-kotlin-android = "1.9.24"
+kotlin-android = "2.0.0"
 compose-kotlin-android = "2.0.21"
 android-application = "8.9.2"
 google-services = "4.4.2"
@@ -61,6 +61,10 @@ mpandroidchart = "3.1.0"
 
 # Retrofit
 retrofit = "3.0.0"
+
+# Hilt
+hilt = "2.57"
+ksp = "2.0.21-1.0.27"
 
 # Testing Libraries
 junit = "4.13.2"
@@ -144,6 +148,10 @@ mpandroidchart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 
+# Hilt
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
+
 # Testing Libraries
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-junit" }
@@ -164,3 +172,5 @@ compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "
 google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
 realm-kotlin = { id = "io.realm.kotlin", version.ref = "realm-kotlin" }
 navigation-safeargs = { id = "androidx.navigation.safeargs", version.ref = "navigation-safeargs" }
+hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

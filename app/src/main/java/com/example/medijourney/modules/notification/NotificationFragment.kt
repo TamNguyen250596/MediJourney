@@ -52,7 +52,6 @@ class NotificationFragment : Fragment(), MenuProvider, BaseAdapterInterface,
         super.onViewCreated(view, savedInstanceState)
         setupView()
         observeViewModel()
-        viewModel.onViewCreated()
     }
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {

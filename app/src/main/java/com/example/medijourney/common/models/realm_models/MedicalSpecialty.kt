@@ -20,7 +20,7 @@ class MedicalSpecialty: RealmObject, RealmCycle {
         return "id"
     }
 
-    override fun toRealmObject(map: Map<String, Any>): RealmObject {
+    override fun create(map: Map<String, Any>): RealmObject {
         return MedicalSpecialty().apply {
             id = map["id"] as? String ?: id
             name = map.getLocalizedString("name_localized")
@@ -29,7 +29,7 @@ class MedicalSpecialty: RealmObject, RealmCycle {
         }
     }
 
-    override fun updateFromMap(map: Map<String, Any>) {
+    override fun update(map: Map<String, Any>) {
         name = map.getLocalizedString("name_localized", name)
         enable = map["enable"] as? Boolean ?: enable
         position = map["position"] as? Int ?: position

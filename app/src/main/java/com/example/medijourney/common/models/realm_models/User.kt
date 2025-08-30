@@ -10,7 +10,7 @@ class User: RealmObject, RealmCycle {
 
     // Properties
     @PrimaryKey
-    var userCode: String = ""
+    var id: String = ""
     var avatarUrl: String? = null
     var backgroundUrl: String? = null
     var email: String = ""
@@ -24,12 +24,12 @@ class User: RealmObject, RealmCycle {
 
     // Functions
     override fun primaryKey(): String {
-        return "userCode"
+        return "id"
     }
 
-    override fun toRealmObject(map: Map<String, Any>): RealmObject {
+    override fun create(map: Map<String, Any>): RealmObject {
         return User().apply {
-            userCode = map["user_code"] as? String ?: ""
+            id = map["id"] as? String ?: ""
             avatarUrl = map["avatar_url"] as? String
             backgroundUrl = map["background_url"] as? String
             email = map["email"] as? String ?: ""
@@ -43,7 +43,7 @@ class User: RealmObject, RealmCycle {
         }
     }
 
-    override fun updateFromMap(map: Map<String, Any>) {
+    override fun update(map: Map<String, Any>) {
         avatarUrl = map["avatar_url"] as? String ?: avatarUrl
         backgroundUrl = map["background_url"] as? String ?: backgroundUrl
         email = map["email"] as? String ?: email

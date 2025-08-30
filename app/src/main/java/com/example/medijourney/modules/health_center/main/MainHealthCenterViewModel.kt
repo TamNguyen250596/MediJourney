@@ -31,15 +31,15 @@ class MainHealthCenterViewModel: ViewModel() {
         // Fitness trackers section
         FireStoreManager.buildUserCollectionRef(FireStoreCollection.USER_FITNESS_TRACKERS)
             .observe(UserFitnessTracker::class.java, this::class.java)
-        FireStoreManager.buildCollectionRef(FireStoreCollection.FITNESS_TRACKER_ACTIVITIES)
+        FireStoreManager.buildCollection(FireStoreCollection.FITNESS_TRACKER_ACTIVITIES)
             .whereEqualTo("enable", true)
             .observe(FitnessTrackerActivity::class.java, this::class.java)
 
         // Exercise plans section
-        FireStoreManager.buildCollectionRef(FireStoreCollection.EXERCISES)
+        FireStoreManager.buildCollection(FireStoreCollection.EXERCISES)
             .whereEqualTo("enable", true)
             .observe(Exercise::class.java, this::class.java)
-        FireStoreManager.buildCollectionRef(FireStoreCollection.EXERCISE_LEVELS)
+        FireStoreManager.buildCollection(FireStoreCollection.EXERCISE_LEVELS)
             .whereEqualTo("enable", true)
             .observe(ExerciseLevel::class.java, this::class.java)
         FireStoreManager.buildUserCollectionRef(FireStoreCollection.USER_EXERCISE_PLANS)
@@ -52,7 +52,7 @@ class MainHealthCenterViewModel: ViewModel() {
         // Recommended receipts section
         FireStoreManager.buildUserCollectionRef(FireStoreCollection.USER_RECOMMEND_RECIPES)
             .observe(UserRecommendRecipe::class.java, this::class.java)
-        FireStoreManager.buildCollectionRef(FireStoreCollection.RECIPES)
+        FireStoreManager.buildCollection(FireStoreCollection.RECIPES)
             .whereEqualTo("enable", true)
             .observe(Recipe::class.java, this::class.java)
     }

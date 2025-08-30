@@ -27,7 +27,7 @@ class AdvancedSecurityViewModel: ViewModel() {
     private var userSetting: UserSetting? = null
 
     // Life cycle
-    fun onViewCreated() {
+    init {
         viewModelScope.launch {
             getUserSetting()
             updateOTPSwitch()
@@ -97,13 +97,15 @@ class AdvancedSecurityViewModel: ViewModel() {
         val uid = FirebaseAuthManager.getCurrentUserCode()
         if (uid == null || userSetting == null) return
 
-        FireStoreManager.buildDocRef(
-            Pair(FireStoreCollection.USER_MEMBER, uid),
-            Pair(FireStoreCollection.USER_SETTINGS, userSetting.id)
-        )
-            .update(mapOf("enable_otp_auth" to false))
-            .addOnCompleteListener {
-                completion.invoke(it.isSuccessful)
+        viewModelScope.launch {
+            val result = FireStoreManager.updateDoc(
+                FireStoreCollection.USER_SETTINGS,
+                userSetting.id,
+                mapOf("enable_otp_auth" to false)
+            )
+            if (result) {
+                completion.invoke(true)
             }
+        }
     }
 }

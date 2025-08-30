@@ -24,7 +24,7 @@ class Hospital: RealmObject, RealmCycle {
         return "id"
     }
 
-    override fun toRealmObject(map: Map<String, Any>): RealmObject {
+    override fun create(map: Map<String, Any>): RealmObject {
         return Hospital().apply {
             id = map["id"] as? String ?: ""
             tag = map["tag"] as? String ?: ""
@@ -36,7 +36,7 @@ class Hospital: RealmObject, RealmCycle {
         }
     }
 
-    override fun updateFromMap(map: Map<String, Any>) {
+    override fun update(map: Map<String, Any>) {
         tag = map["tag"] as? String ?: tag
         imageName = map["image_name"] as? String
         name = map["name"] as? String

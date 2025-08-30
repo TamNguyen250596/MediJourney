@@ -96,7 +96,7 @@ class SleepTrackingReportViewModel : ViewModel() {
         if (!userFitnessTracker.isValid()) return
 
         FireStoreManager.buildSubCollectionRef(FireStoreCollection.USER_SLEEP_TRACKING_REPORTS,
-            Pair(FireStoreCollection.USER_MEMBER, userFitnessTracker.ownerUserCode))
+            Pair(FireStoreCollection.USER_MEMBERS, userFitnessTracker.ownerUserCode))
             .whereEqualTo("device_id", deviceId)
             .observe(UserSleepTrackingReport::class.java, this::class.java)
     }

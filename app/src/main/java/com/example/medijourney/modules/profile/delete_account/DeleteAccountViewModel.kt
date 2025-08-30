@@ -2,10 +2,8 @@ package com.example.medijourney.modules.profile.delete_account
 
 import android.app.Activity
 import android.content.Context
-import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.medijourney.R
 import com.example.medijourney.common.extensions.disposeBy
 import com.example.medijourney.common.managers.firebase_auth.AuthenticationResult
 import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
@@ -16,26 +14,29 @@ class DeleteAccountViewModel: ViewModel() {
     // Properties
     var shouldLogout = MutableLiveData<Boolean>(false)
     var errorMessages = MutableLiveData<String?>(null)
+    var isFailToDeactivate = MutableLiveData<Boolean>(false)
+    var isFailToDelete = MutableLiveData<Boolean>(false)
     private val disposables = CompositeDisposable()
 
     // Life cycle
-    fun onViewCreated(view: View) {
-        observeUserAuthenticationResult(view)
+    init {
+        observeUserAuthenticationResult()
     }
 
     // Functions
-    private fun observeUserAuthenticationResult(view: View) {
+    private fun observeUserAuthenticationResult() {
         FirebaseAuthManager.userAuthenticationResult
             .distinctUntilChanged()
             .subscribe {
                 when (it) {
                     AuthenticationResult.DEACTIVE_ACCOUNT_FAILED -> {
-                        errorMessages.postValue(view.context.getString(R.string.error_user_deactivation_failed))
+                        isFailToDeactivate.postValue(true)
                     }
                     AuthenticationResult.DELETE_ACCOUNT_FAILED -> {
-                        errorMessages.postValue(view.context.getString(R.string.error_user_deletion_failed))
+                        isFailToDelete.postValue(true)
                     }
-                    AuthenticationResult.DELETE_ACCOUNT_SUCCESS, AuthenticationResult.DEACTIVE_ACCOUNT_SUCCESS -> {
+                    AuthenticationResult.DELETE_ACCOUNT_SUCCESS,
+                    AuthenticationResult.DEACTIVE_ACCOUNT_SUCCESS -> {
                         shouldLogout.postValue(true)
                     }
                     else -> {}

@@ -124,7 +124,7 @@ class EditProfileViewModel: ViewModel() {
             if (url.isNullOrEmpty()) return@saveImage completion(false)
             val currentUserCode = FirebaseAuthManager.getCurrentUserCode() ?: return@saveImage completion(false)
 
-            FireStoreManager.buildDocRef(Pair(FireStoreCollection.USER_MEMBER, currentUserCode))
+            FireStoreManager.buildDoc(FireStoreCollection.USER_MEMBERS, currentUserCode)
                 .update(mapOf(fireStoreKey to url))
                 .addOnCompleteListener { completion.invoke(it.isSuccessful) }
         }
@@ -322,7 +322,7 @@ class EditProfileViewModel: ViewModel() {
         if (errorAtTag.isNotEmpty()) return completion.invoke(false)
         val currentUserCode = FirebaseAuthManager.getCurrentUserCode() ?: return completion.invoke(false)
 
-        FireStoreManager.buildDocRef(Pair(FireStoreCollection.USER_MEMBER, currentUserCode))
+        FireStoreManager.buildDoc(FireStoreCollection.USER_MEMBERS, currentUserCode)
             .update(tempInfoAtTag)
             .addOnCompleteListener { completion.invoke(it.isSuccessful) }
     }

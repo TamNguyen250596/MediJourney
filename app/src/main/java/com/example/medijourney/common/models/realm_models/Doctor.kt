@@ -22,7 +22,7 @@ class Doctor: RealmObject, RealmCycle {
         return "id"
     }
 
-    override fun toRealmObject(map: Map<String, Any>): RealmObject {
+    override fun create(map: Map<String, Any>): RealmObject {
         return Doctor().apply {
             id = map["id"] as? String ?: ""
             doctorName = map["doctor_name"] as? String
@@ -32,7 +32,7 @@ class Doctor: RealmObject, RealmCycle {
         }
     }
 
-    override fun updateFromMap(map: Map<String, Any>) {
+    override fun update(map: Map<String, Any>) {
         doctorImage = map["doctor_image"] as? String
         doctorSubSpecialities.addAll(map.getStringSet("doctor_sub_specialities"))
         workingHospitals.addAll(map.getStringSet("working_hospitals"))

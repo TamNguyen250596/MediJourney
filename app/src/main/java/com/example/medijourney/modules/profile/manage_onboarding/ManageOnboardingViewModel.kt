@@ -41,14 +41,9 @@ class ManageOnboardingViewModel: ViewModel() {
     private var medicalSpecialtyResult: RealmResults<MedicalSpecialty>? = null
     private var subMedicalSpecialtyResult: RealmResults<MedicalSubSpecialty>? = null
     private var userMedicalSpecialtyResult: RealmResults<UserMedicalSpecialty>? = null
-    private var currentLanguageCode = "vi"
 
     // Life cycle
-    fun inputData(languageCode: String) {
-        currentLanguageCode = languageCode
-    }
-
-    fun onViewCreated() {
+    init {
         viewModelScope.launch {
             getData()
             observeRealms()
@@ -81,7 +76,7 @@ class ManageOnboardingViewModel: ViewModel() {
         FirebaseAuthManager.getCurrentUserCode()?.let {
             userMedicalSpecialtyResult = RealmManager.read(
                 UserMedicalSpecialty::class.java,
-                realmQuery = where(UserMedicalSpecialty::userCode.name, Operator.EQUAL, it)
+                realmQuery = where(UserMedicalSpecialty::userId.name, Operator.EQUAL, it)
             )
         }
     }
@@ -203,11 +198,14 @@ class ManageOnboardingViewModel: ViewModel() {
         }
 
         currentUpdatedIndex = dataList.value?.indexOf(viewModel)
-        FireStoreManager.buildUserDocRef(Pair(FireStoreCollection.USER_MEDICAL_SPECIALTIES, userMedicalSpecialty.id))
-            .update(mapOf("following_medical_specialties" to tempFollowingList))
-            .addOnCompleteListener {
-                completion?.invoke(it.isSuccessful)
-            }
+        viewModelScope.launch {
+            val result = FireStoreManager.updateDoc(
+                FireStoreCollection.USER_MEDICAL_SPECIALTIES,
+                userMedicalSpecialty.id,
+                mapOf("following_medical_specialties" to tempFollowingList)
+            )
+            completion?.invoke(result)
+        }
     }
 
     fun getWebViewModel(model: BaseItemInterface?): WebModel? {

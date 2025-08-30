@@ -38,7 +38,7 @@ class NotificationViewModel: ViewModel() {
     private var currentObserverId: Int? = null
 
     // Life cycle
-    fun onViewCreated() {
+    init {
         observeLatestUserNotifications()
         viewModelScope.launch {
             getData()
@@ -166,8 +166,8 @@ class NotificationViewModel: ViewModel() {
         notificationResult.forEachIndexed { index, userNotification ->
             if (!userNotification.isValid()) return@forEachIndexed
 
-            FireStoreManager.buildDocRef(
-                Pair(FireStoreCollection.USER_MEMBER, userNotification.userCode),
+            FireStoreManager.buildDoc(
+                Pair(FireStoreCollection.USER_MEMBERS, userNotification.userCode),
                 Pair(FireStoreCollection.USER_NOTIFICATIONS, userNotification.id)
             )
                 .delete()
@@ -195,8 +195,8 @@ class NotificationViewModel: ViewModel() {
         val userCode = FirebaseAuthManager.getCurrentUserCode() ?: return callback.invoke()
         val id = item.id
 
-        FireStoreManager.buildDocRef(
-            Pair(FireStoreCollection.USER_MEMBER, userCode),
+        FireStoreManager.buildDoc(
+            Pair(FireStoreCollection.USER_MEMBERS, userCode),
             Pair(FireStoreCollection.USER_NOTIFICATIONS, item.id)
         )
             .delete()
@@ -214,8 +214,8 @@ class NotificationViewModel: ViewModel() {
         val userCode = FirebaseAuthManager.getCurrentUserCode() ?: return
         val notificationId = notification.id
 
-        FireStoreManager.buildDocRef(
-            Pair(FireStoreCollection.USER_MEMBER, userCode),
+        FireStoreManager.buildDoc(
+            Pair(FireStoreCollection.USER_MEMBERS, userCode),
             Pair(FireStoreCollection.USER_NOTIFICATIONS, notification.id)
         )
             .update("is_read", true)

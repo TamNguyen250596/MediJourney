@@ -12,7 +12,6 @@ import com.example.medijourney.common.managers.firebase_storage.FirebaseStorageM
 import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.item_models.DynamicUIItem
 import com.example.medijourney.common.models.realm_models.MedicalProduct
-import com.example.medijourney.common.models.realm_models.UserMedicalProduct
 import io.realm.kotlin.ext.asFlow
 import io.realm.kotlin.ext.isValid
 import kotlinx.coroutines.FlowPreview
@@ -135,19 +134,10 @@ class MedicalProductDetailsViewModel : ViewModel() {
         map["user_code"] = currentUserCode
         map["is_read"] = false
 
-        val userMedicalProductDoc = FireStoreManager.buildUserDocRef(Pair(FireStoreCollection.USER_MEDICAL_PRODUCTS, null))
-        map["id"] = userMedicalProductDoc.id
-        userMedicalProductDoc.set(map)
-            .addOnSuccessListener {
-                viewModelScope.launch {
-                    RealmManager.create(UserMedicalProduct::class.java, map)
-                    _isLoading.value = false
-                    completion(true)
-                }
-            }
-            .addOnFailureListener {
-                _isLoading.value = false
-                completion(false)
-            }
+        viewModelScope.launch {
+            val result = FireStoreManager.createDoc(FireStoreCollection.USER_MEDICAL_PRODUCTS, map)
+            _isLoading.value = false
+            completion(result)
+        }
     }
 }

@@ -29,7 +29,7 @@ class UserMessage: RealmObject, RealmCycle {
         return "id"
     }
 
-    override fun toRealmObject(map: Map<String, Any>): RealmObject {
+    override fun create(map: Map<String, Any>): RealmObject {
         return UserMessage().apply {
             id = map["id"] as? String ?: ""
             createdAt = map.getRealmInstant("created_at")
@@ -38,12 +38,12 @@ class UserMessage: RealmObject, RealmCycle {
         }
     }
 
-    override fun updateFromMap(map: Map<String, Any>) {
+    override fun update(map: Map<String, Any>) {
         messageId = map["message_id"] as? String ?: messageId
     }
 
-    override fun handleDependencies(map: Map<String, Any>) {
-        super.handleDependencies(map)
+    override fun didInit(map: Map<String, Any>) {
+        super.didInit(map)
 
         val messageId = map["message_id"] as? String ?: return
         val id = map["id"] as? String ?: return
@@ -64,7 +64,7 @@ class UserMessage: RealmObject, RealmCycle {
             }
         }
 
-        FireStoreManager.buildDocRef(FireStoreCollection.MESSAGES to messageId)
+        FireStoreManager.buildDoc(FireStoreCollection.MESSAGES to messageId)
             .addListener {
                 val data = it.data
                 if (data != null) {
@@ -76,7 +76,7 @@ class UserMessage: RealmObject, RealmCycle {
                                 .find()
                                 .firstOrNull()
                             if (existingMessage == null) {
-                                val message = Message().toRealmObject(data) as? Message
+                                val message = Message().create(data) as? Message
                                 val userMessage = query(
                                     UserMessage::class,
                                     "${UserMessage::id.name} == $0", id)
@@ -86,7 +86,7 @@ class UserMessage: RealmObject, RealmCycle {
                                     userMessage?.message = copyToRealm(message)
                                 }
                             } else {
-                                existingMessage.updateFromMap(data)
+                                existingMessage.update(data)
                             }
                         }
                     }
@@ -98,7 +98,7 @@ class UserMessage: RealmObject, RealmCycle {
         super.removeDependencies()
         if (!isValid()) return
 
-        val query =  FireStoreManager.buildDocRef(FireStoreCollection.MESSAGES to messageId)
+        val query =  FireStoreManager.buildDoc(FireStoreCollection.MESSAGES to messageId)
         FireStoreManager.removeListener(query)
     }
 }

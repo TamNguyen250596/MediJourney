@@ -74,14 +74,14 @@ class MainProfileViewModel: ViewModel() {
 
         currentUser = RealmManager.read(User::class.java, currentUserCode)
         userMembershipResult = RealmManager.read(UserMembership::class.java,
-            realmQuery = where(UserMedicalSpecialty::userCode.name, Operator.EQUAL, currentUserCode)
+            realmQuery = where(UserMedicalSpecialty::userId.name, Operator.EQUAL, currentUserCode)
         )
         membershipResult = RealmManager.read(Membership::class.java)
     }
 
     // Observe Data
     private fun syncFireStore() {
-        FireStoreManager.buildCollectionRef(FireStoreCollection.MEMBERSHIPS)
+        FireStoreManager.buildCollection(FireStoreCollection.MEMBERSHIPS)
             .observe(Membership::class.java, this::class.java)
         FireStoreManager.buildUserCollectionRef(FireStoreCollection.USER_MEMBERSHIP)
             .observe(UserMembership::class.java, this::class.java)

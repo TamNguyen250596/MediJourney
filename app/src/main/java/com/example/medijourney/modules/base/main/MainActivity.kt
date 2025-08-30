@@ -20,8 +20,9 @@ import androidx.navigation.ui.setupWithNavController
 import com.example.medijourney.R
 import com.example.medijourney.databinding.ActivityMainBinding
 import com.example.medijourney.modules.ad.FullScreenAdFragment
-import io.realm.kotlin.ext.isValid
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     // Properties
@@ -48,7 +49,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        viewModel.updateShowSplashAd(true)
+        viewModel.splashAdInfo.value?.let {
+            showFullScreenAd(it.first, it.second)
+        }
     }
 
     // Functions
@@ -172,9 +175,8 @@ class MainActivity : AppCompatActivity() {
                 binding.bottomNavView.getOrCreateBadge(R.id.notificationFragment).number = it
             }
         }
-        viewModel.showPlashAd.observe(this) {
-            if (!it) return@observe
-            showFullScreenAd()
+        viewModel.splashAdInfo.observe(this) {
+            showFullScreenAd(it.first, it.second)
         }
     }
 
@@ -187,12 +189,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showFullScreenAd() {
-        val ad = viewModel.getSplashAd() ?: return
-        if (!ad.isValid()) return
-        val fragment = FullScreenAdFragment()
-        fragment.imageUrlString = "images/advertisements/${ad.imageName}.png"
-        fragment.actionUrlString = ad.actionUrl
+    private fun showFullScreenAd(imageUrlString: String, actionUrlString: String?) {
+        val fragment = FullScreenAdFragment.newInstance(imageUrlString, actionUrlString)
         fragment.show(supportFragmentManager, FullScreenAdFragment::class.java.simpleName)
     }
 }

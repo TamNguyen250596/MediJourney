@@ -22,7 +22,7 @@ class UserMembership: RealmObject, RealmCycle {
         return "id"
     }
 
-    override fun toRealmObject(map: Map<String, Any>): RealmObject {
+    override fun create(map: Map<String, Any>): RealmObject {
         return UserMembership().apply {
             id = map.getUserObjectKey(id)
             userCode = map["user_code"] as? String ?: userCode
@@ -31,7 +31,7 @@ class UserMembership: RealmObject, RealmCycle {
         }
     }
 
-    override fun updateFromMap(map: Map<String, Any>) {
+    override fun update(map: Map<String, Any>) {
         membershipId = map.getInt("membership_id", membershipId)
         expiredAt = map.getRealmInstant("expired_at", expiredAt)
     }

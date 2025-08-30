@@ -31,7 +31,7 @@ class Message: RealmObject, RealmCycle {
         return "id"
     }
 
-    override fun toRealmObject(map: Map<String, Any>): RealmObject {
+    override fun create(map: Map<String, Any>): RealmObject {
         return Message().apply {
             id = map["id"] as? String ?: ""
             message = map["message"] as? String
@@ -48,7 +48,7 @@ class Message: RealmObject, RealmCycle {
         }
     }
 
-    override fun updateFromMap(map: Map<String, Any>) {
+    override fun update(map: Map<String, Any>) {
         message = map["message"] as? String ?: message
         mediaName = map["media_name"] as? String ?: mediaName
         mediaUrl = map["media_url"] as? String ?: mediaUrl

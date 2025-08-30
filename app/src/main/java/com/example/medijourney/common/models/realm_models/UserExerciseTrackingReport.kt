@@ -29,7 +29,7 @@ class UserExerciseTrackingReport: RealmObject, RealmCycle {
         return "id"
     }
 
-    override fun toRealmObject(map: Map<String, Any>): RealmObject {
+    override fun create(map: Map<String, Any>): RealmObject {
         return UserExerciseTrackingReport().apply {
             id = map["id"] as? String ?: id
             userCode = map["user_code"] as? String ?: userCode
@@ -45,7 +45,7 @@ class UserExerciseTrackingReport: RealmObject, RealmCycle {
         }
     }
 
-    override fun updateFromMap(map: Map<String, Any>) {
+    override fun update(map: Map<String, Any>) {
         reportedAt = map.getRealmInstant("reported_at", reportedAt)
         burnedCalories = map.getDouble("burned_calories", burnedCalories)
         exerciseDescription = map.getLocalizedString("exercise_description", exerciseDescription)

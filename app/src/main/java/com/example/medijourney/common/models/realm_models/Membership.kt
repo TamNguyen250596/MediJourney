@@ -20,7 +20,7 @@ class Membership: RealmObject, RealmCycle {
         return "id"
     }
 
-    override fun toRealmObject(map: Map<String, Any>): RealmObject {
+    override fun create(map: Map<String, Any>): RealmObject {
         return Membership().apply {
             id = map.getInt("id")
             name = map.getLocalizedString("name_localized")
@@ -29,7 +29,7 @@ class Membership: RealmObject, RealmCycle {
         }
     }
 
-    override fun updateFromMap(map: Map<String, Any>) {
+    override fun update(map: Map<String, Any>) {
         name = map.getLocalizedString("name_localized", name)
         imageName = map["image_name"] as? String ?: imageName
         position = map.getInt("position", position)

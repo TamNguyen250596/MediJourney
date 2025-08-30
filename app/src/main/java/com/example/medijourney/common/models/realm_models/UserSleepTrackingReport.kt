@@ -31,7 +31,7 @@ class UserSleepTrackingReport: RealmObject, RealmCycle {
         return "id"
     }
 
-    override fun toRealmObject(map: Map<String, Any>): RealmObject {
+    override fun create(map: Map<String, Any>): RealmObject {
         return UserSleepTrackingReport().apply {
             id = map.getUserObjectKey(id)
             userCode = map["user_code"] as? String ?: userCode
@@ -48,7 +48,7 @@ class UserSleepTrackingReport: RealmObject, RealmCycle {
         }
     }
 
-    override fun updateFromMap(map: Map<String, Any>) {
+    override fun update(map: Map<String, Any>) {
         sleepDuration = map.getDouble("sleep_duration", sleepDuration)
         reportedAt = map.getRealmInstant("reported_at", reportedAt)
         n1StageDuration = map.getDouble("n1_stage_duration", n1StageDuration)

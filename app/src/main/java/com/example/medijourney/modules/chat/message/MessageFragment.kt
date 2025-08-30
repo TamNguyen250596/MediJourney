@@ -20,7 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
@@ -76,7 +75,7 @@ class MessageFragment : Fragment(), MenuProvider {
         super.onViewCreated(view, savedInstanceState)
         setupView()
         observeViewModel()
-        viewModel.onViewCreated(conversationId)
+        viewModel.inputConversationId(conversationId)
         observeNavController()
     }
 

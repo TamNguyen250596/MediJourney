@@ -30,7 +30,7 @@ class UserExercisePlan:  RealmObject, RealmCycle {
         return "id"
     }
 
-    override fun toRealmObject(map: Map<String, Any>): RealmObject {
+    override fun create(map: Map<String, Any>): RealmObject {
         return UserExercisePlan().apply {
             id = map["id"] as? String ?: id
             userCode = map["user_code"] as? String ?: userCode
@@ -42,7 +42,7 @@ class UserExercisePlan:  RealmObject, RealmCycle {
         }
     }
 
-    override fun updateFromMap(map: Map<String, Any>) {
+    override fun update(map: Map<String, Any>) {
         createdAt = map.getRealmInstant("created_at", createdAt)
         name = map["name"] as? String ?: name
         duration = map.getDouble("duration", duration)

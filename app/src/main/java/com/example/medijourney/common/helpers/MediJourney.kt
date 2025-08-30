@@ -2,10 +2,9 @@ package com.example.medijourney.common.helpers
 
 import android.app.Application
 import android.content.Context
-import com.example.medijourney.common.constants.Constants
-import com.example.medijourney.common.managers.InternationManager
-import java.util.Locale
+import dagger.hilt.android.HiltAndroidApp
 
+@HiltAndroidApp
 class MediJourney: Application() {
 
     override fun onCreate() {

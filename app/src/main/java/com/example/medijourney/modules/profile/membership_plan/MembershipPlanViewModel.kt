@@ -33,16 +33,11 @@ class MembershipPlanViewModel : ViewModel() {
 
     // Properties
     val membershipPlans = MutableLiveData<MutableList<SelectionItemModel>>()
-    private var currentLanguageCode = "vi"
     private var membershipResult: RealmResults<Membership>? = null
     private var userMembershipResult: RealmResults<UserMembership>? = null
 
     // Life cycle
-    fun inputData(languageCode: String) {
-        currentLanguageCode = languageCode
-    }
-
-    fun onCreateView() {
+    init {
         viewModelScope.launch {
             getData()
             observeData()
@@ -56,7 +51,7 @@ class MembershipPlanViewModel : ViewModel() {
             sort = listOf(Pair(Membership::position.name, Sort.ASCENDING)))
         FirebaseAuthManager.getCurrentUserCode()?.let {
             userMembershipResult = RealmManager.read(UserMembership::class.java,
-                realmQuery = where(UserMedicalSpecialty::userCode.name, Operator.EQUAL, it)
+                realmQuery = where(UserMedicalSpecialty::userId.name, Operator.EQUAL, it)
             )
         }
     }
@@ -114,8 +109,8 @@ class MembershipPlanViewModel : ViewModel() {
         val userMembership = userMembershipResult.firstOrNull() ?: return completion(false)
 
         if (userMembership.isValid() && userMembership.membershipId != membership.id) {
-            FireStoreManager.buildDocRef(
-                Pair(FireStoreCollection.USER_MEMBER, userMembership.userCode),
+            FireStoreManager.buildDoc(
+                Pair(FireStoreCollection.USER_MEMBERS, userMembership.userCode),
                 Pair(FireStoreCollection.USER_MEMBERSHIP, userMembership.id))
                 .update(mapOf("membership_id" to membership.id))
                 .addOnCompleteListener {

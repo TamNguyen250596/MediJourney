@@ -57,7 +57,7 @@ class AIChatViewModel : ViewModel() {
     private var observeCurrentPageJob: Job? = null
 
     // Life cycle
-    fun onViewCreated() {
+    init {
         conversationId = getConversationId()
         viewModelScope.launch {
             getData()
@@ -265,7 +265,7 @@ class AIChatViewModel : ViewModel() {
 
     // Send Message
     fun sendMessage(text: String, imageUri: Uri?) {
-        val messageDocRef = FireStoreManager.buildDocRef(Pair(FireStoreCollection.MESSAGES, null))
+        val messageDocRef = FireStoreManager.buildDoc(Pair(FireStoreCollection.MESSAGES, null))
         val userMessageDocRef = FireStoreManager.buildUserDocRef(Pair(FireStoreCollection.USER_MESSAGES, null))
         val messageMap = generateMessageMap(messageDocRef.id, text, imageUri)
         val userMessageMap = generateUserMessageMap(userMessageDocRef.id, messageDocRef.id, messageMap)
@@ -289,7 +289,7 @@ class AIChatViewModel : ViewModel() {
 
         val user = user
         if (user != null && user.isValid()) {
-            messageMap["sender_id"] = user.userCode
+            messageMap["sender_id"] = user.id
             messageMap["sender_image_name"] = "avatar"
             user.displayName?.let {
                 messageMap["sender_name"] = it

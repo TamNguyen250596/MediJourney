@@ -28,7 +28,7 @@ class UserNotification: RealmObject, RealmCycle {
         return "id"
     }
 
-    override fun toRealmObject(map: Map<String, Any>): RealmObject {
+    override fun create(map: Map<String, Any>): RealmObject {
         return UserNotification().apply {
             id = map.getUserObjectKey(id)
             userCode = map["user_code"] as? String ?: userCode
@@ -43,7 +43,7 @@ class UserNotification: RealmObject, RealmCycle {
         }
     }
 
-    override fun updateFromMap(map: Map<String, Any>) {
+    override fun update(map: Map<String, Any>) {
         imageURL = map["image_url"] as? String ?: imageURL
         title = map["title"] as? String ?: title
         description = map["description"] as? String ?: description

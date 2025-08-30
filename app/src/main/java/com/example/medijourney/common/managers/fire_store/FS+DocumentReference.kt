@@ -1,7 +1,7 @@
 package com.example.medijourney.common.managers.fire_store
 
-import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.managers.realm.RealmCycle
+import com.example.medijourney.common.managers.realm.RealmManager
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import io.realm.kotlin.types.RealmObject

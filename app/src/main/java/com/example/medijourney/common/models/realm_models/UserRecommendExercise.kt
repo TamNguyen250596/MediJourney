@@ -20,7 +20,7 @@ class UserRecommendExercise: RealmObject, RealmCycle {
         return "id"
     }
 
-    override fun toRealmObject(map: Map<String, Any>): RealmObject {
+    override fun create(map: Map<String, Any>): RealmObject {
         return UserRecommendExercise().apply {
             id = map["id"] as? String ?: id
             userCode = map["user_code"] as? String ?: userCode
@@ -28,7 +28,7 @@ class UserRecommendExercise: RealmObject, RealmCycle {
         }
     }
 
-    override fun updateFromMap(map: Map<String, Any>) {
+    override fun update(map: Map<String, Any>) {
         recommendExercises.addAll(map.getIntSet("recommend_exercises", recommendExercises))
     }
 }

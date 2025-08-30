@@ -20,7 +20,7 @@ class Advertisement:  RealmObject, RealmCycle {
         return "id"
     }
 
-    override fun toRealmObject(map: Map<String, Any>): RealmObject {
+    override fun create(map: Map<String, Any>): RealmObject {
         return Advertisement().apply {
             id = map["id"] as? String ?: ""
             position = map.getInt("position")
@@ -30,7 +30,7 @@ class Advertisement:  RealmObject, RealmCycle {
         }
     }
 
-    override fun updateFromMap(map: Map<String, Any>) {
+    override fun update(map: Map<String, Any>) {
         position = map.getInt("position", position)
         imageName = map["image_name"] as? String ?: imageName
         actionUrl = map["action_url"] as? String ?: actionUrl
