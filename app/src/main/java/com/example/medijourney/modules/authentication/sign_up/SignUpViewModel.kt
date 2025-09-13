@@ -1,48 +1,34 @@
 package com.example.medijourney.modules.authentication.sign_up
 
 import android.content.Context
-import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.medijourney.R
 import com.example.medijourney.common.constants.Constants
-import com.example.medijourney.common.extensions.disposeBy
 import com.example.medijourney.common.managers.firebase_auth.AuthenticationResult
-import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
-import io.reactivex.rxjava3.disposables.CompositeDisposable
+import com.example.medijourney.common.managers.firebase_auth.FAManger
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SignUpViewModel(): ViewModel() {
+@HiltViewModel
+class SignUpViewModel @Inject constructor(
+    private val faManger: FAManger
+) : ViewModel() {
 
     // Properties
-    var enableSignUpButton = MutableLiveData<Boolean>(false)
-    var errorMessages = MutableLiveData<String?>(null)
+    val isLoading = MutableLiveData(false)
+    val signUpState = MutableLiveData<AuthenticationResult>(null)
+    val enableSignUpButton = MutableLiveData(false)
+    val errorMessages = MutableLiveData<String?>(null)
     private var validTextViews: MutableMap<String, Boolean> = mutableMapOf(
         "email" to false,
         "password" to false,
         "confirmPassword" to false
     )
-    private val disposables = CompositeDisposable()
-
-    // Life cycle
-    fun onViewCreated(view: View) {
-        observeUserAuthenticationResult(view)
-    }
 
     // Functions
-    private fun observeUserAuthenticationResult(view: View) {
-        FirebaseAuthManager.userAuthenticationResult
-            .distinctUntilChanged()
-            .subscribe {
-                when (it) {
-                    AuthenticationResult.SIGN_UP_FAILED -> {
-                        errorMessages.postValue(view.context.getString(R.string.failed_authentication_error_message))
-                    }
-
-                    else -> {}
-                }
-            }.disposeBy(disposables)
-    }
-
     fun checkEmailError(email: String, context: Context): String? {
         val isValid = email.matches(Constants.EMAIL_VALIDATOR_FORMAT.toRegex())
         this.validTextViews["email"] = isValid
@@ -66,6 +52,14 @@ class SignUpViewModel(): ViewModel() {
 
     private fun setEnableSignUpButtonValue(enable: Boolean) {
         this.enableSignUpButton.postValue(enable)
-        this.enableSignUpButton.value = enable
+    }
+
+    fun signUp(fullName: String, email: String, password: String) {
+        viewModelScope.launch {
+            isLoading.postValue(true)
+            val result = faManger.signUp(email, password, mapOf("full_name" to fullName))
+            isLoading.postValue(false)
+            signUpState.postValue(result)
+        }
     }
 }

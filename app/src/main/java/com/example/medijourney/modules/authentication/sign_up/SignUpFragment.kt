@@ -11,13 +11,17 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.example.medijourney.R
 import com.example.medijourney.R.color.deep_turquoise_blue_color
 import com.example.medijourney.R.color.disable_grey_color
 import com.example.medijourney.R.color.white
-import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
+import com.example.medijourney.common.managers.firebase_auth.AuthenticationResult
 import com.example.medijourney.common.ui_components.dialogs.IndicatorHandler
 import com.example.medijourney.databinding.FragmentSignUpBinding
+import com.example.medijourney.modules.base.auth.AuthActivity
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SignUpFragment : Fragment() {
 
     // Properties
@@ -35,32 +39,42 @@ class SignUpFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.onViewCreated(view)
         observeUIComponents()
         observeViewModel()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        IndicatorHandler.hide()
     }
 
     // Functions
     private fun observeViewModel() {
         viewModel.enableSignUpButton.observe(viewLifecycleOwner) { enable ->
             binding.signUpButton.isEnabled = enable
-            context?.let {
-                val backgroundColor = when (enable) {
-                    true -> ContextCompat.getColor(it, deep_turquoise_blue_color)
-                    false -> ContextCompat.getColor(it, disable_grey_color)
+            val backgroundColor = when (enable) {
+                true -> ContextCompat.getColor(requireContext(), deep_turquoise_blue_color)
+                false -> ContextCompat.getColor(requireContext(), disable_grey_color)
+            }
+            binding.signUpButton.setBackgroundColor(backgroundColor)
+            binding.signUpButton.setTextColor(ContextCompat.getColor(requireContext(), white))
+        }
+        viewModel.signUpState.observe(viewLifecycleOwner) {
+            when (it) {
+                AuthenticationResult.SIGN_UP_FAILED -> {
+                    showFailedAuthenticationToast(getString(R.string.failed_authentication_error_message))
                 }
-                binding.signUpButton.setBackgroundColor(backgroundColor)
-                binding.signUpButton.setTextColor(ContextCompat.getColor(it, white))
+                AuthenticationResult.SIGN_UP_SUCCESS -> {
+                    val activity = requireActivity() as? AuthActivity ?: return@observe
+                    activity.openMainApp()
+                }
+                else -> {}
             }
         }
         viewModel.errorMessages.observe(viewLifecycleOwner) {
-            it?.let {
-                showFailedAuthenticationToast(it)
+            val message = it ?: return@observe
+            showFailedAuthenticationToast(message)
+        }
+        viewModel.isLoading.observe(viewLifecycleOwner) {
+            if (it) {
+                IndicatorHandler.show(requireContext())
+            } else {
+                IndicatorHandler.hide()
             }
         }
     }
@@ -70,10 +84,11 @@ class SignUpFragment : Fragment() {
         binding.passwordTextInputEditText.addTextChangedListener(textWatcher)
         binding.confirmPasswordTextInputEditText.addTextChangedListener(textWatcher)
         binding.signUpButton.setOnClickListener {
-            val fullName = binding.fullNameTextInputEditText.text.toString()
-            val email = binding.emailTextInputEditText.text.toString()
-            val password = binding.passwordTextInputEditText.text.toString()
-            FirebaseAuthManager.signUpUser(fullName, email, password, requireContext())
+            viewModel.signUp(
+                binding.fullNameTextInputEditText.text.toString(),
+                binding.emailTextInputEditText.text.toString(),
+                binding.passwordTextInputEditText.text.toString()
+            )
         }
         binding.signInButton.setOnClickListener {
             findNavController().popBackStack()
@@ -91,18 +106,16 @@ class SignUpFragment : Fragment() {
     }
 
     private fun handleTextChanged(text: String) {
-        context?.let {
-            when {
-                binding.emailTextInputEditText.isFocused -> {
-                    binding.emailTextInputLayout.error = viewModel.checkEmailError(text, it)
-                }
-                binding.passwordTextInputEditText.isFocused -> {
-                    binding.passwordTextInputLayout.error = viewModel.checkPasswordError(text, it)
-                }
-                binding.confirmPasswordTextInputEditText.isFocused -> {
-                    val password = binding.passwordTextInputEditText.text.toString()
-                    binding.confirmPasswordTextInputLayout.error = viewModel.checkConfirmPasswordError(password, text, it)
-                }
+        when {
+            binding.emailTextInputEditText.isFocused -> {
+                binding.emailTextInputLayout.error = viewModel.checkEmailError(text, requireContext())
+            }
+            binding.passwordTextInputEditText.isFocused -> {
+                binding.passwordTextInputLayout.error = viewModel.checkPasswordError(text, requireContext())
+            }
+            binding.confirmPasswordTextInputEditText.isFocused -> {
+                val password = binding.passwordTextInputEditText.text.toString()
+                binding.confirmPasswordTextInputLayout.error = viewModel.checkConfirmPasswordError(password, text, requireContext())
             }
         }
     }

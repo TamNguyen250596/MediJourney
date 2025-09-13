@@ -7,10 +7,15 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 import com.example.medijourney.common.constants.Constants
 import com.google.gson.Gson
-import kotlinx.coroutines.flow.first
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
-
+import javax.inject.Inject
+import javax.inject.Singleton
 
 object DataStoreHelper {
 
@@ -77,10 +82,53 @@ object DataStoreHelper {
             mutablePreferences
         }
     }
+}
 
-    suspend fun deleteAll(context: Context) {
-        context.dataStore.edit { preferences ->
-            preferences.clear()
+class MDataStore @Inject constructor(
+    private val dataStore: DataStore<Preferences>
+) {
+
+    // Functions
+    suspend fun getStringList(key: Preferences.Key<String>): MutableList<String> {
+        val jsonFlow = dataStore.data.map { preferences ->
+            preferences[key]
         }
+
+        val json = jsonFlow.firstOrNull() ?: return mutableListOf()
+        return Gson().fromJson(json, Array<String>::class.java).toMutableList()
+    }
+
+    suspend fun removeStringInList(key: Preferences.Key<String>, value: String) {
+        val currentList = getStringList(key)
+        currentList.remove(value)
+        val json = Gson().toJson(currentList)
+        dataStore.edit { preferences ->
+            preferences[key] = json
+        }
+    }
+
+    suspend fun deleteAuthenticatedPreferencesKey() {
+        dataStore.updateData { preferences ->
+            val mutablePreferences = preferences.toMutablePreferences()
+            Constants.authenticatedPreferencesKey.forEach {
+                mutablePreferences.remove(it)
+            }
+            mutablePreferences
+        }
+    }
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+object MDataStoreModule {
+
+    val Context.mediJourneyDataStore: DataStore<Preferences> by preferencesDataStore(
+        name = "medi_journey_data_store"
+    )
+
+    @Provides
+    @Singleton
+    fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> {
+        return context.mediJourneyDataStore
     }
 }

@@ -3,15 +3,15 @@ package com.example.medijourney.common.managers.fire_store
 import com.example.medijourney.common.constants.Constants
 import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
 import com.example.medijourney.common.managers.realm.RealmManager
+import com.google.firebase.Firebase
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
-import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.firestore
 import com.google.firebase.installations.FirebaseInstallations
-import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -182,6 +182,10 @@ object FireStoreManager {
             }
             listeners.clear()
         }
+        for (listener in newListeners) {
+            listener.registration?.remove()
+        }
+        newListeners.clear()
     }
 
     // DocumentReference - Build
@@ -192,12 +196,16 @@ object FireStoreManager {
     }
 
     // DocumentReference - Update
-    suspend fun createDoc(collection: FireStoreCollection, data: Map<String, Any>): Boolean {
+    suspend fun createDoc(collection: FireStoreCollection, documentId: String? = null, data: Map<String, Any>): Boolean {
         val realmObject = collection.getRealmObject() ?: return false
         val db = Firebase.firestore
-        val docRef = db.collection(collection.name.lowercase()).document()
+        val docRef = if (documentId != null) {
+            db.collection(collection.name.lowercase()).document(documentId)
+        } else {
+            db.collection(collection.name.lowercase()).document()
+        }
         val data = data.toMutableMap()
-        data["id"] = docRef.id
+        data["id"] = documentId ?: docRef.id
 
         val result = suspendCancellableCoroutine { cont ->
             docRef.set(data).addOnCompleteListener {
@@ -271,6 +279,16 @@ object FireStoreManager {
                 } else {
                     RealmManager.delete(realmObject, it.id)
                 }
+            }
+        }
+    }
+
+    // DocumentReference - Delete
+    suspend fun deleteDoc(collection: FireStoreCollection, documentId: String): Boolean {
+        val docRef = buildDoc(collection, documentId)
+        return suspendCancellableCoroutine { cont ->
+            docRef.delete().addOnCompleteListener {
+                cont.resume(it.isSuccessful)
             }
         }
     }

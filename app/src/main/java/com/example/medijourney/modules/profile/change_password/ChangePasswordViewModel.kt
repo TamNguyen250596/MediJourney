@@ -2,37 +2,35 @@ package com.example.medijourney.modules.profile.change_password
 
 import android.content.Context
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.medijourney.R
-import com.example.medijourney.common.extensions.disposeBy
 import com.example.medijourney.common.managers.firebase_auth.AuthenticationResult
-import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
-import io.reactivex.rxjava3.disposables.CompositeDisposable
+import com.example.medijourney.common.managers.firebase_auth.FAManger
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ChangePasswordViewModel: ViewModel() {
+@HiltViewModel
+class ChangePasswordViewModel @Inject constructor(
+    private val state: SavedStateHandle,
+    private val faManger: FAManger,
+) : ViewModel() {
 
     // Properties
-    var enableConfirmButton = MutableLiveData<Boolean>(false)
-    var isSuccessMessages = MutableLiveData<Boolean>(null)
+    val isLoading = MutableLiveData(false)
+    val changePasswordState = MutableLiveData<AuthenticationResult?>(null)
+    val enableConfirmButton = MutableLiveData(false)
     private var validTextViews: MutableMap<String, Boolean> = mutableMapOf()
     private var currentPassword: String? = null
-    private val disposables = CompositeDisposable()
 
     // Life cycle
     init {
         validTextViews = getValidTextViews()
-        observeUserAuthenticationResult()
     }
 
     // Functions
-    private fun observeUserAuthenticationResult() {
-        FirebaseAuthManager.userAuthenticationResult
-            .distinctUntilChanged()
-            .subscribe {
-                isSuccessMessages.postValue(it == AuthenticationResult.CHANGE_PASSWORD_SUCCESS)
-            }.disposeBy(disposables)
-    }
-
     private fun getValidTextViews(): MutableMap<String, Boolean> {
         val map = mutableMapOf(
             "newPassword" to false,
@@ -45,7 +43,7 @@ class ChangePasswordViewModel: ViewModel() {
     }
 
     fun checkUserLoggedIn(): Boolean {
-        return FirebaseAuthManager.userAuthenticationResult.value == AuthenticationResult.SIGN_IN_SUCCESS
+        return faManger.currentUser != null
     }
 
     fun checkCurrentPasswordError(password: String, context: Context): String? {
@@ -81,5 +79,18 @@ class ChangePasswordViewModel: ViewModel() {
     private fun setEnableSignUpButtonValue(enable: Boolean) {
         this.enableConfirmButton.postValue(enable)
         this.enableConfirmButton.value = enable
+    }
+
+    fun changePassword(newPassword: String) {
+        viewModelScope.launch {
+            isLoading.postValue(true)
+            if (checkUserLoggedIn()) {
+                faManger.changePasswordWhenLogIn(newPassword)
+            } else {
+                val tempToken = state.get<String>("tempLogInToken") ?: return@launch
+                faManger.changePasswordWithoutLogIn(tempToken, newPassword)
+            }
+            isLoading.postValue(false)
+        }
     }
 }

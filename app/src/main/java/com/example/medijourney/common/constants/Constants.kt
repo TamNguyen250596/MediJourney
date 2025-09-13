@@ -66,5 +66,5 @@ object Constants {
     const val DEFAULT_LIMIT = 100L
 
     // Keys
-    const val WEB_CLIENT_ID = "797762986274-h0j51q3t2dsppkcfqf9efiromoouu00t.apps.googleusercontent.com"
+    const val WEB_CLIENT_ID = "797762986274-376j91rm8l9iej1crlgsqvh44pjiumrg.apps.googleusercontent.com"
 }

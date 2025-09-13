@@ -1,54 +1,50 @@
 package com.example.medijourney.modules.profile.delete_account
 
 import android.app.Activity
-import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.medijourney.common.extensions.disposeBy
+import androidx.lifecycle.viewModelScope
 import com.example.medijourney.common.managers.firebase_auth.AuthenticationResult
-import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
-import io.reactivex.rxjava3.disposables.CompositeDisposable
+import com.example.medijourney.common.managers.firebase_auth.FAManger
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class DeleteAccountViewModel: ViewModel() {
+@HiltViewModel
+class DeleteAccountViewModel @Inject constructor(
+    private val faManger: FAManger
+) : ViewModel() {
 
     // Properties
-    var shouldLogout = MutableLiveData<Boolean>(false)
-    var errorMessages = MutableLiveData<String?>(null)
-    var isFailToDeactivate = MutableLiveData<Boolean>(false)
-    var isFailToDelete = MutableLiveData<Boolean>(false)
-    private val disposables = CompositeDisposable()
-
-    // Life cycle
-    init {
-        observeUserAuthenticationResult()
-    }
+    val isLoading = MutableLiveData(false)
+    val authState = MutableLiveData<AuthenticationResult?>(null)
 
     // Functions
-    private fun observeUserAuthenticationResult() {
-        FirebaseAuthManager.userAuthenticationResult
-            .distinctUntilChanged()
-            .subscribe {
-                when (it) {
-                    AuthenticationResult.DEACTIVE_ACCOUNT_FAILED -> {
-                        isFailToDeactivate.postValue(true)
-                    }
-                    AuthenticationResult.DELETE_ACCOUNT_FAILED -> {
-                        isFailToDelete.postValue(true)
-                    }
-                    AuthenticationResult.DELETE_ACCOUNT_SUCCESS,
-                    AuthenticationResult.DEACTIVE_ACCOUNT_SUCCESS -> {
-                        shouldLogout.postValue(true)
-                    }
-                    else -> {}
-                }
-            }.disposeBy(disposables)
-    }
-
-    fun deActiveUser(context: Context) {
-        FirebaseAuthManager.deActiveUser(context)
+    fun deActiveUser(activity: Activity) {
+        viewModelScope.launch {
+            isLoading.postValue(true)
+            val result = faManger.deActiveUser()
+            if (result == AuthenticationResult.DEACTIVE_ACCOUNT_SUCCESS) {
+              logOut(activity)
+            } else {
+              authState.postValue(result)
+            }
+        }
     }
 
     fun deleteUser(activity: Activity) {
-        FirebaseAuthManager.deleteUser(activity)
+        viewModelScope.launch {
+            isLoading.postValue(true)
+            val result = faManger.deleteUser()
+            if (result == AuthenticationResult.DELETE_ACCOUNT_SUCCESS) {
+                logOut(activity)
+            } else {
+                authState.postValue(result)
+            }
+        }
+    }
+
+    private suspend fun logOut(activity: Activity) {
+        faManger.logOut(activity)
     }
 }

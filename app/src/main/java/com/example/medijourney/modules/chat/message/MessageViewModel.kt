@@ -13,6 +13,7 @@ import com.example.medijourney.common.managers.fire_store.addListener
 import com.example.medijourney.common.managers.fire_store.awaitGet
 import com.example.medijourney.common.managers.fire_store.observe
 import com.example.medijourney.common.managers.fire_store.remove
+import com.example.medijourney.common.managers.firebase_auth.FAManger
 import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
 import com.example.medijourney.common.managers.firebase_storage.FirebaseStorageManager
 import com.example.medijourney.common.managers.realm.Operator
@@ -25,8 +26,10 @@ import com.example.medijourney.common.models.realm_models.User
 import com.example.medijourney.common.models.realm_models.UserMessage
 import com.example.medijourney.common.models.ui_models.ImageStyle
 import com.example.medijourney.common.models.ui_models.MTextStyle
+import com.example.medijourney.common.respository.UserRepository
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.Query
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.ext.isValid
 import io.realm.kotlin.query.RealmResults
 import io.realm.kotlin.query.Sort
@@ -42,8 +45,13 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.UUID
+import javax.inject.Inject
 
-class MessageViewModel : ViewModel() {
+@HiltViewModel
+class MessageViewModel @Inject constructor(
+    private val faManger: FAManger,
+    private val userRepository: UserRepository
+) : ViewModel() {
 
     // Properties
     var viewTitle = MutableLiveData<String>()
@@ -101,7 +109,11 @@ class MessageViewModel : ViewModel() {
 
     // Functions
     private suspend fun getData() {
-        user = FirebaseAuthManager.getCurrentRealmUser()
+        userRepository
+            .getUser(faManger.currentUserCode)
+            .collectLatest {
+                user = it
+            }
         getConversation()
         getMessageResults()
         getUserMessageResults()

@@ -8,9 +8,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import com.example.medijourney.R
-import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
+import com.example.medijourney.common.managers.firebase_auth.AuthenticationResult
+import com.example.medijourney.common.ui_components.dialogs.IndicatorHandler
 import com.example.medijourney.databinding.FragmentDeleteAccountBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class DeleteAccountFragment : Fragment() {
 
     // Properties
@@ -35,7 +38,7 @@ class DeleteAccountFragment : Fragment() {
     // Functions
     private fun  observeUIComponents() {
         binding.deactivateButton.setOnClickListener {
-            viewModel.deActiveUser(requireContext())
+            viewModel.deActiveUser(requireActivity())
         }
 
         binding.deleteButton.setOnClickListener {
@@ -44,24 +47,25 @@ class DeleteAccountFragment : Fragment() {
     }
 
     private fun observeViewModel() {
-        viewModel.errorMessages.observe(viewLifecycleOwner) { errorMessage ->
-            errorMessage?.let {
-                showDialog(getString(R.string.error), it)
+        viewModel.authState.observe(viewLifecycleOwner) {
+            when(it) {
+                AuthenticationResult.DEACTIVE_ACCOUNT_FAILED -> {
+                    showDialog(getString(R.string.error), getString(R.string.error_user_deactivation_failed))
+                }
+                AuthenticationResult.DEACTIVE_ACCOUNT_SUCCESS -> {
+                    showDialog(getString(R.string.success), getString(R.string.account_deactivated_message))
+                }
+                AuthenticationResult.DELETE_ACCOUNT_FAILED -> {
+                    showDialog(getString(R.string.error), getString(R.string.error_user_deletion_failed))
+                }
+                else -> {}
             }
         }
-        viewModel.shouldLogout.observe(viewLifecycleOwner) {
+        viewModel.isLoading.observe(viewLifecycleOwner) {
             if (it) {
-                FirebaseAuthManager.logOut(requireActivity())
-            }
-        }
-        viewModel.isFailToDeactivate.observe(viewLifecycleOwner) {
-            if (it) {
-                showDialog(getString(R.string.error), getString(R.string.error_user_deactivation_failed))
-            }
-        }
-        viewModel.isFailToDelete.observe(viewLifecycleOwner) {
-            if (it) {
-                showDialog(getString(R.string.error), getString(R.string.error_user_deletion_failed))
+                IndicatorHandler.show(requireContext())
+            } else {
+                IndicatorHandler.hide()
             }
         }
     }

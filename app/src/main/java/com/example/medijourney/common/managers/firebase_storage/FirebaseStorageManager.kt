@@ -3,8 +3,8 @@ package com.example.medijourney.common.managers.firebase_storage
 import android.net.Uri
 import androidx.core.net.toUri
 import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.ktx.storage
+import com.google.firebase.Firebase
+import com.google.firebase.storage.storage
 import java.io.File
 
 object FirebaseStorageManager {

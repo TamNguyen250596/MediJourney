@@ -72,9 +72,6 @@ dependencies {
     // Realm
     implementation(libs.realm.library.base)
 
-    // RxJava
-    implementation(libs.rxjava)
-
     // Datastore
     implementation(libs.datastore.preferences)
 
@@ -91,6 +88,9 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.storage)
     implementation(libs.firebase.installations)
+    implementation(libs.credentials)
+    implementation(libs.credentials.play.services.auth)
+    implementation(libs.googleid)
 
     // Play Services Auth
     implementation(libs.play.services.auth)

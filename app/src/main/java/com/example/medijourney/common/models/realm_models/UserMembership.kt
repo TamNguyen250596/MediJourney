@@ -13,7 +13,7 @@ class UserMembership: RealmObject, RealmCycle {
     // Properties
     @PrimaryKey
     var id: String = ""
-    var userCode: String = ""
+    var userId: String = ""
     var membershipId = 0
     var expiredAt: RealmInstant? = null
 
@@ -25,7 +25,7 @@ class UserMembership: RealmObject, RealmCycle {
     override fun create(map: Map<String, Any>): RealmObject {
         return UserMembership().apply {
             id = map.getUserObjectKey(id)
-            userCode = map["user_code"] as? String ?: userCode
+            userId = map["user_id"] as? String ?: userId
             membershipId = map.getInt("membership_id")
             expiredAt = map.getRealmInstant("expired_at")
         }

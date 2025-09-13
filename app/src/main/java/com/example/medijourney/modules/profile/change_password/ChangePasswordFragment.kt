@@ -10,21 +10,21 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
-import androidx.navigation.fragment.navArgs
 import com.example.medijourney.R
 import com.example.medijourney.R.color.deep_turquoise_blue_color
 import com.example.medijourney.R.color.disable_grey_color
 import com.example.medijourney.R.color.white
-import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
+import com.example.medijourney.common.managers.firebase_auth.AuthenticationResult
+import com.example.medijourney.common.ui_components.dialogs.IndicatorHandler
 import com.example.medijourney.databinding.FragmentChangePasswordBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class ChangePasswordFragment : Fragment() {
 
     // Properties
     private lateinit var binding: FragmentChangePasswordBinding
     private val viewModel: ChangePasswordViewModel by viewModels()
-    private val args: ChangePasswordFragmentArgs by navArgs()
-    private val tempLogInToken: String? by lazy { args.tempLogInToken }
 
     // Life cycle
     override fun onCreateView(
@@ -52,35 +52,37 @@ class ChangePasswordFragment : Fragment() {
         binding.passwordTextInputEditText.addTextChangedListener(textWatcher)
         binding.confirmPasswordTextInputEditText.addTextChangedListener(textWatcher)
         binding.confirmButton.setOnClickListener {
-            val newPassword = binding.passwordTextInputEditText.text.toString()
-            if (viewModel.checkUserLoggedIn()) {
-                FirebaseAuthManager.changePasswordWhenLogIn(newPassword, requireContext())
-            } else {
-                val tempToken = tempLogInToken ?: return@setOnClickListener
-                FirebaseAuthManager.changePasswordWithoutLogIn(tempToken, newPassword, requireContext())
-            }
+            viewModel.changePassword(binding.passwordTextInputEditText.text.toString())
         }
     }
 
     private fun observeViewModel() {
         viewModel.enableConfirmButton.observe(viewLifecycleOwner) { enable ->
             binding.confirmButton.isEnabled = enable
-            context?.let {
-                val backgroundColor = when (enable) {
-                    true -> ContextCompat.getColor(it, deep_turquoise_blue_color)
-                    false -> ContextCompat.getColor(it, disable_grey_color)
-                }
-                binding.confirmButton.setBackgroundColor(backgroundColor)
-                binding.confirmButton.setTextColor(ContextCompat.getColor(it, white))
+            val backgroundColor = when (enable) {
+                true -> ContextCompat.getColor(requireContext(), deep_turquoise_blue_color)
+                false -> ContextCompat.getColor(requireContext(), disable_grey_color)
             }
+            binding.confirmButton.setBackgroundColor(backgroundColor)
+            binding.confirmButton.setTextColor(ContextCompat.getColor(requireContext(), white))
         }
-        viewModel.isSuccessMessages.observe(viewLifecycleOwner) {
-            val message = if (it) {
-                getString(R.string.change_password_success_message)
-            } else {
-                getString(R.string.error_user_deactivation_failed)
+        viewModel.changePasswordState.observe(viewLifecycleOwner) {
+            val message = when (it) {
+                AuthenticationResult.CHANGE_PASSWORD_SUCCESS -> {
+                    getString(R.string.change_password_success_message)
+                }
+                else -> {
+                    getString(R.string.error_user_deactivation_failed)
+                }
             }
             showDialog(getString(R.string.error), message)
+        }
+        viewModel.isLoading.observe(viewLifecycleOwner) {
+            if (it) {
+                IndicatorHandler.show(requireContext())
+            } else {
+                IndicatorHandler.hide()
+            }
         }
     }
 

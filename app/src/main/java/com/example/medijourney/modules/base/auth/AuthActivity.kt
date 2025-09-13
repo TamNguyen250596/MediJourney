@@ -1,14 +1,18 @@
 package com.example.medijourney.modules.base.auth
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.View
+import android.view.ViewGroup.MarginLayoutParams
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.Insets
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -16,29 +20,28 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.example.medijourney.R
 import com.example.medijourney.common.constants.Constants
-import com.example.medijourney.common.extensions.disposeBy
-import com.example.medijourney.common.managers.firebase_auth.AuthenticationResult
-import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
 import com.example.medijourney.databinding.ActivityAuthBinding
 import com.example.medijourney.modules.base.main.MainActivity
-import io.reactivex.rxjava3.disposables.CompositeDisposable
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class AuthActivity : AppCompatActivity() {
 
     // Properties
     private lateinit var binding: ActivityAuthBinding
+    private val viewModel: AuthActivityViewModel by viewModels()
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration
-    private val disposables = CompositeDisposable()
 
     // Life cycle
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        super.onCreate(savedInstanceState)
         binding = ActivityAuthBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setUpView()
-        observeAuthResult()
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -48,8 +51,7 @@ class AuthActivity : AppCompatActivity() {
 
     // Functions
     private fun setUpView() {
-        if (FirebaseAuthManager.getCurrentFirebaseUser() != null) {
-            FirebaseAuthManager.userAuthenticationResult.onNext(AuthenticationResult.SIGN_IN_SUCCESS)
+        if (viewModel.checkUserLoggedIn()) {
             openMainApp()
         } else {
             setupAuthView()
@@ -61,67 +63,82 @@ class AuthActivity : AppCompatActivity() {
         appBarConfiguration = AppBarConfiguration(navController.graph)
         setSupportActionBar(binding.appBarLayout.toolbar)
         setupActionBarWithNavController(navController, appBarConfiguration)
+        observeWindowInsets()
+        observeDestinationChanged()
 
         val signOut = intent.getBooleanExtra(Constants.SIGN_OUT, false)
         if (signOut) {
             navController.navigate(R.id.action_launchFragment_to_signInFragment)
         } else {
-            Handler(Looper.getMainLooper()).postDelayed({
+            lifecycleScope.launch {
+                delay(1000)
                 navController.navigate(R.id.action_launchFragment_to_signInFragment)
-            }, 1000)
+            }
         }
+    }
+
+    private fun observeWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            updateViewTopMargin(v, insets)
+            WindowInsetsCompat.CONSUMED
+        }
+    }
+
+    private fun updateViewTopMargin(view: View, insets: Insets) {
+        val destination = navController.currentDestination ?: return
+        val top = when(destination.id) {
+            R.id.launchFragment,
+            R.id.signInFragment,
+            R.id.signUpFragment  -> {
+                0
+            }
+            else -> insets.top
+        }
+        view.updateLayoutParams<MarginLayoutParams> {
+            topMargin = top
+        }
+    }
+
+    private fun observeDestinationChanged() {
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            binding.appBarLayout.toolbar.setNavigationIcon(R.drawable.ic_left_arrow)
+            binding.appBarLayout.toolbar.setNavigationIcon(R.drawable.ic_back)
 
             when (destination.id) {
-                R.id.launchFragment, R.id.signInFragment,
+                R.id.launchFragment,
+                R.id.signInFragment,
                 R.id.signUpFragment -> {
                     binding.appBarLayout.root.visibility = View.GONE
-                    binding.root.setBackgroundColor(ContextCompat.getColor(this, R.color.deep_turquoise_blue_color))
+                    setRootViewColor(R.color.deep_turquoise_blue_color)
                 }
                 else -> {
-                    binding.appBarLayout.root.visibility = View.VISIBLE
-                    binding.root.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
+                    showAppBarWithToolbar(
+                        textColor = R.color.disable_grey_color,
+                        backgroundColor = R.color.white,
+                        dividerColor = R.color.gray_400,
+                        navigationIconTint = R.color.disable_grey_color
+                    )
+                    setRootViewColor(R.color.white)
                 }
             }
         }
     }
 
-    private fun openMainApp() {
+    private fun showAppBarWithToolbar(textColor: Int, backgroundColor: Int, dividerColor: Int, navigationIconTint: Int) {
+        binding.appBarLayout.root.visibility = View.VISIBLE
+        binding.appBarLayout.toolbar.setTitleTextColor(ContextCompat.getColor(this, textColor))
+        binding.appBarLayout.toolbar.setBackgroundColor(ContextCompat.getColor(this, backgroundColor))
+        binding.appBarLayout.viewDivider.setBackgroundColor(ContextCompat.getColor(this, dividerColor))
+        binding.appBarLayout.toolbar.setNavigationIconTint(ContextCompat.getColor(this, navigationIconTint))
+    }
+
+    private fun setRootViewColor(backgroundColor: Int) {
+        binding.root.setBackgroundColor(ContextCompat.getColor(this, backgroundColor))
+    }
+
+    fun openMainApp() {
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
         finish()
-    }
-
-    private fun observeAuthResult() {
-        FirebaseAuthManager.userAuthenticationResult
-            .subscribe(
-                { result ->
-                    when (result) {
-                        AuthenticationResult.SIGN_IN_SUCCESS,
-                        AuthenticationResult.SIGN_UP_SUCCESS -> {
-                            openMainApp()
-                        }
-                        AuthenticationResult.ACCOUNT_DEACTIVATED -> {
-                            showDialog(getString(R.string.error),
-                                getString(R.string.account_deactivated_message))
-                        }
-                        else -> {}
-                    }
-                },
-                { error ->
-                    error.printStackTrace()
-                }
-            ).disposeBy(disposables)
-    }
-
-    private fun showDialog(title: String, message: String) {
-        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
-        builder
-            .setMessage(message)
-            .setTitle(title)
-
-        val dialog: AlertDialog = builder.create()
-        dialog.show()
     }
 }

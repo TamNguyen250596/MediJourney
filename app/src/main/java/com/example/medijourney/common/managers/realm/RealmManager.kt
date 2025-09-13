@@ -11,6 +11,7 @@ import io.realm.kotlin.types.RealmObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlin.reflect.KClass
+import kotlin.reflect.KMutableProperty1
 
 object RealmManager {
 
@@ -35,7 +36,7 @@ object RealmManager {
 
             try {
                 copyToRealm(realmObject, UpdatePolicy.ERROR)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 realmEntryInstance.update(data)
             }
         }
@@ -80,15 +81,16 @@ object RealmManager {
                 val kClass = realmObject.javaClass.kotlin
                 val primaryKeyName = realmObject.primaryKey()
                 val existingEntity = query(kClass, "$primaryKeyName == $0", primaryKey).find().firstOrNull()
+                val scope = CoroutineScope(Dispatchers.IO)
                 if (existingEntity != null) {
                     existingEntity.update(data)
-                    existingEntity.handleNestedObjects(data, CoroutineScope(Dispatchers.IO))
+                    existingEntity.handleNestedObjects(data, scope, configuration)
                 } else {
                     val unmanagedEntity = realmObject.create(data)
                     val entity = copyToRealm(unmanagedEntity, UpdatePolicy.ALL)
                     if (entity is RealmCycle) {
                         entity.didInit(data)
-                        entity.handleNestedObjects(data, CoroutineScope(Dispatchers.IO))
+                        entity.handleNestedObjects(data, scope, configuration)
                     }
                 }
             }
@@ -110,7 +112,7 @@ object RealmManager {
 
                 try {
                     copyToRealm(realmObject, UpdatePolicy.ERROR)
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     realmEntryInstance.update(data)
                 }
             }
@@ -188,7 +190,31 @@ object RealmManager {
             }
             for (entity in entities.find()) {
                 entity.update(data)
-                entity.handleNestedObjects(data, CoroutineScope(Dispatchers.IO))
+                entity.handleNestedObjects(data, CoroutineScope(Dispatchers.IO), configuration)
+            }
+        }
+    }
+
+    suspend fun <T : RealmObject, R : RealmObject> linkEntity(
+        id: String,
+        entityClass: Class<T>,
+        relatedClass: Class<R>,
+        relationProperty: KMutableProperty1<T, R?>,
+        configuration: RealmConfiguration? = null
+    ) {
+        val realm = createRealm(configuration)
+
+        realm.write {
+            val entity = query(entityClass.kotlin, "id == $0", id)
+                .find()
+                .firstOrNull { relationProperty.get(it) == null }
+
+            val relatedEntity = query(relatedClass.kotlin, "id == $0", id)
+                .find()
+                .firstOrNull()
+
+            if (entity != null && relatedEntity != null) {
+                relationProperty.set(entity, relatedEntity)
             }
         }
     }

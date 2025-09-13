@@ -1,65 +1,81 @@
 package com.example.medijourney.modules.authentication.phone_authentication
 
-import android.view.View
+import android.app.Activity
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.medijourney.R
-import com.example.medijourney.common.extensions.disposeBy
+import com.example.medijourney.common.constants.Constants
 import com.example.medijourney.common.managers.fire_store.FireStoreCollection
 import com.example.medijourney.common.managers.fire_store.FireStoreManager
 import com.example.medijourney.common.managers.firebase_auth.AuthenticationResult
+import com.example.medijourney.common.managers.firebase_auth.FAManger
 import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
 import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.realm_models.UserSetting
-import io.reactivex.rxjava3.disposables.CompositeDisposable
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.ext.isValid
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class PhoneAuthenticationViewModel : ViewModel() {
+@HiltViewModel
+class PhoneAuthenticationViewModel @Inject constructor(
+    private val state: SavedStateHandle,
+    private val faManger: FAManger
+) : ViewModel() {
 
     // Properties
-    var errorMessages = MutableLiveData<String?>(null)
-    var phoneNumber: String? = null
-    var otp: String? = null
-    private val disposables = CompositeDisposable()
-
-    // Life cycle
-    fun onViewCreated(view: View) {
-        observeUserAuthenticationResult(view)
-    }
+    val isLoading = MutableLiveData(false)
+    val signInState = MutableLiveData<AuthenticationResult>(null)
+    private var phoneNumber: String? = null
+    private var otp: String? = null
 
     // Functions
-    private fun observeUserAuthenticationResult(view: View) {
-        FirebaseAuthManager.userAuthenticationResult
-            .distinctUntilChanged()
-            .subscribe {
-                when (it) {
-                    AuthenticationResult.SIGN_IN_FAILED -> {
-                        errorMessages.postValue(view.context.getString(R.string.failed_authentication_error_message))
-                    }
-                    else -> {}
-                }
-            }.disposeBy(disposables)
+    fun updatePhoneNumber(value: String?) {
+        phoneNumber = value
     }
 
-    fun enableOTPAuth(completion: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            val uid = FirebaseAuthManager.getCurrentUserCode() ?: return@launch completion.invoke(false)
-            val userSetting = RealmManager.read(UserSetting::class.java, uid) ?: return@launch completion.invoke(false)
-            if (!userSetting.isValid()) return@launch completion.invoke(false)
-            if (otp?.count() != 6) return@launch completion.invoke(false)
+    fun updateOTP(value: String?) {
+        isLoading.postValue(true)
+        otp = value
+    }
 
-            val result = FireStoreManager.updateDoc(
-                FireStoreCollection.USER_SETTINGS,
-                userSetting.id,
-                mapOf("enable_otp_auth" to true)
-            )
-            completion.invoke(result)
+    fun handleViewType(activity: Activity) {
+        val viewType = state.get<String>("viewType") ?: return
+        when (viewType) {
+            Constants.FORGOT_PASSWORD -> {
+                requestAPIToGetTempLogInToken()
+            }
+            Constants.ENABLE_OTP_AUTH -> {
+                viewModelScope.launch {
+                    enableOTPAuth()
+                    isLoading.postValue(false)
+                }
+            }
+            Constants.SIGN_IN_BY_PHONE_NUMBER -> {
+                val phoneNumber = phoneNumber ?: return
+
+                viewModelScope.launch {
+                    faManger.signInByPhoneNumber(phoneNumber, activity)
+                    isLoading.postValue(false)
+                    signInState.postValue(AuthenticationResult.SIGN_IN_SUCCESS)
+                }
+            }
         }
     }
 
-    fun requestAPIToGetTempLogInToken(completion: (String?) -> Unit) {
-        completion.invoke("test")
+    suspend fun enableOTPAuth() {
+        val uid = FirebaseAuthManager.getCurrentUserCode() ?: return
+        val userSetting = RealmManager.read(UserSetting::class.java, uid) ?: return
+        if (!userSetting.isValid()) return
+        if (otp?.count() != 6) return
+
+        FireStoreManager.updateDoc(
+            FireStoreCollection.USER_SETTINGS,
+            userSetting.id,
+            mapOf("enable_otp_auth" to true)
+        )
     }
+
+    private fun requestAPIToGetTempLogInToken() {}
 }

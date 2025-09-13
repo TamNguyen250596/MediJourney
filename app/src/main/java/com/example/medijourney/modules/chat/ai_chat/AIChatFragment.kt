@@ -22,7 +22,9 @@ import com.example.medijourney.common.helpers.FragmentHelper
 import com.example.medijourney.common.ui_components.composes.CIndicator
 import com.example.medijourney.common.ui_components.composes.MessageInputField
 import com.example.medijourney.modules.chat.message.sub_views.MessageListView
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class AIChatFragment : Fragment() {
 
     // Properties

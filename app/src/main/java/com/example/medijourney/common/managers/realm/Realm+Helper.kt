@@ -1,5 +1,6 @@
 package com.example.medijourney.common.managers.realm
 
+import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.types.RealmObject
 import kotlinx.coroutines.CoroutineScope
 
@@ -8,7 +9,7 @@ interface RealmCycle {
     fun create(map: Map<String, Any>): RealmObject
     fun didInit(map: Map<String, Any>) {}
     fun update(map: Map<String, Any>)
-    fun handleNestedObjects(map: Map<String, Any>, coroutine: CoroutineScope) {}
+    fun handleNestedObjects(map: Map<String, Any>, coroutine: CoroutineScope, configuration: RealmConfiguration? = null) {}
     fun removeDependencies() {}
 }
 

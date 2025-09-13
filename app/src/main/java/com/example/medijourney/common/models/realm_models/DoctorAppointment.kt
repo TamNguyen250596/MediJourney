@@ -7,6 +7,7 @@ import com.example.medijourney.common.managers.fire_store.addListener
 import com.example.medijourney.common.managers.fire_store.remove
 import com.example.medijourney.common.managers.realm.RealmCycle
 import com.example.medijourney.common.managers.realm.RealmManager
+import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.ext.isValid
 import io.realm.kotlin.types.RealmInstant
 import io.realm.kotlin.types.RealmObject
@@ -151,17 +152,19 @@ class DoctorAppointment: RealmObject, RealmCycle {
 
     override fun handleNestedObjects(
         map: Map<String, Any>,
-        coroutine: CoroutineScope
+        coroutine: CoroutineScope,
+        configuration: RealmConfiguration?
     ) {
+        val medicalSubSpecialtyId = map["medical_sub_specialty_id"] as? String
+
         coroutine.launch {
-            val medicalSubSpecialtyId = map["medical_sub_specialty_id"] as? String
-            if (medicalSubSpecialtyId != null) {
-                if (medicalSubSpecialty == null) {
-                    medicalSubSpecialty = RealmManager.read(
-                        MedicalSubSpecialty::class.java,
-                        medicalSubSpecialtyId
-                    )
-                }
+            if (!medicalSubSpecialtyId.isNullOrBlank()) {
+                RealmManager.linkEntity(
+                    medicalSubSpecialtyId,
+                    DoctorAppointment::class.java,
+                    MedicalSubSpecialty::class.java,
+                    DoctorAppointment::medicalSubSpecialty
+                )
                 FireStoreManager.observeDoc(
                     FireStoreCollection.MEDICAL_SUB_SPECIALTIES,
                     medicalSubSpecialtyId

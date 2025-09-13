@@ -15,15 +15,15 @@ recyclerview = "1.4.0"
 navigation = "2.8.9"
 
 # Firebase
-firebase-bom = "33.13.0"
-firebase-installations = "18.0.0"
+firebase-bom = "34.2.0"
+firebase-installations = "19.0.0"
+credentials = "1.6.0-alpha05"
+credentials-play-services-auth = "1.6.0-alpha05"
+googleid = "1.1.1"
 
 # Glide
 glide = "4.16.0"
 glide-compose = "1.0.0-beta01"
-
-# RxJava
-rxjava = "3.1.8"
 
 # Datastore
 datastore = "1.1.4"
@@ -87,9 +87,6 @@ glide-compose = { module = "com.github.bumptech.glide:compose", version.ref = "g
 # Realm
 realm-library-base = { group = "io.realm.kotlin", name = "library-base", version.ref = "realm-kotlin" }
 
-# RxJava
-rxjava = { group = "io.reactivex.rxjava3", name = "rxjava", version.ref = "rxjava" }
-
 # Datastore
 datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 
@@ -106,6 +103,9 @@ firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
 firebase-storage = { group = "com.google.firebase", name = "firebase-storage" }
 firebase-installations = { module = "com.google.firebase:firebase-installations", version.ref = "firebase-installations" }
+credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
+credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials-play-services-auth" }
+googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
 
 # Play Services
 play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "play-services-auth" }

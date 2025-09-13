@@ -110,7 +110,7 @@ class MembershipPlanViewModel : ViewModel() {
 
         if (userMembership.isValid() && userMembership.membershipId != membership.id) {
             FireStoreManager.buildDoc(
-                Pair(FireStoreCollection.USER_MEMBERS, userMembership.userCode),
+                Pair(FireStoreCollection.USER_MEMBERS, userMembership.userId),
                 Pair(FireStoreCollection.USER_MEMBERSHIP, userMembership.id))
                 .update(mapOf("membership_id" to membership.id))
                 .addOnCompleteListener {

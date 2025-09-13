@@ -1,5 +1,6 @@
 package com.example.medijourney.modules.profile.main
 
+import android.app.Activity
 import android.net.Uri
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -10,6 +11,7 @@ import com.example.medijourney.common.managers.InternationManager
 import com.example.medijourney.common.managers.fire_store.FireStoreCollection
 import com.example.medijourney.common.managers.fire_store.FireStoreManager
 import com.example.medijourney.common.managers.fire_store.observe
+import com.example.medijourney.common.managers.firebase_auth.FAManger
 import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
 import com.example.medijourney.common.managers.realm.Operator
 import com.example.medijourney.common.managers.realm.RealmManager
@@ -20,6 +22,7 @@ import com.example.medijourney.common.models.realm_models.User
 import com.example.medijourney.common.models.realm_models.UserMedicalSpecialty
 import com.example.medijourney.common.models.realm_models.UserMembership
 import com.example.medijourney.common.ui_components.recycle_view_adapter.h_dual_image_text_view.HDualImageTextViewHolder
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.ext.asFlow
 import io.realm.kotlin.ext.isValid
 import io.realm.kotlin.notifications.UpdatedObject
@@ -34,10 +37,15 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class MainProfileViewModel: ViewModel() {
+@HiltViewModel
+class MainProfileViewModel @Inject constructor(
+    private val faManger: FAManger
+) : ViewModel() {
 
     // Properties
+    val isLoading = MutableLiveData(false)
     var bgImageUri = MutableLiveData<Uri?>(null)
     var avatarImageUri = MutableLiveData<Uri?>(null)
     var userName = MutableLiveData<String?>(null)
@@ -189,5 +197,13 @@ class MainProfileViewModel: ViewModel() {
                 }
             }
         }.toMutableList()
+    }
+
+    fun logOut(activity: Activity) {
+        viewModelScope.launch {
+            isLoading.postValue(true)
+            faManger.logOut(activity)
+            isLoading.postValue(false)
+        }
     }
 }

@@ -135,7 +135,7 @@ class MedicalProductDetailsViewModel : ViewModel() {
         map["is_read"] = false
 
         viewModelScope.launch {
-            val result = FireStoreManager.createDoc(FireStoreCollection.USER_MEDICAL_PRODUCTS, map)
+            val result = FireStoreManager.createDoc(FireStoreCollection.USER_MEDICAL_PRODUCTS, null, map)
             _isLoading.value = false
             completion(result)
         }

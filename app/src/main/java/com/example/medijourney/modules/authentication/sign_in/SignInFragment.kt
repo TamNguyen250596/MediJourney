@@ -1,6 +1,5 @@
 package com.example.medijourney.modules.authentication.sign_in
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
@@ -9,35 +8,28 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.medijourney.R
 import com.example.medijourney.common.constants.Constants
-import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
+import com.example.medijourney.common.managers.firebase_auth.AuthenticationResult
 import com.example.medijourney.common.ui_components.dialogs.IndicatorHandler
 import com.example.medijourney.databinding.FragmentSignInBinding
+import com.example.medijourney.modules.base.auth.AuthActivity
 import com.facebook.CallbackManager
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SignInFragment : Fragment() {
 
     // Properties
     private lateinit var binding: FragmentSignInBinding
     private val viewModel: SignInViewModel by viewModels()
     private var callBackManager: CallbackManager? = null
-    private var resultLauncher: ActivityResultLauncher<Intent>? = null
 
     // Life cycle
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        if (resultLauncher == null) {
-            resultLauncher = generateResultLauncher()
-        }
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -48,7 +40,6 @@ class SignInFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.onViewCreated(view)
         observeViewModel()
         observeUIComponents()
     }
@@ -72,9 +63,23 @@ class SignInFragment : Fragment() {
                 binding.signInButton.setTextColor(ContextCompat.getColor(it, R.color.white))
             }
         }
-        viewModel.errorMessages.observe(viewLifecycleOwner) {
-            it?.let {
-                showFailedAuthenticationToast(it)
+        viewModel.signInState.observe(viewLifecycleOwner) {
+            when(it) {
+                AuthenticationResult.SIGN_IN_FAILED -> {
+                    showFailedAuthenticationToast(getString(R.string.failed_authentication_error_message))
+                }
+                AuthenticationResult.SIGN_IN_SUCCESS -> {
+                    val activity = requireActivity() as? AuthActivity ?: return@observe
+                    activity.openMainApp()
+                }
+                else -> {}
+            }
+        }
+        viewModel.isLoading.observe(viewLifecycleOwner) {
+            if (it) {
+                IndicatorHandler.show(requireContext())
+            } else {
+                IndicatorHandler.hide()
             }
         }
     }
@@ -83,9 +88,10 @@ class SignInFragment : Fragment() {
         binding.emailTextInputEditText.addTextChangedListener(textWatcher)
         binding.passwordTextInputEditText.addTextChangedListener(textWatcher)
         binding.signInButton.setOnClickListener {
-            val email = binding.emailTextInputEditText.text.toString()
-            val password = binding.passwordTextInputEditText.text.toString()
-            FirebaseAuthManager.signIn(email, password, requireContext())
+            viewModel.signIn(
+                binding.emailTextInputEditText.text.toString(),
+                binding.passwordTextInputEditText.text.toString()
+            )
         }
         binding.forgotPasswordTextView.setOnClickListener {
             handlePhoneAuthenticationNavigation(Constants.FORGOT_PASSWORD)
@@ -94,38 +100,21 @@ class SignInFragment : Fragment() {
             findNavController().navigate(R.id.action_signInFragment_to_signUpFragment)
         }
         binding.facebookSignInImageButton.setOnClickListener {
-            context?.let {
-                IndicatorHandler.show(it)
-            }
             if (callBackManager == null) {
                 callBackManager = CallbackManager.Factory.create()
             }
             callBackManager?.let {
-                FirebaseAuthManager.signInByFacebook(requireActivity(), it, null)
+                viewModel.fbSignIn(requireActivity(), it)
             }
         }
         binding.googleSignInImageButton.setOnClickListener {
-            resultLauncher?.let {
-                FirebaseAuthManager.openGmailSignInDialog(requireActivity(), it)
-            }
+            viewModel.googleSignIn(requireActivity())
         }
         binding.phoneImageButton.setOnClickListener {
             handlePhoneAuthenticationNavigation(Constants.SIGN_IN_BY_PHONE_NUMBER)
         }
         binding.fingerPrintImageButton.setOnClickListener {
             findNavController().navigate(R.id.action_signInFragment_to_fingerPrintSignInFragment)
-        }
-    }
-
-    private fun generateResultLauncher(): ActivityResultLauncher<Intent> {
-        return registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            when (result.resultCode) {
-                Activity.RESULT_OK -> {
-                    result.data?.let { data ->
-                        FirebaseAuthManager.signInByGmail(data, requireContext())
-                    }
-                }
-            }
         }
     }
 
@@ -140,14 +129,12 @@ class SignInFragment : Fragment() {
     }
 
     private fun handleTextChanged(text: String) {
-        context?.let {
-            when {
-                binding.emailTextInputEditText.isFocused -> {
-                    binding.emailTextInputLayout.error = viewModel.checkEmailError(text, it)
-                }
-                binding.passwordTextInputEditText.isFocused -> {
-                    binding.passwordTextInputLayout.error = viewModel.checkPasswordError(text, it)
-                }
+        when {
+            binding.emailTextInputEditText.isFocused -> {
+                binding.emailTextInputLayout.error = viewModel.checkEmailError(text, requireContext())
+            }
+            binding.passwordTextInputEditText.isFocused -> {
+                binding.passwordTextInputLayout.error = viewModel.checkPasswordError(text, requireContext())
             }
         }
     }

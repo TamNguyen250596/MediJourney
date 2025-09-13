@@ -17,7 +17,7 @@ import com.example.medijourney.common.constants.Constants.SHARED_PREFS_FILENAME
 import com.example.medijourney.common.managers.bio_metric.BiometricPromptUtils
 import com.example.medijourney.common.managers.bio_metric.CiphertextWrapper
 import com.example.medijourney.common.managers.bio_metric.CryptographyManager
-import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
+import com.example.medijourney.common.managers.firebase_auth.AuthenticationResult
 import com.example.medijourney.common.models.item_models.BaseItemInterface
 import com.example.medijourney.common.ui_components.recycle_view_adapter.BaseAdapterInterface
 import com.example.medijourney.common.ui_components.recycle_view_adapter.text_view.TextViewListAdapter
@@ -26,7 +26,10 @@ import com.example.medijourney.common.ui_components.item_decoration.ItemBorderDe
 import com.example.medijourney.common.ui_components.item_touch_helper.swipe_delete.SwipeToDeleteCallback
 import com.example.medijourney.common.ui_components.item_touch_helper.swipe_delete.SwipeToDeleteCallbackInterface
 import com.example.medijourney.databinding.FragmentFingerPrintSignInBinding
+import com.example.medijourney.modules.base.auth.AuthActivity
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class FingerPrintSignInFragment : Fragment(), BaseAdapterInterface,
     SwipeToDeleteCallbackInterface {
 
@@ -49,12 +52,6 @@ class FingerPrintSignInFragment : Fragment(), BaseAdapterInterface,
         super.onViewCreated(view, savedInstanceState)
         setupView()
         observeViewModel()
-        viewModel.getUserList(requireContext())
-    }
-
-    override fun onPause() {
-        super.onPause()
-        IndicatorHandler.hide()
     }
 
     // Functions
@@ -78,6 +75,19 @@ class FingerPrintSignInFragment : Fragment(), BaseAdapterInterface,
             } else {
                 adapter.updateItems(it)
             }
+        }
+        viewModel.isLoading.observe(viewLifecycleOwner) {
+            if (it) {
+                IndicatorHandler.show(requireContext())
+            } else {
+                IndicatorHandler.hide()
+            }
+        }
+        viewModel.signInState.observe(viewLifecycleOwner) {
+            if (it != AuthenticationResult.SIGN_IN_SUCCESS) return@observe
+            val activity = requireActivity() as? AuthActivity ?: return@observe
+
+            activity.openMainApp()
         }
     }
 
@@ -117,7 +127,7 @@ class FingerPrintSignInFragment : Fragment(), BaseAdapterInterface,
         ciphertextWrapper?.let { textWrapper ->
             authResult.cryptoObject?.cipher?.let {
                 val password = cryptographyManager.decryptData(textWrapper.ciphertext, it)
-                FirebaseAuthManager.signIn(viewModel.selectedUser, password, requireContext())
+                viewModel.signIn(viewModel.selectedUser, password)
             }
         }
     }
@@ -132,6 +142,6 @@ class FingerPrintSignInFragment : Fragment(), BaseAdapterInterface,
 
     // SwipeToDeleteCallbackInterface
     override fun onSwiped(position: Int, direction: Int) {
-        viewModel.deleteItem(position, cryptographyManager, requireContext())
+        viewModel.deleteItem(position, cryptographyManager)
     }
 }

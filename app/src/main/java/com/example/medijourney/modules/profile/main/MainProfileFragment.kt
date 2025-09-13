@@ -10,12 +10,14 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.medijourney.R
 import com.example.medijourney.common.helpers.ImageHelper
-import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
 import com.example.medijourney.common.models.item_models.BaseItemInterface
+import com.example.medijourney.common.ui_components.dialogs.IndicatorHandler
 import com.example.medijourney.common.ui_components.recycle_view_adapter.BaseAdapterInterface
 import com.example.medijourney.common.ui_components.recycle_view_adapter.h_dual_image_text_view.HDualImageTextViewAdapter
 import com.example.medijourney.databinding.FragmentMainProfileBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainProfileFragment : Fragment(), BaseAdapterInterface {
 
     // Properties
@@ -74,6 +76,13 @@ class MainProfileFragment : Fragment(), BaseAdapterInterface {
             binding.profileRecyclerView.adapter = adapter
             adapter.output = this@MainProfileFragment
         }
+        viewModel.isLoading.observe(viewLifecycleOwner) {
+            if (it) {
+                IndicatorHandler.show(requireActivity())
+            } else {
+                IndicatorHandler.hide()
+            }
+        }
     }
 
     // ProfileAdapterListener
@@ -86,15 +95,11 @@ class MainProfileFragment : Fragment(), BaseAdapterInterface {
                 findNavController().navigate(R.id.action_mainProfileFragment_to_manageProfileFragment)
             }
             "log_out" -> {
-                handleLogOut()
+                viewModel.logOut(requireActivity())
             }
             else -> {
                 return
             }
         }
-    }
-
-    private fun handleLogOut() {
-        FirebaseAuthManager.logOut(requireActivity())
     }
 }

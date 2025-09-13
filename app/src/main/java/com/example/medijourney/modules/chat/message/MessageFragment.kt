@@ -35,8 +35,10 @@ import com.example.medijourney.common.ui_components.composes.CIndicator
 import com.example.medijourney.common.ui_components.composes.MessageInputField
 import com.example.medijourney.modules.chat.message.sub_views.MessageListView
 import com.example.medijourney.modules.chat.message.sub_views.PinnedMessageItem
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 
+@AndroidEntryPoint
 class MessageFragment : Fragment(), MenuProvider {
 
     // Properties

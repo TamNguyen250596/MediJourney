@@ -4,7 +4,7 @@ import com.example.medijourney.common.managers.fire_store.FSFilterBuilder
 import com.example.medijourney.common.managers.fire_store.FireStoreCollection
 import com.example.medijourney.common.managers.fire_store.FireStoreManager
 import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
-import com.example.medijourney.common.respository.FirestoreListener
+import com.example.medijourney.common.interfaces.FirestoreListenerInterface
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -14,7 +14,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-interface MainActivityListener : FirestoreListener
+interface MainActivityListener : FirestoreListenerInterface
 
 class MainActivityListenerImpl @Inject constructor() : MainActivityListener {
 

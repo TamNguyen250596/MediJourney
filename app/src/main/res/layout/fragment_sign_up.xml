@@ -198,6 +198,7 @@
                         android:text="@string/sign_in"
                         android:textColor="@color/deep_turquoise_blue_color"
                         android:textSize="16sp"
+                        android:textStyle="bold"
                         app:backgroundTint="@color/light_blue_color" />
                 </LinearLayout>
 

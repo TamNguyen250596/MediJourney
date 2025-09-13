@@ -11,12 +11,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.navArgs
 import com.example.medijourney.R
 import com.example.medijourney.common.constants.Constants
-import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
+import com.example.medijourney.common.managers.firebase_auth.AuthenticationResult
 import com.example.medijourney.common.ui_components.dialogs.IndicatorHandler
 import com.example.medijourney.common.ui_components.fragments.otp_view.OtpFragment
 import com.example.medijourney.common.ui_components.fragments.phone_number_view.PhoneNumberFragment
 import com.example.medijourney.databinding.FragmentPhoneAuthenticationBinding
+import com.example.medijourney.modules.base.auth.AuthActivity
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class PhoneAuthenticationFragment : Fragment() {
 
     // Properties
@@ -52,11 +55,6 @@ class PhoneAuthenticationFragment : Fragment() {
         observeViewModel()
     }
 
-    override fun onPause() {
-        super.onPause()
-        IndicatorHandler.hide()
-    }
-
     // Functions
     private fun setupUI() {
         val title = when(viewType) {
@@ -65,34 +63,35 @@ class PhoneAuthenticationFragment : Fragment() {
             else -> getString(R.string.sign_in)
         }
         (activity as? AppCompatActivity)?.supportActionBar?.title = title
+
         childFragmentManager.setFragmentResultListener("phone_number_result", this) { _, bundle ->
-            viewModel.phoneNumber = bundle.getString("phone_number")
+            viewModel.updatePhoneNumber(bundle.getString("phone_number"))
         }
         childFragmentManager.setFragmentResultListener("otp_string_result", this) { _, bundle ->
-            viewModel.otp = bundle.getString("otp_string")
-            IndicatorHandler.show(requireContext())
-            when(viewType) {
-                Constants.FORGOT_PASSWORD -> {
-                    viewModel.requestAPIToGetTempLogInToken {}
-                }
-                Constants.ENABLE_OTP_AUTH -> {
-                    IndicatorHandler.show(requireContext())
-                    viewModel.enableOTPAuth {
-                        IndicatorHandler.hide()
-                    }
-                }
-                Constants.SIGN_IN_BY_PHONE_NUMBER -> {
-                    FirebaseAuthManager.signInByPhoneNumber(requireActivity())
-                }
-                else -> {}
-            }
+            viewModel.updateOTP(bundle.getString("otp_string"))
+            viewModel.handleViewType(requireActivity())
         }
     }
 
     private fun observeViewModel() {
-        viewModel.errorMessages.observe(viewLifecycleOwner) {
-            it?.let {
-                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+        viewModel.signInState.observe(viewLifecycleOwner) {
+            when(it) {
+                AuthenticationResult.SIGN_IN_FAILED -> {
+                    val message = getString(R.string.failed_authentication_error_message)
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                }
+                AuthenticationResult.SIGN_IN_SUCCESS -> {
+                    val activity = requireActivity() as? AuthActivity ?: return@observe
+                    activity.openMainApp()
+                }
+                else -> {}
+            }
+        }
+        viewModel.isLoading.observe(viewLifecycleOwner) {
+            if (it) {
+                IndicatorHandler.show(requireContext())
+            } else {
+                IndicatorHandler.hide()
             }
         }
     }
