@@ -23,8 +23,10 @@ import com.example.medijourney.common.managers.bio_metric.BiometricPromptUtils
 import com.example.medijourney.common.managers.bio_metric.CryptographyManager
 import com.example.medijourney.common.ui_components.dialogs.IndicatorHandler
 import com.example.medijourney.databinding.FragmentAdvancedSecurityBinding
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class AdvancedSecurityFragment : Fragment() {
 
     // Properties
@@ -88,7 +90,7 @@ class AdvancedSecurityFragment : Fragment() {
     // Finger Print
     private fun handleDisableFingerPrintAuth() {
         viewLifecycleOwner.lifecycleScope.launch {
-            val currentUserEmail = FirebaseAuthManager.getCurrentFirebaseUser()?.email ?: return@launch
+            val currentUserEmail = viewModel.currentUserEmail ?: return@launch
 
             cryptographyManager.removeData(currentUserEmail)
             DataStoreHelper.removeStringInList(requireContext(), Constants.biometricAuthUsers, currentUserEmail)
@@ -116,7 +118,7 @@ class AdvancedSecurityFragment : Fragment() {
 
     private fun handleBiometricSuccess() {
         viewLifecycleOwner.lifecycleScope.launch {
-            val currentUserEmail = FirebaseAuthManager.getCurrentFirebaseUser()?.email ?: return@launch
+            val currentUserEmail = viewModel.currentUserEmail ?: return@launch
             val cipher = cryptographyManager.getInitializedCipherForEncryption(currentUserEmail)
             val biometricPrompt = BiometricPromptUtils.createBiometricPrompt(
                 requireActivity(), ::encryptAndStoreServerToken

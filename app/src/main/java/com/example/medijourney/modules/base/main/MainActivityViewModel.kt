@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.medijourney.common.managers.fire_store.FireStoreCollection
 import com.example.medijourney.common.managers.fire_store.FireStoreManager
-import com.example.medijourney.common.respository.AdvertisementRepository
-import com.example.medijourney.common.respository.UserSettingRepository
+import com.example.medijourney.common.respositories.AdvertisementRepository
+import com.example.medijourney.common.respositories.UserSettingRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.ext.isValid
 import kotlinx.coroutines.delay

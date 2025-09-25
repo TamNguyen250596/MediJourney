@@ -53,9 +53,11 @@ import com.example.medijourney.common.models.item_models.DynamicUIItem
 import com.example.medijourney.common.ui_components.composes.CIndicator
 import com.example.medijourney.common.ui_components.composes.LImage3TextsRButtonView
 import com.example.medijourney.common.ui_components.composes.EmptyPlaceholder
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class MainChatFragment : Fragment(), MenuProvider {
 
     // Properties

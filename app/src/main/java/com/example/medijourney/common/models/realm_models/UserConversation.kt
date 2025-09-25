@@ -17,7 +17,7 @@ class UserConversation: RealmObject, RealmCycle {
     // Properties
     @PrimaryKey
     var id: String = ""
-    var userCode: String = ""
+    var userId: String = ""
     var tag: String = ""
     var conversationId: String = ""
     var conversation: Conversation? = null
@@ -30,7 +30,7 @@ class UserConversation: RealmObject, RealmCycle {
     override fun create(map: Map<String, Any>): RealmObject {
         return UserConversation().apply {
             id = map["id"] as? String ?: id
-            userCode = map["user_code"] as? String ?: userCode
+            userId = map["user_id"] as? String ?: userId
             tag = map["tag"] as? String ?: tag
             conversationId = map["conversation_id"] as? String ?: conversationId
         }

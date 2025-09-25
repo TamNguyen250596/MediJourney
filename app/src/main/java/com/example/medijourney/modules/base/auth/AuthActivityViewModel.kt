@@ -6,11 +6,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class AuthActivityViewModel @Inject constructor(
-    private val faManger: FAManger
-) : ViewModel()  {
+class AuthActivityViewModel @Inject constructor() : ViewModel()  {
 
     fun checkUserLoggedIn(): Boolean {
-        return faManger.currentUser != null
+        return FAManger.currentUser != null
     }
 }

@@ -1,9 +1,11 @@
 package com.example.medijourney.modules.chat.search_message
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.medijourney.R
 import com.example.medijourney.common.constants.Constants
+import com.example.medijourney.common.extensions.firstThenDebounce
 import com.example.medijourney.common.helpers.DateHelper
 import com.example.medijourney.common.managers.fire_store.FireStoreCollection
 import com.example.medijourney.common.managers.fire_store.FireStoreManager
@@ -17,23 +19,32 @@ import com.example.medijourney.common.models.item_models.DynamicUIItem
 import com.example.medijourney.common.models.realm_models.Conversation
 import com.example.medijourney.common.models.realm_models.Message
 import com.example.medijourney.common.models.realm_models.UserConversation
-import com.example.medijourney.common.models.realm_models.UserMessage
 import com.example.medijourney.common.models.ui_models.MTextStyle
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.Query
+import com.example.medijourney.common.respositories.MessageRepository
+import com.example.medijourney.common.respositories.UserConversationRepository
+import com.example.medijourney.common.respositories.UserMessageRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.ext.isValid
 import io.realm.kotlin.query.RealmResults
-import io.realm.kotlin.query.Sort
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SearchMessageViewModel : ViewModel() {
+@HiltViewModel
+class SearchMessageViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
+    private val userConversationRepository: UserConversationRepository,
+    private val messageRepository: MessageRepository,
+    private val userMessageRepository: UserMessageRepository
+) : ViewModel() {
 
     // Properties
     private val _isLoading = MutableStateFlow(value = true)
@@ -42,9 +53,8 @@ class SearchMessageViewModel : ViewModel() {
     val itemModels: StateFlow<List<DynamicUIItem>> = _itemModels.asStateFlow()
     val searchTextFlow = MutableStateFlow<String?>(null)
     private var userConversation: UserConversation? = null
-    private var userConversations: RealmResults<UserConversation>? = null
     private var messages: RealmResults<Message>? = null
-    private var conversationIds = listOf<String>()
+    private var conversationIds: List<String> = listOf()
     private var cursorCreatedAt: Long? = null
     private var observeMessagesJob: Job? = null
 
@@ -54,97 +64,49 @@ class SearchMessageViewModel : ViewModel() {
     }
 
     // View cycle
-    fun inputUserConversationId(userConversationId: String?) {
-        setUpViewModel(userConversationId)
+    init {
+        viewModelScope.launch {
+            conversationIds = getConversationIds()
+            observeMessagesFlow()
+            launch {
+                observeSearchText()
+            }
+        }
     }
 
-    private fun setUpViewModel(userConversationId: String?) {
-        viewModelScope.launch {
-            getData(userConversationId)
-            _itemModels.value = generateDynamicUIItemModels(messages)
-            getFSUserConversation()
-            launch { observeSearchText() }
-            observeMessagesJob = launch { observeData()}
+    private suspend fun getConversationIds(): List<String> {
+        return savedStateHandle.get<String>("conversationId")?.let {
+            listOf(it)
+        } ?: run {
+            userConversationRepository
+                .observeUserConversations()
+                .collect()
+            userConversationRepository
+                .getUserConversationsFlow(null)
+                .firstOrNull()?.map {
+                it.conversationId
+            } ?: listOf()
+        }
+    }
+
+    private fun observeMessagesFlow() {
+        if (observeMessagesJob != null) {
+            observeMessagesJob?.cancel()
+            observeMessagesJob = null
+        }
+        observeMessagesJob = viewModelScope.launch {
+            val dataList = messageRepository.getMessages(conversationIds, searchTextFlow.value)
+            updateCursorCreatedAt(dataList)
+            messageRepository.geMessagesFLow(conversationIds, searchTextFlow.value)
+                .firstThenDebounce(500)
+                .collect {
+                    _itemModels.value = generateDynamicUIItemModels(it)
+                }
         }
     }
 
     // Functions
-    private suspend fun getData(userConversationId: String?) {
-        userConversationId?.let {
-            userConversation = RealmManager.read(UserConversation::class.java, userConversationId)
-        } ?: run {
-            userConversations = RealmManager.read(UserConversation::class.java)
-        }
-        getMessages(searchTextFlow.value)
-    }
-
-    private suspend fun getMessages(keywords: String?, userConversation: UserConversation? = null) {
-        if (keywords.isNullOrEmpty()) return
-        val queryList: MutableList<RQuery> = mutableListOf()
-
-        if (userConversation != null && userConversation.isValid()) {
-            queryList.add(RQuery.Where(Message::conversationId.name, Operator.EQUAL, userConversation.conversationId))
-        }
-        queryList.add(RQuery.Where(Message::keywords.name, Operator.CONTAINS, keywords))
-
-        messages = RealmManager.read(
-            clazz = Message::class.java,
-            realmQuery = if (queryList.isNotEmpty()) RQuery.And(queryList) else null,
-            sort = listOf(
-                Message::createdAt.name to Sort.DESCENDING
-            )
-        )
-    }
-
-    private fun getFSUserConversation() {
-        if (userConversation != null) return
-
-        FireStoreManager.buildUserCollectionRef(FireStoreCollection.USER_CONVERSATIONS)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                conversationIds = snapshot.documents.mapNotNull {
-                    val data = it.data ?: return@mapNotNull null
-                    data["conversation_id"] as? String
-                }
-                getFSMessage(searchTextFlow.value, userConversation, conversationIds)
-            }
-    }
-
-    private fun getFSMessage(keywords: String? = null, userConversation: UserConversation?, conversationIds: List<String>) {
-        FireStoreManager.buildCollection(FireStoreCollection.MESSAGES)
-            .apply {
-                if (userConversation != null && userConversation.isValid()) {
-                    whereEqualTo("conversation_id", userConversation.id)
-                } else if (conversationIds.isNotEmpty()) {
-                    whereIn("conversation_id", conversationIds)
-                }
-                if (!keywords.isNullOrEmpty()) {
-                    whereArrayContains("keywords", keywords)
-                }
-            }
-            .orderBy(Constants.CREATED_AT, Query.Direction.DESCENDING)
-            .limit(Constants.DEFAULT_LIMIT)
-            .get()
-            .addOnSuccessListener { snapshot ->
-            updateCursorCreatedAt(snapshot.documents)
-            saveDocuments(snapshot.documents)
-            _isLoading.value = false
-        }
-    }
-
-    @OptIn(FlowPreview::class)
-    private suspend fun observeData() {
-        val msg = messages ?: return
-
-        msg.asFlow()
-            .debounce(500)
-            .collect {
-                messages = it.list
-                _itemModels.value = generateDynamicUIItemModels(messages)
-            }
-    }
-
-    private fun generateDynamicUIItemModels(messages: RealmResults<Message>?): List<DynamicUIItem> {
+    private fun generateDynamicUIItemModels(messages: List<Message>?): List<DynamicUIItem> {
         if (messages == null) return emptyList()
 
         return messages.mapNotNull { message ->
@@ -228,13 +190,8 @@ class SearchMessageViewModel : ViewModel() {
     private fun searchMessage(keywords: String?) {
         _isLoading.value = true
         cursorCreatedAt = null
-        observeMessagesJob?.cancel()
-        observeMessagesJob = null
         viewModelScope.launch {
-            getMessages(keywords, userConversation)
-            getFSMessage(keywords, userConversation, conversationIds)
-            observeMessagesJob = launch { observeData() }
-            _itemModels.value = generateDynamicUIItemModels(messages)
+            observeMessagesFlow()
             _isLoading.value = false
         }
     }
@@ -250,47 +207,24 @@ class SearchMessageViewModel : ViewModel() {
         val dateLong = DateHelper.convertRealmInstantToMillis(createdAt)
         if (dateLong >= cursorCreatedAt) return
 
-        FireStoreManager.buildCollection(FireStoreCollection.MESSAGES)
-            .apply {
-                val userConversation = userConversation
-                if (userConversation != null && userConversation.isValid()) {
-                    whereEqualTo("conversation_id", userConversation.id)
-                } else if (conversationIds.isNotEmpty()) {
-                    whereIn("conversation_id", conversationIds)
-                }
-                if (!searchTextFlow.value.isNullOrEmpty()) {
-                    whereArrayContains(Message::keywords.name, searchTextFlow.value.toString())
-                }
-            }
-            .whereGreaterThan(Constants.CREATED_AT, cursorCreatedAt)
-            .orderBy(Constants.CREATED_AT, Query.Direction.DESCENDING)
-            .limit(Constants.DEFAULT_LIMIT)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                updateCursorCreatedAt(snapshot.documents)
-                saveDocuments(snapshot.documents)
-            }
+        viewModelScope.launch {
+            val dataList = messageRepository.getMessages(
+                conversationIds,
+                searchTextFlow.value,
+                cursorCreatedAt
+            )
+            updateCursorCreatedAt(dataList)
+        }
     }
 
-    private fun updateCursorCreatedAt(documents: List<DocumentSnapshot>) {
-        val lastDoc = documents.lastOrNull() ?: return
-        val lastData = lastDoc.data ?: return
+    private fun updateCursorCreatedAt(documents: List<MutableMap<String, Any>>) {
+        val lastData = documents.lastOrNull() ?: return
         val eldestCreatedDateNumber = lastData[Constants.CREATED_AT] as? Long ?: return
-        val eldestCreatedDateLong = eldestCreatedDateNumber as? Long ?: return
+        val eldestCreatedDateLong = eldestCreatedDateNumber
         val cursorDate = cursorCreatedAt
         if (cursorDate != null && eldestCreatedDateLong > cursorDate) return
 
         cursorCreatedAt = eldestCreatedDateLong
-    }
-
-    private fun saveDocuments(documents: List<DocumentSnapshot>) {
-        viewModelScope.launch {
-            documents.forEach { doc ->
-                doc.data?.let { data ->
-                    RealmManager.create(Message::class.java, data)
-                }
-            }
-        }
     }
 
     // Selected Message Handle
@@ -361,24 +295,13 @@ class SearchMessageViewModel : ViewModel() {
     }
 
     private suspend fun ensureUserMessage(messageId: String): String? {
-        val existing = RealmManager.read(
-            clazz = UserMessage::class.java,
-            realmQuery = RQuery.Where(UserMessage::messageId.name, Operator.EQUAL, messageId)
-        ).firstOrNull()
+        val existing = userMessageRepository.getUserMessageFlow(messageId).firstOrNull()?.firstOrNull()
 
         if (existing?.isValid() == true) return existing.id
 
-        val snapshot = try {
-            FireStoreManager.buildUserCollectionRef(FireStoreCollection.USER_MESSAGES)
-                .whereEqualTo("message_id", messageId)
-                .awaitGet()
-        } catch (e: Exception) {
-            return null
-        }
-
-        val doc = snapshot.documents.firstOrNull() ?: return null
-        val data = doc.data ?: return null
-        RealmManager.create(UserMessage::class.java, data)
-        return doc.id
+        return userMessageRepository.getUserMessages(messageId)
+            .firstOrNull()?.firstOrNull()?.let {
+                it["id"] as? String
+            }
     }
 }

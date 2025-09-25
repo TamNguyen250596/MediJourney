@@ -1,7 +1,5 @@
-package com.example.medijourney.common.respository
+package com.example.medijourney.common.respositories
 
-import com.example.medijourney.common.extensions.equalTo
-import com.example.medijourney.common.extensions.toFlow
 import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.realm_models.User
 import dagger.Binds
@@ -13,16 +11,12 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 interface UserRepository {
-    fun getUser(id: String): Flow<User?>
+    fun getUserFlow(id: String): Flow<User?>
 }
 
 class UserRepositoryImpl @Inject constructor() : UserRepository {
-    override fun getUser(id: String): Flow<User?> {
-        return RealmManager
-            .query(User::class.java)
-            .equalTo(User::id.name, id)
-            .toFlow()
-            .map { it.firstOrNull() }
+    override fun getUserFlow(id: String): Flow<User?> {
+        return RealmManager.flow(User::class,).map { it.firstOrNull() }
     }
 }
 

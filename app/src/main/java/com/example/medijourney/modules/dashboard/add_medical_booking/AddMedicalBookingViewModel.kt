@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.medijourney.common.constants.Constants
 import com.example.medijourney.common.helpers.DateHelper
 import com.example.medijourney.common.managers.InternationManager
-import com.example.medijourney.common.managers.fire_store.FSFilterBuilder
+import com.example.medijourney.common.managers.fire_store.FSQueryBuilder
 import com.example.medijourney.common.managers.fire_store.FireStoreCollection
 import com.example.medijourney.common.managers.fire_store.FireStoreManager
 import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
@@ -198,7 +198,7 @@ class AddMedicalBookingViewModel : ViewModel() {
         try {
             val snapshot = FireStoreManager.getCollection(
                 FireStoreCollection.DOCTORS_APPOINTMENTS,
-                filterBuilder = FSFilterBuilder()
+                queryBuilder = FSQueryBuilder()
                     .equalTo("patient_id", "")
                     .equalTo("hospital_id", hospitalId)
                     .equalTo("medical_sub_specialty_id", subSpecialtyId)

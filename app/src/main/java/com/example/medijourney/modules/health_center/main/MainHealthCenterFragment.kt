@@ -31,9 +31,10 @@ import com.example.medijourney.modules.health_center.main.sub_ui.healthy_receipt
 import com.example.medijourney.modules.health_center.main.sub_ui.healthy_receipts.RecommendedRecipesViewModel
 import com.example.medijourney.modules.health_center.main.sub_ui.recommend_exercises.RecommendedExerciseList
 import com.example.medijourney.modules.health_center.main.sub_ui.recommend_exercises.RecommendedExerciseViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import io.realm.kotlin.ext.isValid
 
-
+@AndroidEntryPoint
 class MainHealthCenterFragment : Fragment() {
 
     // Properties
@@ -44,11 +45,6 @@ class MainHealthCenterFragment : Fragment() {
     private val recommendedRecipesViewModel: RecommendedRecipesViewModel by viewModels()
 
     // Life cycle
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewModel.onCreate()
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?

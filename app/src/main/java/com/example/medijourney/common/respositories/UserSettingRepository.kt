@@ -1,6 +1,5 @@
-package com.example.medijourney.common.respository
+package com.example.medijourney.common.respositories
 
-import com.example.medijourney.common.extensions.toFlow
 import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.realm_models.UserSetting
 import dagger.Binds
@@ -16,9 +15,7 @@ interface UserSettingRepository {
 
 class UserSettingImpl @Inject constructor() : UserSettingRepository {
     override fun getUserSettings(): Flow<List<UserSetting>> {
-        return RealmManager
-            .query(UserSetting::class.java)
-            .toFlow()
+        return RealmManager.flow(UserSetting::class)
     }
 }
 

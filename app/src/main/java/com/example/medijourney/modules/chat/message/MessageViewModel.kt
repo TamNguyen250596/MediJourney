@@ -2,22 +2,17 @@ package com.example.medijourney.modules.chat.message
 
 import android.net.Uri
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.medijourney.common.constants.Constants
 import com.example.medijourney.common.constants.MessageMenuAction
+import com.example.medijourney.common.extensions.firstThenDebounce
 import com.example.medijourney.common.helpers.DateHelper
 import com.example.medijourney.common.managers.fire_store.FireStoreCollection
 import com.example.medijourney.common.managers.fire_store.FireStoreManager
-import com.example.medijourney.common.managers.fire_store.addListener
-import com.example.medijourney.common.managers.fire_store.awaitGet
-import com.example.medijourney.common.managers.fire_store.observe
-import com.example.medijourney.common.managers.fire_store.remove
 import com.example.medijourney.common.managers.firebase_auth.FAManger
-import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
 import com.example.medijourney.common.managers.firebase_storage.FirebaseStorageManager
-import com.example.medijourney.common.managers.realm.Operator
-import com.example.medijourney.common.managers.realm.RQuery
 import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.item_models.DynamicUIItem
 import com.example.medijourney.common.models.realm_models.Conversation
@@ -26,22 +21,23 @@ import com.example.medijourney.common.models.realm_models.User
 import com.example.medijourney.common.models.realm_models.UserMessage
 import com.example.medijourney.common.models.ui_models.ImageStyle
 import com.example.medijourney.common.models.ui_models.MTextStyle
-import com.example.medijourney.common.respository.UserRepository
-import com.google.firebase.firestore.DocumentSnapshot
+import com.example.medijourney.common.respositories.ConversationRepository
+import com.example.medijourney.common.respositories.MessageRepository
+import com.example.medijourney.common.respositories.UserMessageRepository
+import com.example.medijourney.common.respositories.UserRepository
 import com.google.firebase.firestore.Query
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.ext.isValid
-import io.realm.kotlin.query.RealmResults
-import io.realm.kotlin.query.Sort
-import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.UUID
@@ -49,8 +45,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MessageViewModel @Inject constructor(
-    private val faManger: FAManger,
-    private val userRepository: UserRepository
+    state: SavedStateHandle,
+    private val userRepository: UserRepository,
+    conversationRepository: ConversationRepository,
+    private val userMessageRepository: UserMessageRepository,
+    private val messageRepository: MessageRepository
 ) : ViewModel() {
 
     // Properties
@@ -66,60 +65,56 @@ class MessageViewModel @Inject constructor(
     private val _selectedSearchMessageIndex = MutableStateFlow<Int?>(null)
     val selectedSearchMessageIndex: StateFlow<Int?> = _selectedSearchMessageIndex.asStateFlow()
     val messageListReady = MutableLiveData(false)
+    private var conversationId: String = state.get<String>("conversationId") ?: ""
     private var user: User? = null
-    private var conversation: Conversation? = null
-    private var messageResults: RealmResults<Message>? = null
-    private var userMessageResults: RealmResults<UserMessage>? = null
-    private var pinnedMessageResults: RealmResults<Message>? = null
+    private var conversationFlow = conversationRepository.getConversationFlow(conversationId)
+    private var messagesFlow = messageRepository.geMessagesFLow(conversationId)
+    private var userMessagesFlow = userMessageRepository.getUserMessageFLow(conversationId)
+    private var pinnedMessagesFlow = messageRepository.getPinnedMessagesFlow(conversationId)
     private var cursorCreatedAt: Long? = null
-    private var conversationId: String = ""
     private var latestMessagesQuery: Query? = null
-    private var currentPageQuery: MutableList<Query> = mutableListOf()
     private var observeCurrentPageJob: Job? = null
 
     // Life cycle
-    fun inputConversationId(conversationId: String) {
-        this.conversationId = conversationId
-        setUpViewModel()
-    }
-
-    private fun setUpViewModel() {
+    init {
         viewModelScope.launch {
-            getData()
-            viewTitle.postValue(getViewTitle(conversation))
-            _pinnedItemModels.value = generatePinnedDynamicList(pinnedMessageResults)
-            _itemModels.value = generateDynamicList(userMessageResults)
-            observeFS()
-            launch {
-                observePinnedMessagesResults()
-            }
-            launch {
-                observeUserMessages()
-            }
+            user = userRepository.getUserFlow(FAManger.currentUserCode).firstOrNull()
+            observeData(this)
+            observeFS(this)
             delay(1500)
             messageListReady.postValue(true)
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        latestMessagesQuery?.remove()
-        FireStoreManager.removeListeners(this::class.java)
+    private fun observeData(coroutineScope: CoroutineScope) {
+        coroutineScope.launch {
+            conversationFlow.collect {
+                val conversation = it ?: return@collect
+                val title = getViewTitle(conversation)
+
+                viewTitle.postValue(title)
+            }
+        }
+
+        coroutineScope.launch {
+            messagesFlow
+                .combine(userMessagesFlow) { _, userMessages -> userMessages }
+                .firstThenDebounce(500)
+                .collectLatest {
+                    _itemModels.value = generateDynamicList(it)
+                }
+        }
+
+        coroutineScope.launch {
+            pinnedMessagesFlow
+                .firstThenDebounce(500)
+                .collect {
+                _pinnedItemModels.value = generatePinnedDynamicList(it)
+            }
+        }
     }
 
     // Functions
-    private suspend fun getData() {
-        userRepository
-            .getUser(faManger.currentUserCode)
-            .collectLatest {
-                user = it
-            }
-        getConversation()
-        getMessageResults()
-        getUserMessageResults()
-        getPinnedMessageResults()
-    }
-
     private fun getViewTitle(conversation: Conversation?): String {
         conversation ?: return ""
         if (!conversation.isValid()) return ""
@@ -127,100 +122,20 @@ class MessageViewModel @Inject constructor(
         return conversation.name
     }
 
-    private suspend fun getConversation() {
-        conversation = RealmManager.read(Conversation::class.java, conversationId)
-    }
 
-    private suspend fun getMessageResults() {
-        messageResults = RealmManager.read(
-            clazz = Message::class.java,
-            realmQuery = RQuery.Where(Message::conversationId.name, Operator.EQUAL, conversationId),
-            sort = listOf(
-                Message::createdAt.name to Sort.DESCENDING
-            )
-        )
-    }
-
-    private suspend fun getUserMessageResults() {
-        userMessageResults = RealmManager.read(
-            clazz = UserMessage::class.java,
-            realmQuery = RQuery.Where(UserMessage::conversationId.name, Operator.EQUAL, conversationId),
-            sort = listOf(
-                UserMessage::createdAt.name to Sort.DESCENDING
-            )
-        )
-    }
-
-    private suspend fun getPinnedMessageResults() {
-        pinnedMessageResults = RealmManager.read(
-            clazz = Message::class.java,
-            realmQuery = RQuery.Where(Message::isPinned.name, Operator.EQUAL, true),
-            sort = listOf(
-                Message::createdAt.name to Sort.DESCENDING
-            )
-        )
-    }
-
-    private fun observeFS() {
-        observePinnedMessages()
-        observeLatestMessages()
-    }
-
-    private fun observePinnedMessages() {
-        FireStoreManager.buildCollection(FireStoreCollection.MESSAGES)
-            .whereEqualTo("conversation_id", conversationId)
-            .whereEqualTo("is_pinned", true)
-            .orderBy(Constants.CREATED_AT, Query.Direction.DESCENDING)
-            .observe(Message::class.java, this::class.java)
-    }
-
-    private fun observeLatestMessages() {
-        latestMessagesQuery = FireStoreManager.buildUserCollectionRef(FireStoreCollection.USER_MESSAGES)
-            .whereEqualTo("conversation_id", conversationId)
-            .orderBy(Constants.CREATED_AT, Query.Direction.DESCENDING)
-            .limit(Constants.DEFAULT_LIMIT)
-
-        latestMessagesQuery?.addListener {
-            if (cursorCreatedAt == null) {
-                updateCursorCreatedAt(it.documents)
-            }
-            saveDocuments(it.documents)
+    private fun observeFS(coroutineScope: CoroutineScope) {
+        coroutineScope.launch {
+            messageRepository.observePinnedMessages(conversationId)
+        }
+        coroutineScope.launch {
+            userMessageRepository.observeLatestMessages(conversationId)
+                .collect {
+                    updateCursorCreatedAt(it)
+                }
         }
     }
 
-    @OptIn(FlowPreview::class)
-    private suspend fun observePinnedMessagesResults() {
-        val messages = pinnedMessageResults ?: return
-
-        messages.asFlow()
-            .debounce(500)
-            .collect {
-                this.pinnedMessageResults = it.list
-                _pinnedItemModels.value = generatePinnedDynamicList(pinnedMessageResults)
-            }
-
-    }
-
-    @Suppress("NAME_SHADOWING")
-    @OptIn(FlowPreview::class)
-    private suspend fun observeUserMessages() {
-        val messageResults = messageResults ?: return
-        val userMessageResults = userMessageResults ?: return
-
-        combine(
-            messageResults.asFlow(),
-            userMessageResults.asFlow()
-        ) { messageResults, userMessageResults ->
-            this.messageResults = messageResults.list
-            this.userMessageResults = userMessageResults.list
-        }
-            .debounce(500)
-            .collectLatest {
-                _itemModels.value = generateDynamicList(this.userMessageResults)
-            }
-    }
-
-    private fun generatePinnedDynamicList(pinnedMessageResults: RealmResults<Message>?): List<DynamicUIItem> {
+    private fun generatePinnedDynamicList(pinnedMessageResults: List<Message>?): List<DynamicUIItem> {
         pinnedMessageResults ?: return emptyList()
         val size = pinnedMessageResults.size
 
@@ -241,10 +156,10 @@ class MessageViewModel @Inject constructor(
         }
     }
 
-    private fun generateDynamicList(userMessageResults: RealmResults<UserMessage>?): List<DynamicUIItem> {
+    private fun generateDynamicList(userMessageResults: List<UserMessage>?): List<DynamicUIItem> {
         userMessageResults ?: return emptyList()
         val size = userMessageResults.size
-        val currentUserCode = FirebaseAuthManager.getCurrentUserCode()
+        val currentUserCode = FAManger.currentUserCode
 
         return userMessageResults.mapIndexedNotNull { index, entity ->
             val message = entity.message ?: return@mapIndexedNotNull null
@@ -520,8 +435,6 @@ class MessageViewModel @Inject constructor(
         val cursorCreatedAt = cursorCreatedAt ?: return
         if (dateLong >= cursorCreatedAt) return
 
-        currentPageQuery.forEach { it.remove() }
-        currentPageQuery.clear()
         observeCurrentPageJob?.cancel()
         observeCurrentPageJob = null
         viewModelScope.launch {
@@ -540,61 +453,29 @@ class MessageViewModel @Inject constructor(
     }
 
     private suspend fun getCurrentPage(dateLong: Long) {
-        try {
-            val snapshots = FireStoreManager.buildUserCollectionRef(FireStoreCollection.USER_MESSAGES)
-                .whereEqualTo("conversation_id", conversationId)
-                .whereGreaterThan(Constants.CREATED_AT, dateLong)
-                .orderBy(Constants.CREATED_AT, Query.Direction.DESCENDING)
-                .limit(Constants.DEFAULT_LIMIT)
-                .awaitGet()
-
-            updateCursorCreatedAt(snapshots.documents)
-            saveDocuments(snapshots.documents)
-            observeCurrentPage()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        val dataList = userMessageRepository.getOlderMessages(conversationId, dateLong)
+        updateCursorCreatedAt(dataList)
+        observeCurrentPage()
     }
 
     private fun observeCurrentPage() {
         observeCurrentPageJob = viewModelScope.launch {
             delay(10_000)
             val dateLong = cursorCreatedAt ?: return@launch
-            FireStoreManager.buildUserCollectionRef(FireStoreCollection.USER_MESSAGES)
-                .whereEqualTo("conversation_id", conversationId)
-                .whereGreaterThan(Constants.CREATED_AT, dateLong)
-                .orderBy(Constants.CREATED_AT, Query.Direction.DESCENDING)
-                .limit(Constants.DEFAULT_LIMIT)
-                .also {
-                    currentPageQuery.add(it)
-                    it.addListener { snapshots ->
-                        updateCursorCreatedAt(snapshots.documents)
-                        saveDocuments(snapshots.documents)
-                    }
+            userMessageRepository.observeOlderMessages(conversationId, dateLong)
+                .collect {
+                    updateCursorCreatedAt(it)
                 }
-
-            FireStoreManager.buildUserCollectionRef(FireStoreCollection.USER_MESSAGES)
-                .whereEqualTo("conversation_id", conversationId)
-                .whereLessThan(Constants.CREATED_AT, dateLong)
-                .orderBy(Constants.CREATED_AT, Query.Direction.DESCENDING)
-                .limit(Constants.DEFAULT_LIMIT)
-                .also {
-                    currentPageQuery.add(it)
-                    it.addListener { snapshots ->
-                        saveDocuments(snapshots.documents)
-                    }
-                }
+            userMessageRepository.observeLaterMessages(conversationId, dateLong)
+                .collect()
         }
     }
 
-    private fun updateCursorCreatedAt(documents: List<DocumentSnapshot>) {
+    private fun updateCursorCreatedAt(documents: List<Map<String, Any>>) {
         val firstDoc = documents.firstOrNull() ?: return
-        val firstData = firstDoc.data ?: return
-        val latestCreatedDateNumber = firstData[Constants.CREATED_AT] as? Long ?: return
-
+        val latestCreatedDateNumber = firstDoc[Constants.CREATED_AT] as? Long ?: return
         val lastDoc = documents.lastOrNull() ?: return
-        val lastData = lastDoc.data ?: return
-        val eldestCreatedDateNumber = lastData[Constants.CREATED_AT] as? Long ?: return
+        val eldestCreatedDateNumber = lastDoc[Constants.CREATED_AT] as? Long ?: return
 
         val cursorDate = cursorCreatedAt
 
@@ -610,22 +491,15 @@ class MessageViewModel @Inject constructor(
         }
     }
 
-    private fun saveDocuments(documents: List<DocumentSnapshot>) {
+    fun updateSelectedSearchMessageIndex(userMessageId: String) {
         viewModelScope.launch {
-            documents.forEach { doc ->
-                doc.data?.let { data ->
-                    RealmManager.create(UserMessage::class.java, data)
-                }
+            val entities = userMessagesFlow.firstOrNull()
+            val index = entities?.indexOfFirst {
+                it.isValid() && it.id == userMessageId
+            }
+            if (index != null && index >= 0) {
+                _selectedSearchMessageIndex.value = index
             }
         }
-    }
-
-    fun updateSelectedSearchMessageIndex(userMessageId: String) {
-        val userMessages = userMessageResults ?: return
-        val index = userMessages.indexOfFirst {
-            it.isValid() && it.id == userMessageId
-        }
-        if (index < 0) return
-        _selectedSearchMessageIndex.value = index
     }
 }

@@ -47,8 +47,10 @@ import com.example.medijourney.common.ui_components.composes.CIndicator
 import com.example.medijourney.common.ui_components.composes.EmptyPlaceholder
 import com.example.medijourney.common.ui_components.composes.SearchMessageItem
 import com.example.medijourney.common.ui_components.dialogs.IndicatorHandler
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 
+@AndroidEntryPoint
 class SearchMessageFragment : Fragment() {
 
     // Properties
@@ -66,11 +68,6 @@ class SearchMessageFragment : Fragment() {
                 goBackThePreviousFragment(it)
             }
         }
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        viewModel.inputUserConversationId(conversationId)
     }
 
     // View cycle

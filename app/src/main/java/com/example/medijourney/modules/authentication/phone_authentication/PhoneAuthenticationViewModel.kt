@@ -65,7 +65,7 @@ class PhoneAuthenticationViewModel @Inject constructor(
     }
 
     suspend fun enableOTPAuth() {
-        val uid = FirebaseAuthManager.getCurrentUserCode() ?: return
+        val uid = FAManger.currentUserCode
         val userSetting = RealmManager.read(UserSetting::class.java, uid) ?: return
         if (!userSetting.isValid()) return
         if (otp?.count() != 6) return

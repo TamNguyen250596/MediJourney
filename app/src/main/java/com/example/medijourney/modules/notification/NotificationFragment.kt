@@ -30,8 +30,10 @@ import com.example.medijourney.modules.base.main.MainActivity
 import com.example.medijourney.modules.health_center.add_fitness_tracker.AddFitnessTrackerFragment
 import com.example.medijourney.modules.notification.adapter.NotificationAdapter
 import com.google.android.material.divider.MaterialDividerItemDecoration
+import dagger.hilt.android.AndroidEntryPoint
 import io.realm.kotlin.ext.isValid
 
+@AndroidEntryPoint
 class NotificationFragment : Fragment(), MenuProvider, BaseAdapterInterface,
     SwipeToDeleteCallbackInterface {
 

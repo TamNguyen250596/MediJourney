@@ -12,7 +12,7 @@ class UserRecommendRecipe: RealmObject, RealmCycle {
     // Properties
     @PrimaryKey
     var id: String = ""
-    var userCode: String = ""
+    var userId: String = ""
     var recommendReceipts: RealmSet<Int> = realmSetOf()
 
     // Functions
@@ -23,7 +23,7 @@ class UserRecommendRecipe: RealmObject, RealmCycle {
     override fun create(map: Map<String, Any>): RealmObject {
         return UserRecommendRecipe().apply {
             id = map["id"] as? String ?: id
-            userCode = map["user_code"] as? String ?: userCode
+            userId = map["user_id"] as? String ?: userId
             recommendReceipts.addAll(map.getIntSet("recommend_receipts"))
         }
     }

@@ -1,6 +1,7 @@
 package com.example.medijourney.common.managers.realm
 
-import com.example.medijourney.common.extensions.RFilter
+import com.example.medijourney.common.extensions.RQueryBuilder
+import com.example.medijourney.common.extensions.toFlow
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.UpdatePolicy
@@ -10,6 +11,7 @@ import io.realm.kotlin.query.Sort
 import io.realm.kotlin.types.RealmObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 
@@ -135,7 +137,8 @@ object RealmManager {
     }
 
     suspend fun <T : RealmObject> read(
-        clazz: Class<T>, realmQuery: RQuery? = null,
+        clazz: Class<T>,
+        realmQuery: RQuery? = null,
         sort: List<Pair<String, Sort>> = listOf(),
         configuration: RealmConfiguration? = null
     ): RealmResults<T> {
@@ -154,6 +157,20 @@ object RealmManager {
             }
             entities.find()
         }
+    }
+
+    fun <T : RealmObject> flow(
+        kClazz: KClass<T>,
+        queryBuilder: RQueryBuilder? = null,
+        configuration: RealmConfiguration? = null
+    ): Flow<List<T>> {
+        val realm = createRealm(configuration)
+        var entities = realm.query(kClazz)
+        queryBuilder?.let {
+            entities =  queryBuilder.applyTo(entities)
+        }
+
+        return entities.toFlow()
     }
 
     // Update
@@ -175,7 +192,7 @@ object RealmManager {
 
     suspend fun <T> update(
         kClass: KClass<T>,
-        filterBuilder: RFilter? = null,
+        queryBuilder: RQueryBuilder? = null,
         data: Map<String, Any>,
         configuration: RealmConfiguration? = null
     ) where T : RealmCycle, T : RealmObject {
@@ -183,10 +200,8 @@ object RealmManager {
 
         realm.write {
             var entities = query(kClass)
-            filterBuilder?.let {
-                for (filter in it.build()) {
-                    entities = entities.query(filter.key, filter.value)
-                }
+            queryBuilder?.let {
+                entities = it.applyTo(entities)
             }
             for (entity in entities.find()) {
                 entity.update(data)

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.medijourney.R
 import com.example.medijourney.common.constants.Constants
 import com.example.medijourney.common.helpers.DataStoreHelper
@@ -11,17 +12,22 @@ import com.example.medijourney.common.managers.bio_metric.CryptographyManager
 import com.example.medijourney.common.managers.fire_store.FireStoreCollection
 import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
 import com.example.medijourney.common.managers.fire_store.FireStoreManager
+import com.example.medijourney.common.managers.firebase_auth.FAManger
 import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.realm_models.UserSetting
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.ext.asFlow
 import io.realm.kotlin.ext.isValid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class AdvancedSecurityViewModel: ViewModel() {
+@HiltViewModel
+class AdvancedSecurityViewModel @Inject constructor() : ViewModel() {
 
     // Properties
+    var currentUserEmail = FAManger.currentUser?.email
     var isFingerprintAuthEnabled = MutableLiveData(false)
     var isOTPAuthEnabled = MutableLiveData(false)
     private var userSetting: UserSetting? = null
@@ -61,10 +67,9 @@ class AdvancedSecurityViewModel: ViewModel() {
     fun checkFingerPrintAuthEnable(cryptographyManager: CryptographyManager, context: Context) {
         viewModelScope.launch {
             var result = false
-            val currentUserEmail = FirebaseAuthManager.getCurrentFirebaseUser()?.email
-            if (currentUserEmail != null) {
-                result = cryptographyManager.checkKey(currentUserEmail) &&
-                        DataStoreHelper.checkStringInList(context, Constants.biometricAuthUsers, currentUserEmail)
+            currentUserEmail?.let {
+                result = cryptographyManager.checkKey(it) &&
+                        DataStoreHelper.checkStringInList(context, Constants.biometricAuthUsers, it)
             }
             updateFingerPrintSwitch(result)
         }

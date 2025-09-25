@@ -43,7 +43,7 @@ class ChangePasswordViewModel @Inject constructor(
     }
 
     fun checkUserLoggedIn(): Boolean {
-        return faManger.currentUser != null
+        return FAManger.currentUser != null
     }
 
     fun checkCurrentPasswordError(password: String, context: Context): String? {

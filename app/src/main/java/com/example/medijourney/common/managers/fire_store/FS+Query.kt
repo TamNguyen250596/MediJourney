@@ -99,14 +99,6 @@ fun <T> Query.get(
     }
 }
 
-suspend fun Query.awaitGet(): QuerySnapshot = suspendCancellableCoroutine { cont ->
-    get().addOnSuccessListener {
-        cont.resume(it)
-    }.addOnFailureListener {
-        cont.resumeWithException(it)
-    }
-}
-
 fun Query.addListener(completion: ((QuerySnapshot) -> Unit)) {
     if (FireStoreManager.checkCachedListener(this.hashCode())) {
         return

@@ -6,42 +6,36 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.medijourney.R
+import com.example.medijourney.common.extensions.firstThenDebounce
+import com.example.medijourney.common.helpers.MDataStore
 import com.example.medijourney.common.managers.firebase_storage.FirebaseStorageManager
 import com.example.medijourney.common.managers.InternationManager
-import com.example.medijourney.common.managers.fire_store.FireStoreCollection
 import com.example.medijourney.common.managers.fire_store.FireStoreManager
-import com.example.medijourney.common.managers.fire_store.observe
 import com.example.medijourney.common.managers.firebase_auth.FAManger
-import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
-import com.example.medijourney.common.managers.realm.Operator
-import com.example.medijourney.common.managers.realm.RealmManager
-import com.example.medijourney.common.managers.realm.where
 import com.example.medijourney.common.models.item_models.DynamicUIItem
 import com.example.medijourney.common.models.realm_models.Membership
 import com.example.medijourney.common.models.realm_models.User
-import com.example.medijourney.common.models.realm_models.UserMedicalSpecialty
 import com.example.medijourney.common.models.realm_models.UserMembership
+import com.example.medijourney.common.respositories.MembershipRepository
+import com.example.medijourney.common.respositories.UserMembershipRepository
+import com.example.medijourney.common.respositories.UserRepository
 import com.example.medijourney.common.ui_components.recycle_view_adapter.h_dual_image_text_view.HDualImageTextViewHolder
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.realm.kotlin.ext.asFlow
 import io.realm.kotlin.ext.isValid
-import io.realm.kotlin.notifications.UpdatedObject
-import io.realm.kotlin.query.RealmResults
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class MainProfileViewModel @Inject constructor(
-    private val faManger: FAManger
+    private val mDataStore: MDataStore,
+    private val faManger: FAManger,
+    private val userRepository: UserRepository,
+    private val userMembershipRepository: UserMembershipRepository,
+    private val membershipRepository: MembershipRepository
 ) : ViewModel() {
 
     // Properties
@@ -51,17 +45,15 @@ class MainProfileViewModel @Inject constructor(
     var userName = MutableLiveData<String?>(null)
     var userMembershipInfo = MutableLiveData<Pair<String, String>?>(null)
     var itemModels = MutableLiveData<MutableList<DynamicUIItem>>(mutableListOf())
-    private var currentUser: User? = null
-    private var membershipResult: RealmResults<Membership>? = null
-    private var userMembershipResult: RealmResults<UserMembership>? = null
+    private var currentUserFlow = userRepository.getUserFlow(FAManger.currentUserCode)
+    private var membershipsFlow = membershipRepository.getMembershipsFlow()
+    private var userMembershipFlow = userMembershipRepository.getUserMembershipFow()
     private var currentAppMainProfile: Map<String, Any> = mutableMapOf()
 
     // Life cycle
     init {
         currentAppMainProfile = InternationManager.getCurrentAppMainProfile()
-        syncFireStore()
         viewModelScope.launch {
-            getData()
             observeData()
         }
         handleBackgroundImage()
@@ -77,74 +69,35 @@ class MainProfileViewModel @Inject constructor(
     }
 
     // Get Data
-    private suspend fun getData() {
-        val currentUserCode = FirebaseAuthManager.getCurrentUserCode() ?: return
-
-        currentUser = RealmManager.read(User::class.java, currentUserCode)
-        userMembershipResult = RealmManager.read(UserMembership::class.java,
-            realmQuery = where(UserMedicalSpecialty::userId.name, Operator.EQUAL, currentUserCode)
-        )
-        membershipResult = RealmManager.read(Membership::class.java)
-    }
-
     // Observe Data
-    private fun syncFireStore() {
-        FireStoreManager.buildCollection(FireStoreCollection.MEMBERSHIPS)
-            .observe(Membership::class.java, this::class.java)
-        FireStoreManager.buildUserCollectionRef(FireStoreCollection.USER_MEMBERSHIP)
-            .observe(UserMembership::class.java, this::class.java)
-    }
-
     private suspend fun observeData() = supervisorScope {
-        launch { observeCurrentUser() }
-        launch { observeUserMembership() }
-    }
-
-    private suspend fun observeCurrentUser() {
-        val currentUser = currentUser ?: return
-
-        currentUser.asFlow(listOf(User::displayName.name)).collect {
-            this.currentUser = it.obj
-            when (it) {
-                is UpdatedObject -> {
-                    when (true) {
-                        it.changedFields.contains(User::backgroundUrl.name) -> {
-                            handleBackgroundImage()
-                        }
-                        it.changedFields.contains(User::avatarUrl.name) -> {
-                            handleAvatarImage()
-                        }
-                        it.changedFields.contains(User::displayName.name) -> {
-                            handleUserName()
-                        }
-                        else -> {}
-                    }
-                }
-                else -> {}
-            }
+        launch {
+            membershipRepository.observeMemberships()
         }
-    }
-
-    @Suppress("NAME_SHADOWING")
-    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
-    private suspend fun observeUserMembership() {
-        val membershipResult = membershipResult ?: return
-        val userMembershipResult = userMembershipResult ?: return
-
-        combine(
-            membershipResult.asFlow(),
-            userMembershipResult.asFlow(),
-        ) { membershipResult, userMembershipResult ->
-            this.membershipResult = membershipResult.list
-            this.userMembershipResult = userMembershipResult.list
+        launch {
+            userMembershipRepository.observeUserMembership()
         }
-            .debounce(500)
-            .collectLatest {
-                val modelList = generateUserMembershipInfo()
-                withContext(Dispatchers.Main) {
-                    userMembershipInfo.postValue(modelList)
+        launch {
+            currentUserFlow
+                .firstThenDebounce(500)
+                .collect {
+                    handleBackgroundImage()
+                    handleAvatarImage()
+                    handleUserName(it)
                 }
-            }
+        }
+        launch {
+            membershipsFlow
+                .combine(userMembershipFlow) { memberships, userMembership ->
+                    Pair(memberships, userMembership)
+                }
+                .firstThenDebounce(500)
+                .collect {
+                    val model = generateUserMembershipInfo(it.second, it.first)
+                    userMembershipInfo.postValue(model)
+                }
+
+        }
     }
 
     // Functions
@@ -164,20 +117,18 @@ class MainProfileViewModel @Inject constructor(
         }
     }
 
-    private fun handleUserName() {
-        val currentUser = currentUser ?: return
-        CoroutineScope(Dispatchers.Main).launch {
-            userName.postValue(currentUser.takeIf { it.isValid() }?.displayName)
-        }
+    private fun handleUserName(user: User?) {
+        if (user == null) return
+        if (!user.isValid()) return
+        userName.postValue(user.displayName)
     }
 
-    private fun generateUserMembershipInfo(): Pair<String, String>? {
-        val userMembershipResult = userMembershipResult ?: return null
-        val membershipResult = membershipResult ?: return null
-        val userMembership = userMembershipResult.firstOrNull() ?: return null
-        if (!userMembership.isValid()) return null
+    private fun generateUserMembershipInfo(userMembership: UserMembership?, memberships: List<Membership>?): Pair<String, String>? {
+        if (userMembership == null) return null
+        if (userMembership.isValid()) return null
+        if (memberships == null) return null
 
-        val membership = membershipResult.firstOrNull { it.id == userMembership.membershipId } ?: return null
+        val membership = memberships.firstOrNull { it.id == userMembership.membershipId } ?: return null
         if (!membership.isValid()) return null
 
         val imageName = membership.imageName ?: ""
@@ -202,7 +153,7 @@ class MainProfileViewModel @Inject constructor(
     fun logOut(activity: Activity) {
         viewModelScope.launch {
             isLoading.postValue(true)
-            faManger.logOut(activity)
+            faManger.logOut(activity, mDataStore)
             isLoading.postValue(false)
         }
     }

@@ -1,6 +1,6 @@
 package com.example.medijourney.common.models.realm_models
 
-import com.example.medijourney.common.extensions.RFilter
+import com.example.medijourney.common.extensions.RQueryBuilder
 import com.example.medijourney.common.extensions.getInt
 import com.example.medijourney.common.extensions.getLocalizedString
 import com.example.medijourney.common.extensions.getStringSet
@@ -52,7 +52,7 @@ class MedicalSubSpecialty: RealmObject, RealmCycle {
         CoroutineScope(Dispatchers.IO).launch {
             RealmManager.update(
                 DoctorAppointment::class,
-                filterBuilder = RFilter()
+                queryBuilder = RQueryBuilder()
                     .equalTo(DoctorAppointment::medicalSubSpecialtyId.name, id)
                     .equalTo(DoctorAppointment::medicalSubSpecialty.name, null),
                 mapOf("medical_sub_specialty_id" to id)

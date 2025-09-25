@@ -13,7 +13,7 @@ class UserNotification: RealmObject, RealmCycle {
     // Properties
     @PrimaryKey
     var id: String = ""
-    var userCode: String = ""
+    var userId: String = ""
     var imageURL: String? = null
     var title: String? = null
     var description: String? = null
@@ -31,7 +31,7 @@ class UserNotification: RealmObject, RealmCycle {
     override fun create(map: Map<String, Any>): RealmObject {
         return UserNotification().apply {
             id = map.getUserObjectKey(id)
-            userCode = map["user_code"] as? String ?: userCode
+            userId = map["user_id"] as? String ?: userId
             imageURL = map["image_url"] as? String
             title = map["title"] as? String
             description = map["description"] as? String

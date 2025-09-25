@@ -2,6 +2,7 @@ package com.example.medijourney.common.managers.firebase_storage
 
 import android.net.Uri
 import androidx.core.net.toUri
+import com.example.medijourney.common.managers.firebase_auth.FAManger
 import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
 import com.google.firebase.Firebase
 import com.google.firebase.storage.storage
@@ -14,7 +15,7 @@ object FirebaseStorageManager {
 
     // Image
     fun saveImage(uri: Uri, imageName: String, completion: (url: String?) -> Unit) {
-        val currentUserCode = FirebaseAuthManager.getCurrentUserCode() ?: return completion.invoke(null)
+        val currentUserCode = FAManger.currentUserCode
 
         val imageRef = storage.reference
             .child(FirebaseStorageFolder.IMAGES.name.lowercase())
@@ -40,7 +41,7 @@ object FirebaseStorageManager {
     }
 
     fun downloadUserImage(imageName: String, extension: String, completion: (uri: Uri?) -> Unit) {
-        val currentUserCode = FirebaseAuthManager.getCurrentUserCode() ?: return completion.invoke(null)
+        val currentUserCode = FAManger.currentUserCode
 
         val imageRef = storage.reference
             .child(FirebaseStorageFolder.IMAGES.name.lowercase())

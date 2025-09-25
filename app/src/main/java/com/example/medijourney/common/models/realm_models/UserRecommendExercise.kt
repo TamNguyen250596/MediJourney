@@ -12,7 +12,7 @@ class UserRecommendExercise: RealmObject, RealmCycle {
     // Properties
     @PrimaryKey
     var id: String = ""
-    var userCode: String = ""
+    var userId: String = ""
     var recommendExercises: RealmSet<Int> = realmSetOf()
 
     // Functions
@@ -23,7 +23,7 @@ class UserRecommendExercise: RealmObject, RealmCycle {
     override fun create(map: Map<String, Any>): RealmObject {
         return UserRecommendExercise().apply {
             id = map["id"] as? String ?: id
-            userCode = map["user_code"] as? String ?: userCode
+            userId = map["user_id"] as? String ?: userId
             recommendExercises.addAll(map.getIntSet("recommend_exercises"))
         }
     }

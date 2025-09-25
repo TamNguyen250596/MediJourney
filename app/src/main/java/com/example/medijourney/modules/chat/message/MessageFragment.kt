@@ -77,7 +77,6 @@ class MessageFragment : Fragment(), MenuProvider {
         super.onViewCreated(view, savedInstanceState)
         setupView()
         observeViewModel()
-        viewModel.inputConversationId(conversationId)
         observeNavController()
     }
 

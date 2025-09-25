@@ -1,0 +1,52 @@
+package com.example.medijourney.common.respositories
+
+import com.example.medijourney.common.extensions.RQueryBuilder
+import com.example.medijourney.common.managers.fire_store.FSQueryBuilder
+import com.example.medijourney.common.managers.fire_store.FireStoreCollection
+import com.example.medijourney.common.managers.fire_store.FireStoreManager
+import com.example.medijourney.common.managers.firebase_auth.FAManger
+import com.example.medijourney.common.managers.realm.RealmManager
+import com.example.medijourney.common.models.realm_models.UserRecommendExercise
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ViewModelComponent
+import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
+
+// Repository interface
+interface UserRecommendExerciseRepository {
+    suspend fun observeUserRecommendExercises()
+    fun getUserRecommendExercisesFlow(): Flow<List<UserRecommendExercise>>
+}
+
+// Repository implementation
+class UserRecommendExerciseRepositoryImpl @Inject constructor() : UserRecommendExerciseRepository {
+
+    override suspend fun observeUserRecommendExercises() {
+        FireStoreManager.observeCollection(
+            FireStoreCollection.USER_RECOMMEND_EXERCISE,
+            queryBuilder = FSQueryBuilder()
+                .equalTo("user_id", FAManger.currentUserCode)
+        )
+    }
+
+    override fun getUserRecommendExercisesFlow(): Flow<List<UserRecommendExercise>> {
+        return RealmManager.flow(
+            UserRecommendExercise::class,
+            queryBuilder = RQueryBuilder()
+                .equalTo("user_id", FAManger.currentUserCode)
+        )
+    }
+}
+
+// Hilt module
+@Module
+@InstallIn(ViewModelComponent::class)
+abstract class UserRecommendExerciseModule {
+
+    @Binds
+    abstract fun bindUserRecommendExerciseRepository(
+        impl: UserRecommendExerciseRepositoryImpl
+    ): UserRecommendExerciseRepository
+}

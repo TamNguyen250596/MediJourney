@@ -1,7 +1,6 @@
-package com.example.medijourney.common.respository
+package com.example.medijourney.common.respositories
 
-import com.example.medijourney.common.extensions.inValues
-import com.example.medijourney.common.extensions.toFlow
+import com.example.medijourney.common.extensions.RQueryBuilder
 import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.realm_models.Advertisement
 import dagger.Binds
@@ -17,10 +16,11 @@ interface AdvertisementRepository {
 
 class AdvertisementImpl @Inject constructor() : AdvertisementRepository {
     override fun getAdvertisements(locations: List<String>): Flow<List<Advertisement>> {
-        return RealmManager
-            .query(Advertisement::class.java)
-            .inValues(Advertisement::location.name, locations)
-            .toFlow()
+        return RealmManager.flow(
+                Advertisement::class,
+                queryBuilder = RQueryBuilder()
+                    .inValues(Advertisement::location.name, locations)
+        )
     }
 }
 

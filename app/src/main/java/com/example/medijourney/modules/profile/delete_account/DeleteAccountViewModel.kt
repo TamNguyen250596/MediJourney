@@ -4,6 +4,7 @@ import android.app.Activity
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.medijourney.common.helpers.MDataStore
 import com.example.medijourney.common.managers.firebase_auth.AuthenticationResult
 import com.example.medijourney.common.managers.firebase_auth.FAManger
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,6 +13,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class DeleteAccountViewModel @Inject constructor(
+    private val mDataStore: MDataStore,
     private val faManger: FAManger
 ) : ViewModel() {
 
@@ -45,6 +47,6 @@ class DeleteAccountViewModel @Inject constructor(
     }
 
     private suspend fun logOut(activity: Activity) {
-        faManger.logOut(activity)
+        faManger.logOut(activity, mDataStore)
     }
 }

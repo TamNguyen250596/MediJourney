@@ -5,11 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.medijourney.R
 import com.example.medijourney.common.constants.Constants
+import com.example.medijourney.common.extensions.firstThenDebounce
 import com.example.medijourney.common.helpers.DateHelper
 import com.example.medijourney.common.managers.fire_store.FireStoreCollection
 import com.example.medijourney.common.managers.fire_store.FireStoreManager
-import com.example.medijourney.common.managers.fire_store.get
-import com.example.medijourney.common.managers.fire_store.observe
 import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
 import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.item_models.BaseItemInterface
@@ -19,42 +18,57 @@ import com.example.medijourney.common.models.realm_models.UserNotification
 import com.example.medijourney.common.models.ui_models.EdgePadding
 import com.example.medijourney.common.models.ui_models.ImageStyle
 import com.example.medijourney.common.models.ui_models.MTextStyle
-import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.QuerySnapshot
+import com.example.medijourney.common.respositories.UserNotificationRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.ext.isValid
-import io.realm.kotlin.query.RealmResults
-import io.realm.kotlin.query.Sort
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class NotificationViewModel: ViewModel() {
+@HiltViewModel
+class NotificationViewModel @Inject constructor(
+    private val userNotificationRepository: UserNotificationRepository
+) : ViewModel() {
 
     // Properties
-    var models = MutableLiveData<MutableList<DynamicUIItem>>(mutableListOf())
-    private var notificationResult: RealmResults<UserNotification>? = null
+    val models = MutableLiveData<MutableList<DynamicUIItem>>(mutableListOf())
+    private val notificationsFlow = userNotificationRepository.getUserNotificationsFlow()
     private var currentMinCreatedDate: Long? = null
-    private var currentObserverId: Int? = null
+    private var currentObserverJob: Job? = null
 
     // Life cycle
     init {
-        observeLatestUserNotifications()
         viewModelScope.launch {
-            getData()
-            observeRealms()
+            launch {
+                observeData()
+            }
+            launch {
+                observeLatestUserNotifications()
+            }
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        FireStoreManager.removeListeners(this::class.java)
-        currentObserverId?.let {
-            FireStoreManager.removeListener(it)
+    private suspend fun observeData() {
+        notificationsFlow
+            .firstThenDebounce(1000L)
+            .collect {
+            val modelList = getNotificationData(it)
+            models.postValue(modelList)
         }
     }
 
     // Functions
+    private suspend fun observeLatestUserNotifications() {
+        userNotificationRepository
+            .observeLatestNotifications()
+            .collect {
+                if (currentMinCreatedDate == null) {
+                    setCurrentMinCreatedDate(it)
+                }
+            }
+    }
+
     fun observeUserNotifications(position: Int) {
         val value = models.value ?: return
         if (position > value.size - 1) return
@@ -67,68 +81,33 @@ class NotificationViewModel: ViewModel() {
         currentMinCreatedDate?.let {
             if (millis < it) return
 
-            currentObserverId?.let { currentObserverId ->
-                FireStoreManager.removeListener(currentObserverId)
+            if (currentObserverJob != null) {
+                currentObserverJob?.cancel()
+                currentObserverJob = null
             }
 
-            FireStoreManager.buildUserCollectionRef(FireStoreCollection.USER_NOTIFICATIONS)
-                .orderBy("created_at", Query.Direction.DESCENDING)
-                .whereLessThan("created_at", createdAt)
-                .limit(100)
-                .get(UserNotification::class.java) { snapshot ->
-                    setCurrentMinCreatedDate(snapshot)
-                }
+            currentObserverJob = viewModelScope.launch {
+                val list = userNotificationRepository.getOlderNotifications(millis)
+                setCurrentMinCreatedDate(list)
 
-            viewModelScope.launch {
                 delay(15000L)
-                val ref =
-                    FireStoreManager.buildUserCollectionRef(FireStoreCollection.USER_NOTIFICATIONS)
-                currentObserverId = ref.hashCode()
-                ref.orderBy("created_at", Query.Direction.DESCENDING)
-                    .whereLessThan("created_at", createdAt)
-                    .limit(110)
-                    .observe(UserNotification::class.java)
+                userNotificationRepository
+                    .observeOlderNotifications(millis)
+                    .collect { list ->
+                        setCurrentMinCreatedDate(list)
+                    }
             }
         }
     }
 
-    private fun observeLatestUserNotifications() {
-        FireStoreManager.buildUserCollectionRef(FireStoreCollection.USER_NOTIFICATIONS)
-            .orderBy("created_at", Query.Direction.DESCENDING)
-            .limit(100)
-            .observe(UserNotification::class.java, this::class.java) {
-                if (currentMinCreatedDate == null) {
-                    setCurrentMinCreatedDate(it)
-                }
-            }
+    private fun setCurrentMinCreatedDate(dataList: List<Map<String, Any>>) {
+        currentMinCreatedDate = dataList.lastOrNull()?.get("created_at") as? Long
     }
 
-    private fun setCurrentMinCreatedDate(snapshot: QuerySnapshot?) {
-        val documents = snapshot?.documents ?: return
-        currentMinCreatedDate = documents.lastOrNull()?.data?.get("created_at") as? Long
-    }
-
-    private suspend fun getData() {
-        notificationResult = RealmManager.read(UserNotification::class.java,
-            sort = listOf(UserNotification::createdAt.name to Sort.DESCENDING))
-    }
-
-    private suspend fun observeRealms() {
-        val notificationResult = notificationResult ?: return
-
-        notificationResult.asFlow().collect {
-            this.notificationResult = it.list
-
-            val modelList = getNotificationData()
-            models.postValue(modelList)
-        }
-    }
-
-    private fun getNotificationData(): MutableList<DynamicUIItem> {
+    private fun getNotificationData(dataList: List<UserNotification>): MutableList<DynamicUIItem> {
         val list = mutableListOf<DynamicUIItem>()
-        val notificationResult = notificationResult ?: return list
 
-        notificationResult.forEach {
+        dataList.forEach {
             if (!it.isValid()) return@forEach
 
             val item = DynamicUIItem(
@@ -161,51 +140,24 @@ class NotificationViewModel: ViewModel() {
     }
 
     fun deleteAllNotifications(callback: () -> Unit) {
-        val notificationResult = notificationResult ?: return callback.invoke()
-
-        notificationResult.forEachIndexed { index, userNotification ->
-            if (!userNotification.isValid()) return@forEachIndexed
-
-            FireStoreManager.buildDoc(
-                Pair(FireStoreCollection.USER_MEMBERS, userNotification.userCode),
-                Pair(FireStoreCollection.USER_NOTIFICATIONS, userNotification.id)
-            )
-                .delete()
-                .addOnCompleteListener {
-                    if (index == notificationResult.size - 1) {
-                        viewModelScope.launch {
-                            RealmManager.delete(UserNotification::class.java)
-                            callback.invoke()
-                        }
-                    }
-                }
-        }
-
-        CoroutineScope(Dispatchers.Main).launch {
-            delay(5 * 60 * 1000L)
+        viewModelScope.launch {
+            userNotificationRepository.deleteAllNotifications()
             callback.invoke()
         }
     }
 
     fun deleteNotification(position: Int, callback: () -> Unit) {
-        val notificationResult = notificationResult ?: return callback.invoke()
-        if (position > notificationResult.size - 1) return callback.invoke()
-        val item = notificationResult[position]
-        if (!item.isValid()) return callback.invoke()
-        val userCode = FirebaseAuthManager.getCurrentUserCode() ?: return callback.invoke()
-        val id = item.id
+        val models = models.value ?: return callback.invoke()
+        val item = models[position]
+        val notification = item.data as? UserNotification ?: return callback.invoke()
+        if (!notification.isValid()) return callback.invoke()
+        val id = notification.id
 
-        FireStoreManager.buildDoc(
-            Pair(FireStoreCollection.USER_MEMBERS, userCode),
-            Pair(FireStoreCollection.USER_NOTIFICATIONS, item.id)
-        )
-            .delete()
-            .addOnCompleteListener {
-                viewModelScope.launch {
-                    RealmManager.delete(UserNotification::class.java, id)
-                    callback.invoke()
-                }
-            }
+        viewModelScope.launch {
+            userNotificationRepository.deleteNotification(id)
+            callback.invoke()
+
+        }
     }
 
     fun readNotification(model: BaseItemInterface?) {

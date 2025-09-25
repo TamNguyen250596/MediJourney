@@ -4,17 +4,12 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.medijourney.common.constants.Constants
+import com.example.medijourney.common.extensions.firstThenDebounce
 import com.example.medijourney.common.helpers.DateHelper
 import com.example.medijourney.common.managers.fire_store.FireStoreCollection
 import com.example.medijourney.common.managers.fire_store.FireStoreManager
-import com.example.medijourney.common.managers.fire_store.addListener
-import com.example.medijourney.common.managers.fire_store.awaitGet
-import com.example.medijourney.common.managers.fire_store.remove
 import com.example.medijourney.common.managers.firebase_auth.FAManger
-import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
 import com.example.medijourney.common.managers.firebase_storage.FirebaseStorageManager
-import com.example.medijourney.common.managers.realm.Operator
-import com.example.medijourney.common.managers.realm.RQuery
 import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.item_models.DynamicUIItem
 import com.example.medijourney.common.models.realm_models.Message
@@ -22,22 +17,21 @@ import com.example.medijourney.common.models.realm_models.User
 import com.example.medijourney.common.models.realm_models.UserMessage
 import com.example.medijourney.common.models.ui_models.ImageStyle
 import com.example.medijourney.common.models.ui_models.MTextStyle
-import com.example.medijourney.common.respository.UserRepository
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.Query
+import com.example.medijourney.common.respositories.MessageRepository
+import com.example.medijourney.common.respositories.UserMessageRepository
+import com.example.medijourney.common.respositories.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.ext.isValid
-import io.realm.kotlin.query.RealmResults
-import io.realm.kotlin.query.Sort
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.UUID
@@ -45,8 +39,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AIChatViewModel @Inject constructor(
-    private val faManger: FAManger,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val userMessageRepository: UserMessageRepository,
+    messageRepository: MessageRepository
 ) : ViewModel() {
 
     // Properties
@@ -55,104 +50,57 @@ class AIChatViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
     var shouldScrollToBottom = false
-    private var messageResults: RealmResults<Message>? = null
-    private var userMessageResults: RealmResults<UserMessage>? = null
+    private val conversationId: String = FAManger.currentUserCode.plus(Constants.CHAT_GPT)
+    private val userMessagesFlow = userMessageRepository.getUserMessageFLow(conversationId)
+    private var messagesFlow = messageRepository.geMessagesFLow(conversationId)
     private var user: User? = null
-    private var conversationId: String = ""
     private var cursorCreatedAt: Long? = null
-    private var latestMessagesQuery: Query? = null
-    private var currentPageQuery: MutableList<Query> = mutableListOf()
     private var observeCurrentPageJob: Job? = null
 
     // Life cycle
     init {
-        conversationId = getConversationId()
         viewModelScope.launch {
-            getData()
-            _itemModels.value = generateDynamicList(userMessageResults)
+            user = userRepository.getUserFlow(FAManger.currentUserCode).firstOrNull()
             observeLatestMessages()
             observeData()
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        latestMessagesQuery?.remove()
-        FireStoreManager.removeListeners(this::class.java)
-    }
-
     // Functions
-    private fun getConversationId(): String {
-        return FirebaseAuthManager.getCurrentUserCode()?.plus(Constants.CHAT_GPT) ?: ""
-    }
+    private suspend fun observeLatestMessages() {
+        var firstHandled = false
 
-    private suspend fun getData() {
-        userRepository
-            .getUser(faManger.currentUserCode)
-            .collectLatest {
-                user = it
+        userMessageRepository
+            .observeLatestMessages(conversationId)
+            .collect {
+                if (firstHandled) {
+                    updateCursorCreatedAt(it)
+                    firstHandled = true
+                }
             }
-        getMessageResults()
-        getUserMessageResults()
-    }
-
-    private suspend fun getMessageResults() {
-        messageResults = RealmManager.read(
-            clazz = Message::class.java,
-            realmQuery = RQuery.Where(Message::conversationId.name, Operator.EQUAL, conversationId),
-            sort = listOf(
-                Message::createdAt.name to Sort.DESCENDING
-            )
-        )
-    }
-
-    private suspend fun getUserMessageResults() {
-        userMessageResults = RealmManager.read(
-            clazz = UserMessage::class.java,
-            realmQuery = RQuery.Where(UserMessage::conversationId.name, Operator.EQUAL, conversationId),
-            sort = listOf(
-                UserMessage::createdAt.name to Sort.DESCENDING
-            )
-        )
-    }
-
-    private fun observeLatestMessages() {
-        latestMessagesQuery = FireStoreManager.buildUserCollectionRef(FireStoreCollection.USER_MESSAGES)
-            .whereEqualTo("conversation_id", conversationId)
-            .orderBy(Constants.CREATED_AT, Query.Direction.DESCENDING)
-            .limit(Constants.DEFAULT_LIMIT)
-
-        latestMessagesQuery?.addListener {
-            if (cursorCreatedAt == null) {
-                updateCursorCreatedAt(it.documents)
-            }
-            saveDocuments(it.documents)
-        }
     }
 
     @OptIn(FlowPreview::class)
     @Suppress("NAME_SHADOWING")
     private suspend fun observeData() {
-        val messageResults = messageResults ?: return
-        val userMessageResults = userMessageResults ?: return
 
         combine(
-            messageResults.asFlow(),
-            userMessageResults.asFlow()
-        ) { messageResults, userMessageResults ->
-            this.messageResults = messageResults.list
-            this.userMessageResults = userMessageResults.list
+            messagesFlow,
+            userMessagesFlow
+        ) { _, userMessageResults ->
+            userMessageResults
         }
-            .debounce(500)
+            .firstThenDebounce(500)
             .collectLatest {
-                _itemModels.value = generateDynamicList(this.userMessageResults)
+                _itemModels.value = generateDynamicList(it)
+
             }
     }
 
-    private fun generateDynamicList(userMessageResults: RealmResults<UserMessage>?): List<DynamicUIItem> {
+    private fun generateDynamicList(userMessageResults: List<UserMessage>?): List<DynamicUIItem> {
         userMessageResults ?: return emptyList()
         val size = userMessageResults.size
-        val currentUserCode = FirebaseAuthManager.getCurrentUserCode()
+        val currentUserCode = FAManger.currentUserCode
 
         return userMessageResults.mapIndexedNotNull { index, entity ->
             val message = entity.message ?: return@mapIndexedNotNull null
@@ -336,8 +284,6 @@ class AIChatViewModel @Inject constructor(
         val cursorCreatedAt = cursorCreatedAt ?: return
         if (dateLong >= cursorCreatedAt) return
 
-        currentPageQuery.forEach { it.remove() }
-        currentPageQuery.clear()
         observeCurrentPageJob?.cancel()
         observeCurrentPageJob = null
         viewModelScope.launch {
@@ -356,71 +302,31 @@ class AIChatViewModel @Inject constructor(
     }
 
     private suspend fun getCurrentPage(dateLong: Long) {
-        try {
-            val snapshots = FireStoreManager.buildUserCollectionRef(FireStoreCollection.USER_MESSAGES)
-                .whereEqualTo("conversation_id", conversationId)
-                .whereGreaterThan(Constants.CREATED_AT, dateLong)
-                .orderBy(Constants.CREATED_AT, Query.Direction.DESCENDING)
-                .limit(Constants.DEFAULT_LIMIT)
-                .awaitGet()
-
-            updateCursorCreatedAt(snapshots.documents)
-            saveDocuments(snapshots.documents)
-            observeCurrentPage()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        val dataList = userMessageRepository.getOlderMessages(conversationId, dateLong)
+        updateCursorCreatedAt(dataList)
+        observeCurrentPage()
     }
 
     private fun observeCurrentPage() {
         observeCurrentPageJob = viewModelScope.launch {
             delay(10_000)
             val dateLong = cursorCreatedAt ?: return@launch
-            FireStoreManager.buildUserCollectionRef(FireStoreCollection.USER_MESSAGES)
-                .whereEqualTo("conversation_id", conversationId)
-                .whereGreaterThan(Constants.CREATED_AT, dateLong)
-                .orderBy(Constants.CREATED_AT, Query.Direction.DESCENDING)
-                .limit(Constants.DEFAULT_LIMIT)
-                .also {
-                    currentPageQuery.add(it)
-                    it.addListener { snapshots ->
-                        updateCursorCreatedAt(snapshots.documents)
-                        saveDocuments(snapshots.documents)
-                    }
+            userMessageRepository.observeOlderMessages(conversationId, dateLong)
+                .collect {
+                    updateCursorCreatedAt(it)
                 }
-
-            FireStoreManager.buildUserCollectionRef(FireStoreCollection.USER_MESSAGES)
-                .whereEqualTo("conversation_id", conversationId)
-                .whereLessThan(Constants.CREATED_AT, dateLong)
-                .orderBy(Constants.CREATED_AT, Query.Direction.DESCENDING)
-                .limit(Constants.DEFAULT_LIMIT)
-                .also {
-                    currentPageQuery.add(it)
-                    it.addListener { snapshots ->
-                        saveDocuments(snapshots.documents)
-                    }
-                }
+            userMessageRepository.observeLaterMessages(conversationId, dateLong)
+                .collect()
         }
     }
 
-    private fun updateCursorCreatedAt(documents: List<DocumentSnapshot>) {
+    private fun updateCursorCreatedAt(documents: List<Map<String, Any>>) {
         val lastDoc = documents.lastOrNull() ?: return
-        val lastData = lastDoc.data ?: return
-        val eldestCreatedDateNumber = lastData[Constants.CREATED_AT] as? Long ?: return
+        val eldestCreatedDateNumber = lastDoc[Constants.CREATED_AT] as? Long ?: return
         val eldestCreatedDateLong = eldestCreatedDateNumber
         val cursorDate = cursorCreatedAt
         if (cursorDate != null && eldestCreatedDateLong > cursorDate) return
 
         cursorCreatedAt = eldestCreatedDateLong
-    }
-
-    private fun saveDocuments(documents: List<DocumentSnapshot>) {
-        viewModelScope.launch {
-            documents.forEach { doc ->
-                doc.data?.let { data ->
-                    RealmManager.create(UserMessage::class.java, data)
-                }
-            }
-        }
     }
 }

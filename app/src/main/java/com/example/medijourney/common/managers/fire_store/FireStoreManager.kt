@@ -1,8 +1,9 @@
 package com.example.medijourney.common.managers.fire_store
 
 import com.example.medijourney.common.constants.Constants
-import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
+import com.example.medijourney.common.managers.firebase_auth.FAManger
 import com.example.medijourney.common.managers.realm.RealmManager
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.DocumentReference
@@ -12,9 +13,12 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.firestore
 import com.google.firebase.installations.FirebaseInstallations
+import io.realm.kotlin.types.RealmObject
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.tasks.await
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -52,7 +56,7 @@ object FireStoreManager {
         require(nodes.isNotEmpty()) { "buildDocRef requires a non-empty list of collection-document pairs" }
 
         val db = Firebase.firestore
-        val currentUserCode = FirebaseAuthManager.getCurrentUserCode() ?: ""
+        val currentUserCode = FAManger.currentUserCode
         var docRef = db.collection(FireStoreCollection.USER_MEMBERS.name.lowercase())
             .document(currentUserCode)
 
@@ -86,15 +90,6 @@ object FireStoreManager {
             ref = ref.collection(collection.name.lowercase()).document(documentId)
         }
         return ref.collection(subCollection.name.lowercase())
-    }
-
-    fun buildUserCollectionRef(collection: FireStoreCollection): Query {
-        val db = Firebase.firestore
-        val currentUserCode = FirebaseAuthManager.getCurrentUserCode() ?: ""
-        val ref = db.collection(FireStoreCollection.USER_MEMBERS.name.lowercase())
-            .document(currentUserCode)
-            .collection(collection.name.lowercase())
-        return ref
     }
 
     // Functions
@@ -195,7 +190,7 @@ object FireStoreManager {
         return docRef
     }
 
-    // DocumentReference - Update
+    // DocumentReference - Create
     suspend fun createDoc(collection: FireStoreCollection, documentId: String? = null, data: Map<String, Any>): Boolean {
         val realmObject = collection.getRealmObject() ?: return false
         val db = Firebase.firestore
@@ -249,12 +244,28 @@ object FireStoreManager {
 
     // DocumentReference - Observe
     suspend fun observeDoc(collection: FireStoreCollection, documentId: String) {
+        val realmObject = collection.getRealmObject() ?: return
+        val snapshotFlow = getDocumentSnapshotFlow(collection, documentId)
+
+        snapshotFlow.collect { snapshot ->
+            snapshot?.let {
+                if (it.exists()) {
+                    val data = it.data ?: return@let
+                    RealmManager.write(realmObject, data)
+                } else {
+                    RealmManager.delete(realmObject, it.id)
+                }
+            }
+        }
+    }
+
+    fun getDocumentSnapshotFlow(collection: FireStoreCollection, documentId: String): Flow<DocumentSnapshot?> {
         val docRef = buildDoc(collection, documentId)
         val listenerWrapper = FSListener(FSListerType.DOCUMENT(docRef))
-        if (checkCachedListener(listenerWrapper)) return
-        val realmObject = collection.getRealmObject() ?: return
 
-        val snapshotFlow = callbackFlow {
+        return callbackFlow {
+            if (checkCachedListener(listenerWrapper)) return@callbackFlow
+
             val registration: ListenerRegistration = docRef.addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     trySend(null)
@@ -270,45 +281,46 @@ object FireStoreManager {
                 removeListener(listenerWrapper)
             }
         }
-
-        snapshotFlow.collect { snapshot ->
-            snapshot?.let {
-                if (it.exists()) {
-                    val data = it.data ?: return@let
-                    RealmManager.write(realmObject, data)
-                } else {
-                    RealmManager.delete(realmObject, it.id)
-                }
-            }
-        }
     }
 
     // DocumentReference - Delete
     suspend fun deleteDoc(collection: FireStoreCollection, documentId: String): Boolean {
         val docRef = buildDoc(collection, documentId)
-        return suspendCancellableCoroutine { cont ->
+        val realmObject = collection.getRealmObject() ?: return false
+
+        val result = suspendCancellableCoroutine { cont ->
             docRef.delete().addOnCompleteListener {
                 cont.resume(it.isSuccessful)
             }
         }
+        if (result) {
+            RealmManager.delete(realmObject, documentId)
+        }
+        return result
     }
 
     // Collection - Build
-    fun buildQuery(collection: FireStoreCollection, filterBuilder: FSFilterBuilder?): Query {
+    fun buildQuery(collection: FireStoreCollection, queryBuilder: FSQueryBuilder?): Query {
         val db = Firebase.firestore
         val ref = db.collection(collection.name.lowercase())
         var query: Query = ref
-        filterBuilder?.let {
-            for (filter in filterBuilder.build()) {
+        queryBuilder?.let {
+            for (filter in queryBuilder.buildFilter()) {
                 query = query.where(filter)
+            }
+            for (order in queryBuilder.buildOrders()) {
+                query = query.orderBy(order.first, order.second)
+            }
+            queryBuilder.buildLimit()?.let {
+                query = query.limit(it)
             }
         }
         return query
     }
 
     // Collection - Get
-    suspend fun getCollection(collection: FireStoreCollection, filterBuilder: FSFilterBuilder?): QuerySnapshot {
-        val query = buildQuery(collection, filterBuilder)
+    suspend fun getCollection(collection: FireStoreCollection, queryBuilder: FSQueryBuilder?): QuerySnapshot {
+        val query = buildQuery(collection, queryBuilder)
 
         return suspendCancellableCoroutine { cont ->
             query.get().addOnSuccessListener {
@@ -320,13 +332,22 @@ object FireStoreManager {
     }
 
     // Collection - Observe
-    suspend fun observeCollection(collection: FireStoreCollection, filterBuilder: FSFilterBuilder? = null) {
-        val query = buildQuery(collection, filterBuilder)
-        val listenerWrapper = FSListener(FSListerType.COLLECTION(query))
-        if (checkCachedListener(listenerWrapper)) return
+    suspend fun observeCollection(collection: FireStoreCollection, queryBuilder: FSQueryBuilder? = null) {
         val realmObject = collection.getRealmObject() ?: return
+        val snapshotFlow = getQuerySnapshotFlow(collection, queryBuilder)
+        
+        snapshotFlow.collect { snapshot ->
+            handleQuerySnapshot(realmObject, snapshot)
+        }
+    }
+    
+    fun getQuerySnapshotFlow(collection: FireStoreCollection, queryBuilder: FSQueryBuilder? = null): Flow<QuerySnapshot?> {
+        val query = buildQuery(collection, queryBuilder)
+        val listenerWrapper = FSListener(FSListerType.COLLECTION(query))
 
-        val snapshotFlow = callbackFlow {
+        return callbackFlow {
+            if (checkCachedListener(listenerWrapper)) return@callbackFlow
+
             val registration: ListenerRegistration = query.addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     trySend(null)
@@ -342,37 +363,37 @@ object FireStoreManager {
                 removeListener(listenerWrapper)
             }
         }
+    }
+    
+    suspend fun handleQuerySnapshot(realmObject: RealmObject, querySnapshot: QuerySnapshot?) {
+        val snapshot = querySnapshot ?: return
+        val dataList: MutableList<Map<String, Any>> = mutableListOf()
+        val removeIds = mutableListOf<String>()
 
-        snapshotFlow.collect { snapshot ->
-            val snapshot = snapshot ?: return@collect
-            val dataList: MutableList<Map<String, Any>> = mutableListOf()
-            val removeIds = mutableListOf<String>()
-
-            snapshot.documentChanges.forEach {
-                when (it.type) {
-                    DocumentChange.Type.ADDED, DocumentChange.Type.MODIFIED -> {
-                        if (it.document.exists()) {
-                            dataList.add(it.document.data)
-                        }
-                    }
-
-                    DocumentChange.Type.REMOVED -> {
-                        removeIds.add(it.document.id)
+        snapshot.documentChanges.forEach {
+            when (it.type) {
+                DocumentChange.Type.ADDED, DocumentChange.Type.MODIFIED -> {
+                    if (it.document.exists()) {
+                        dataList.add(it.document.data)
                     }
                 }
-            }
 
-            if (dataList.isNotEmpty()) {
-                RealmManager.write(realmObject, dataList)
+                DocumentChange.Type.REMOVED -> {
+                    removeIds.add(it.document.id)
+                }
             }
-            if (removeIds.isNotEmpty()) {
-                RealmManager.delete(realmObject, removeIds)
-            }
+        }
+
+        if (dataList.isNotEmpty()) {
+            RealmManager.write(realmObject, dataList)
+        }
+        if (removeIds.isNotEmpty()) {
+            RealmManager.delete(realmObject, removeIds)
         }
     }
 
     suspend fun observeRedundantData() {
-        val userCode = FirebaseAuthManager.getCurrentUserCode() ?: return
+        val userCode = FAManger.currentUserCode
 
         val id = suspendCancellableCoroutine { count ->
             FirebaseInstallations.getInstance().id.addOnCompleteListener { task ->
@@ -386,7 +407,7 @@ object FireStoreManager {
         val fid = id ?: return
         val query = buildQuery(
             FireStoreCollection.USER_REDUNDANT_DATA,
-            filterBuilder = FSFilterBuilder()
+            queryBuilder = FSQueryBuilder()
                 .equalTo(Constants.FID, fid)
                 .equalTo("user_id", userCode)
         )
@@ -421,6 +442,32 @@ object FireStoreManager {
                 RealmManager.delete(realmObject, dataIds)
                 buildDoc(FireStoreCollection.USER_REDUNDANT_DATA, doc.id).delete()
             }
+        }
+    }
+
+    // Collection - Delete
+    suspend fun deleteCollection(collection: FireStoreCollection, queryBuilder: FSQueryBuilder? = null): Boolean {
+        val query = buildQuery(collection, queryBuilder)
+        val realmObject = collection.getRealmObject() ?: return false
+        val querySnapshot = suspendCancellableCoroutine { cont ->
+            query.get().addOnSuccessListener {
+                cont.resume(it)
+            }.addOnFailureListener {
+                cont.resumeWithException(it)
+            }
+        }
+        return try {
+            if (querySnapshot.isEmpty) return true
+
+            val deleteTasks = querySnapshot.documents.map { doc ->
+                RealmManager.delete(realmObject, doc.id)
+                doc.reference.delete()
+            }
+
+            Tasks.whenAllComplete(deleteTasks).await()
+            deleteTasks.all { it.isSuccessful }
+        } catch (_: Exception) {
+            false
         }
     }
 }

@@ -18,7 +18,7 @@ class UserExercisePlan:  RealmObject, RealmCycle {
     // Properties
     @PrimaryKey
     var id: String = ""
-    var userCode: String = ""
+    var userId: String = ""
     var createdAt: RealmInstant? = null
     var name: String? = null
     var duration: Double = 0.0
@@ -33,7 +33,7 @@ class UserExercisePlan:  RealmObject, RealmCycle {
     override fun create(map: Map<String, Any>): RealmObject {
         return UserExercisePlan().apply {
             id = map["id"] as? String ?: id
-            userCode = map["user_code"] as? String ?: userCode
+            userId = map["user_id"] as? String ?: userId
             createdAt = map.getRealmInstant("created_at")
             name = map["name"] as? String ?: name
             duration = map.getDouble("duration")

@@ -10,10 +10,9 @@ import androidx.credentials.exceptions.GetCredentialException
 import com.example.medijourney.common.constants.Constants
 import com.example.medijourney.common.constants.Constants.WEB_CLIENT_ID
 import com.example.medijourney.common.helpers.MDataStore
-import com.example.medijourney.common.managers.fire_store.FSFilterBuilder
+import com.example.medijourney.common.managers.fire_store.FSQueryBuilder
 import com.example.medijourney.common.managers.fire_store.FireStoreCollection
 import com.example.medijourney.common.managers.fire_store.FireStoreManager
-import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager.getCurrentFirebaseUser
 import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.realm_models.User
 import com.example.medijourney.modules.base.auth.AuthActivity
@@ -47,31 +46,18 @@ import kotlin.coroutines.resume
 
 object FirebaseAuthManager {
 
-    // Properties
-    private val auth = Firebase.auth
-
     // Get Current User Info
-    fun getCurrentFirebaseUser(): FirebaseUser? {
-        return auth.currentUser
-    }
-
     fun getCurrentUserCode(): String? {
-        return auth.currentUser?.uid
+        return Firebase.auth.currentUser?.uid
     }
 }
 
-class FAManger @Inject constructor(
-    private val mDataStore: MDataStore
-) {
+class FAManger @Inject constructor() {
 
-    val currentUser: FirebaseUser?
-        get() {
-            return Firebase.auth.currentUser
-        }
-    val currentUserCode: String
-        get() {
-            return Firebase.auth.currentUser?.uid ?: ""
-        }
+    companion object {
+        val currentUser: FirebaseUser? = Firebase.auth.currentUser
+        val currentUserCode: String = Firebase.auth.currentUser?.uid ?: ""
+    }
 
     // Sign Up
     suspend fun signUp(email: String, password: String, additionalUserInfo: Map<String, Any>? = null): AuthenticationResult {
@@ -253,7 +239,7 @@ class FAManger @Inject constructor(
         try {
             val snapshot = FireStoreManager.getCollection(
                 FireStoreCollection.USER_SETTINGS,
-                filterBuilder = FSFilterBuilder().equalTo("user_id", user.uid)
+                queryBuilder = FSQueryBuilder().equalTo("user_id", user.uid)
             )
             val document = snapshot.documents.firstOrNull()
 
@@ -301,7 +287,7 @@ class FAManger @Inject constructor(
         try {
             val snapshots = FireStoreManager.getCollection(
                 FireStoreCollection.USER_MEMBERS,
-                filterBuilder = FSFilterBuilder().equalTo("email", email)
+                queryBuilder = FSQueryBuilder().equalTo("email", email)
             )
             val document = snapshots.documents.firstOrNull()
             return if (document != null && document["de_active"] == true) {
@@ -316,7 +302,7 @@ class FAManger @Inject constructor(
 
     // DeActive User
     suspend fun deActiveUser(): AuthenticationResult {
-        val currentUser = currentUser ?: return AuthenticationResult.DEACTIVE_ACCOUNT_FAILED
+        val currentUser = FAManger.currentUser ?: return AuthenticationResult.DEACTIVE_ACCOUNT_FAILED
         val isDelectedUser = suspendCancellableCoroutine { count ->
             currentUser.delete()
                 .addOnCompleteListener {
@@ -341,7 +327,7 @@ class FAManger @Inject constructor(
 
     // Delete Account
     suspend fun deleteUser(): AuthenticationResult {
-        val currentUser = currentUser ?: return AuthenticationResult.DELETE_ACCOUNT_FAILED
+        val currentUser = FAManger.currentUser ?: return AuthenticationResult.DELETE_ACCOUNT_FAILED
         val isDelectedUser = suspendCancellableCoroutine { count ->
             currentUser.delete()
                 .addOnCompleteListener {
@@ -365,7 +351,7 @@ class FAManger @Inject constructor(
 
     // Change password
     suspend fun changePasswordWhenLogIn(newPassword: String): AuthenticationResult {
-        val currentUser = currentUser ?: return AuthenticationResult.CHANGE_PASSWORD_FAILED
+        val currentUser = FAManger.currentUser ?: return AuthenticationResult.CHANGE_PASSWORD_FAILED
         val isUpdatedPassword = suspendCancellableCoroutine { count ->
             currentUser.updatePassword(newPassword)
                 .addOnCompleteListener {
@@ -386,9 +372,9 @@ class FAManger @Inject constructor(
         val userName = map["user_name"] ?: return AuthenticationResult.CHANGE_PASSWORD_FAILED
         val currentPassword = map["current_password"] ?: return AuthenticationResult.CHANGE_PASSWORD_FAILED
         val credential = EmailAuthProvider.getCredential(userName, currentPassword)
-        val currentFirebaseUser = getCurrentFirebaseUser() ?: return AuthenticationResult.CHANGE_PASSWORD_FAILED
+        val currentUser = FAManger.currentUser ?: return AuthenticationResult.CHANGE_PASSWORD_FAILED
         val isUpdatedPassword = suspendCancellableCoroutine { count ->
-            currentFirebaseUser.reauthenticate(credential)
+            currentUser.reauthenticate(credential)
                 .addOnCompleteListener {
                     count.resume(it.isSuccessful)
                 }
@@ -402,11 +388,12 @@ class FAManger @Inject constructor(
     }
 
     // Log Out
-    suspend fun logOut(activity: Activity) {
+    suspend fun logOut(activity: Activity, datastore: MDataStore) {
         FireStoreManager.removeAllListeners()
         RealmManager.deleteAll()
-        mDataStore.deleteAuthenticatedPreferencesKey()
+        datastore.deleteAuthenticatedPreferencesKey()
         Firebase.auth.signOut()
+
         val intent = Intent(activity, AuthActivity::class.java)
         intent.putExtra(Constants.SIGN_OUT, true)
         activity.startActivity(intent)

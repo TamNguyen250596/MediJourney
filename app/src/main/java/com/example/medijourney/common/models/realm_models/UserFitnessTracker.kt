@@ -14,7 +14,7 @@ class UserFitnessTracker: RealmObject, RealmCycle {
     // Properties
     @PrimaryKey
     var id: String = ""
-    var userCode: String = ""
+    var userId: String = ""
     var imageName: String? = null
     var name: String? = null
     var model: String? = null
@@ -35,7 +35,7 @@ class UserFitnessTracker: RealmObject, RealmCycle {
     override fun create(map: Map<String, Any>): RealmObject {
         return UserFitnessTracker().apply {
             id = map.getUserObjectKey(id)
-            userCode = map["user_code"] as? String ?: userCode
+            userId = map["user_id"] as? String ?: userId
             imageName = map["image_name"] as? String ?: imageName
             name = map["name"] as? String
             model = map["model"] as? String
