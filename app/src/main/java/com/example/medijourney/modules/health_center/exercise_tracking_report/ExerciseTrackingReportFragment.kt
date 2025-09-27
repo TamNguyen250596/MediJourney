@@ -24,9 +24,11 @@ import com.example.medijourney.modules.health_center.main.sub_ui.recommend_exerc
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
+import dagger.hilt.android.AndroidEntryPoint
 import io.realm.kotlin.ext.isValid
 import java.util.Date
 
+@AndroidEntryPoint
 class ExerciseTrackingReportFragment : Fragment(), OnChartValueSelectedListener {
 
     // Properties
@@ -35,7 +37,6 @@ class ExerciseTrackingReportFragment : Fragment(), OnChartValueSelectedListener 
     private lateinit var binding: FragmentExerciseTrackingReportBinding
     private val dateFormat = "dd/MM/yyyy"
     private val args : ExerciseTrackingReportFragmentArgs by navArgs()
-    private val userFitnessTrackerId: String? by lazy { args.userFitnessTrackerId }
 
     // Life cycle
     override fun onCreateView(
@@ -59,7 +60,6 @@ class ExerciseTrackingReportFragment : Fragment(), OnChartValueSelectedListener 
         setupView()
         observeUIComponents()
         observeViewModel()
-        exerciseTrackingReportViewModel.onViewCreated(userFitnessTrackerId)
         recommendedExerciseViewModel.onViewCreated()
     }
 

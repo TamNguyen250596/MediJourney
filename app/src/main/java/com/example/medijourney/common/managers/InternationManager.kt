@@ -14,9 +14,31 @@ import com.example.medijourney.common.helpers.FileHelper
 import com.example.medijourney.common.helpers.MediJourney
 import com.example.medijourney.common.managers.fire_store.FireStoreManager
 import com.example.medijourney.modules.base.auth.AuthActivity
+import com.google.common.base.Objects
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ViewModelComponent
+import dagger.hilt.components.SingletonComponent
+import jakarta.inject.Qualifier
+import jakarta.inject.Singleton
 
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class AppExerciseTrackingReportDetails
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class AppSleepTrackingReportDetails
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class AppNutritionTrackingReportDetails
+
+@Module
+@InstallIn(ViewModelComponent::class)
 object InternationManager {
 
     // Properties
@@ -115,24 +137,30 @@ object InternationManager {
         return mapData
     }
 
-    fun getCurrentAppSleepTrackingReportDetails(): Map<String, Any> {
+    @Provides
+    @AppSleepTrackingReportDetails
+    fun getCurrentAppSleepTrackingReportDetails(): Map<String, *> {
         val context = MediJourney.getAppContext()
         val jsonString = FileHelper.getValueFromAssets(context, "app_sleep_tracking_report_details.json")
-        val mapData: Map<String, Any> = Gson().fromJson(jsonString, object : TypeToken<Map<String, Any>>(){}.type)
+        val mapData: Map<String, *> = Gson().fromJson(jsonString, object : TypeToken<Map<String, *>>(){}.type)
         return mapData
     }
 
-    fun getCurrentAppNutritionTrackingReportDetails(): Map<String, Any> {
+    @Provides
+    @AppNutritionTrackingReportDetails
+    fun getCurrentAppNutritionTrackingReportDetails(): Map<String, *> {
         val context = MediJourney.getAppContext()
         val jsonString = FileHelper.getValueFromAssets(context, "app_nutrition_tracking_report_details.json")
-        val mapData: Map<String, Any> = Gson().fromJson(jsonString, object : TypeToken<Map<String, Any>>(){}.type)
+        val mapData: Map<String, *> = Gson().fromJson(jsonString, object : TypeToken<Map<String, *>>(){}.type)
         return mapData
     }
 
-    fun getCurrentAppExerciseTrackingReportDetails(): Map<String, Any> {
+    @Provides
+    @AppExerciseTrackingReportDetails
+    fun getCurrentAppExerciseTrackingReportDetails(): Map<String, *> {
         val context = MediJourney.getAppContext()
         val jsonString = FileHelper.getValueFromAssets(context, "app_exercise_tracking_report_details.json")
-        val mapData: Map<String, Any> = Gson().fromJson(jsonString, object : TypeToken<Map<String, Any>>(){}.type)
+        val mapData: Map<String, *> = Gson().fromJson(jsonString, object : TypeToken<Map<String, *>>(){}.type)
         return mapData
     }
 

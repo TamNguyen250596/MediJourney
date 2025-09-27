@@ -18,16 +18,16 @@ import com.example.medijourney.databinding.FragmentSleepTrackingReportBinding
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
+import dagger.hilt.android.AndroidEntryPoint
 import java.util.Date
 
+@AndroidEntryPoint
 class SleepTrackingReportFragment : Fragment(), OnChartValueSelectedListener {
 
     // Properties
     private val viewModel: SleepTrackingReportViewModel by viewModels()
     private lateinit var binding: FragmentSleepTrackingReportBinding
     private val dateFormat = "dd/MM/yyyy"
-    private val args : SleepTrackingReportFragmentArgs by navArgs()
-    private val userFitnessTrackerId: String? by lazy { args.userFitnessTrackerId }
 
     // Life cycle
     override fun onCreateView(
@@ -43,7 +43,6 @@ class SleepTrackingReportFragment : Fragment(), OnChartValueSelectedListener {
         setupView()
         observeUIComponents()
         observeViewModel()
-        viewModel.onCreateView(userFitnessTrackerId)
     }
 
     // Functions

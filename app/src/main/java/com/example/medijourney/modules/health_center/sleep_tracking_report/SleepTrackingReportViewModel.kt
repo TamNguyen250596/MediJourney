@@ -2,24 +2,21 @@ package com.example.medijourney.modules.health_center.sleep_tracking_report
 
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.medijourney.R
+import com.example.medijourney.common.extensions.firstThenDebounce
 import com.example.medijourney.common.helpers.DateHelper
 import com.example.medijourney.common.helpers.MediJourney
-import com.example.medijourney.common.managers.InternationManager
-import com.example.medijourney.common.managers.fire_store.FireStoreCollection
-import com.example.medijourney.common.managers.fire_store.FireStoreManager
-import com.example.medijourney.common.managers.fire_store.observe
-import com.example.medijourney.common.managers.realm.Operator
-import com.example.medijourney.common.managers.realm.RQuery
-import com.example.medijourney.common.managers.realm.RealmManager
+import com.example.medijourney.common.managers.AppSleepTrackingReportDetails
 import com.example.medijourney.common.models.item_models.DynamicUIItem
-import com.example.medijourney.common.models.realm_models.UserFitnessTracker
 import com.example.medijourney.common.models.realm_models.UserSleepTrackingReport
 import com.example.medijourney.common.models.ui_models.EdgePadding
 import com.example.medijourney.common.models.ui_models.Segment
 import com.example.medijourney.common.models.ui_models.MTextStyle
+import com.example.medijourney.common.respositories.UserFitnessTrackerRepository
+import com.example.medijourney.common.respositories.UserSleepTrackingReportRepository
 import com.example.medijourney.common.ui_components.recycle_view_adapter.h_dual_image_text_view.HDualImageTextViewHolder
 import com.github.mikephil.charting.components.LimitLine
 import com.github.mikephil.charting.data.BarData
@@ -27,16 +24,22 @@ import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.highlight.Highlight
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.ext.isValid
-import io.realm.kotlin.query.RealmResults
-import io.realm.kotlin.query.Sort
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import java.util.Calendar
 import java.util.Date
+import javax.inject.Inject
 
-class SleepTrackingReportViewModel : ViewModel() {
+@HiltViewModel
+class SleepTrackingReportViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
+    @AppSleepTrackingReportDetails private val currentAppSleepTrackingReportDetails: Map<String, *>,
+    private val userFitnessTrackerRepository: UserFitnessTrackerRepository,
+    private val userSleepTrackingReportRepository: UserSleepTrackingReportRepository
+) : ViewModel() {
 
     // Properties
     var selectedDate = MutableLiveData<Date?>()
@@ -46,75 +49,39 @@ class SleepTrackingReportViewModel : ViewModel() {
     var description = MutableLiveData<String?>()
     var visibleXRangeMaximum = 5f
     var limitLine: LimitLine? = null
-    private var deviceId: String? = null
-    private var userSleepTrackingReports: RealmResults<UserSleepTrackingReport>? = null
-    private var userFitnessTracker: UserFitnessTracker? = null
-    private var currentSleepTrackingReportDetails: Map<String, Any> = mutableMapOf()
 
     // Life cycle
-    fun onCreateView(userFitnessTrackerId: String?) {
-        currentSleepTrackingReportDetails = InternationManager.getCurrentAppSleepTrackingReportDetails()
+    init {
+        val userFitnessTrackerId = savedStateHandle.get<String>("userFitnessTrackerId")
         viewModelScope.launch {
-            getData(userFitnessTrackerId)
-            handleReports()
-            observeFireStore()
-            observeData()
+            observeData(userFitnessTrackerId)
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        FireStoreManager.removeListeners(this::class.java)
     }
 
     // Functions
-    private suspend fun getData(userFitnessTrackerId: String?) {
-        userFitnessTrackerId ?: return
-        getUserFitnessTracker(userFitnessTrackerId)
-        getUserSleepTrackingReports()
-    }
+    private suspend fun observeData(id: String?) = supervisorScope {
+        if (id == null) return@supervisorScope
 
-    private suspend fun getUserFitnessTracker(userFitnessTrackerId: String) {
-        userFitnessTracker = RealmManager.read(UserFitnessTracker::class.java, userFitnessTrackerId)
+        val deviceId = userFitnessTrackerRepository
+            .getUserFitnessTrackerFlow(id)
+            .first {
+                it != null && it.isValid()
+            }?.deviceId ?: return@supervisorScope
 
-        userFitnessTracker?.let {
-            if (!it.isValid()) return
-            deviceId = it.deviceId
+        launch {
+            userSleepTrackingReportRepository.observeUserSleepTrackingReports(deviceId)
+        }
+        launch {
+            userSleepTrackingReportRepository
+                .getUserSleepTrackingReportsFlow(deviceId)
+                .firstThenDebounce(500)
+                .collect {
+                    handleReports(it)
+                }
         }
     }
 
-    private suspend fun getUserSleepTrackingReports() {
-        val deviceId = deviceId ?: return
-
-        userSleepTrackingReports = RealmManager.read(UserSleepTrackingReport::class.java,
-            realmQuery = RQuery.Where(UserSleepTrackingReport::deviceId.name, Operator.EQUAL, deviceId),
-            sort = listOf(Pair(UserSleepTrackingReport::reportedAt.name, Sort.DESCENDING)))
-    }
-
-    private fun observeFireStore() {
-        val userFitnessTracker = userFitnessTracker ?: return
-        if (!userFitnessTracker.isValid()) return
-
-        FireStoreManager.buildSubCollectionRef(FireStoreCollection.USER_SLEEP_TRACKING_REPORTS,
-            Pair(FireStoreCollection.USER_MEMBERS, userFitnessTracker.ownerUserCode))
-            .whereEqualTo("device_id", deviceId)
-            .observe(UserSleepTrackingReport::class.java, this::class.java)
-    }
-
-    @OptIn(FlowPreview::class)
-    private suspend fun observeData() {
-        val userSleepTrackingReports = userSleepTrackingReports ?: return
-
-        userSleepTrackingReports.asFlow()
-            .debounce(500)
-            .collect {
-                this.userSleepTrackingReports = it.list
-                handleReports()
-            }
-    }
-
-    private fun handleReports() {
-        val userSleepTrackingReports = userSleepTrackingReports ?: return
+    private fun handleReports(userSleepTrackingReports: List<UserSleepTrackingReport>) {
         if (userSleepTrackingReports.isEmpty()) return
 
         val context = MediJourney.getAppContext()
@@ -206,7 +173,7 @@ class SleepTrackingReportViewModel : ViewModel() {
     fun handleValueSelected(e: Entry?) {
         val data = e?.data as? UserSleepTrackingReport ?: return
         if (!data.isValid()) return
-        val attributes = currentSleepTrackingReportDetails["attributes"] as? List<Map<String, Any>> ?: return
+        val attributes = currentAppSleepTrackingReportDetails["attributes"] as? List<Map<String, Any>> ?: return
         val segments = mutableListOf<Segment>()
         val itemModels = mutableListOf<DynamicUIItem>()
         val unit = "H"

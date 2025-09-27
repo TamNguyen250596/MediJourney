@@ -19,8 +19,10 @@ import com.example.medijourney.databinding.FragmentNutritionTrackingReportBindin
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
+import dagger.hilt.android.AndroidEntryPoint
 import java.util.Date
 
+@AndroidEntryPoint
 class NutritionTrackingReportFragment : Fragment() {
 
     // Properties
@@ -28,7 +30,6 @@ class NutritionTrackingReportFragment : Fragment() {
     private lateinit var binding: FragmentNutritionTrackingReportBinding
     private val dateFormat = "dd/MM/yyyy"
     private val args : NutritionTrackingReportFragmentArgs by navArgs()
-    private val userFitnessTrackerId: String? by lazy { args.userFitnessTrackerId }
 
     // Life cycle
     override fun onCreateView(
@@ -44,7 +45,6 @@ class NutritionTrackingReportFragment : Fragment() {
         setupView()
         observeUIComponents()
         observeViewModel()
-        viewModel.onCreateView(userFitnessTrackerId)
     }
 
     // Functions

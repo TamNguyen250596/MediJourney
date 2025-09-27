@@ -13,7 +13,7 @@ class UserExerciseTrackingReport: RealmObject, RealmCycle {
     // Properties
     @PrimaryKey
     var id: String = ""
-    var userCode: String = ""
+    var userId: String = ""
     var deviceId: String = ""
     var reportedAt: RealmInstant? = null
     var burnedCalories: Double = 0.0
@@ -32,7 +32,7 @@ class UserExerciseTrackingReport: RealmObject, RealmCycle {
     override fun create(map: Map<String, Any>): RealmObject {
         return UserExerciseTrackingReport().apply {
             id = map["id"] as? String ?: id
-            userCode = map["user_code"] as? String ?: userCode
+            userId = map["user_id"] as? String ?: userId
             deviceId = map["device_id"] as? String ?: deviceId
             reportedAt = map.getRealmInstant("reported_at")
             burnedCalories = map.getDouble("burned_calories")

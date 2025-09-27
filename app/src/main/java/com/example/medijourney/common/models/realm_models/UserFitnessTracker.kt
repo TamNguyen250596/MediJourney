@@ -19,7 +19,7 @@ class UserFitnessTracker: RealmObject, RealmCycle {
     var name: String? = null
     var model: String? = null
     var version: String? = null
-    var ownerUserCode: String = ""
+    var ownerUserId: String = ""
     var deviceId: String = ""
     var batteryPercentage: Double = 0.0
     var batteryMaximumCapacity: Double = 0.0
@@ -40,7 +40,7 @@ class UserFitnessTracker: RealmObject, RealmCycle {
             name = map["name"] as? String
             model = map["model"] as? String
             version = map["version"] as? String
-            ownerUserCode = map["owner_user_code"] as? String ?: ownerUserCode
+            ownerUserId = map["owner_user_id"] as? String ?: ownerUserId
             deviceId = map["device_id"] as? String ?: deviceId
             batteryPercentage = map.getDouble("battery_percentage")
             batteryMaximumCapacity = map.getDouble("battery_maximum_capacity")

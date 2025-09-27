@@ -78,20 +78,6 @@ object FireStoreManager {
         return ref
     }
 
-    fun buildSubCollectionRef(subCollection: FireStoreCollection, vararg nodes: Pair<FireStoreCollection, String>): Query {
-        require(nodes.isNotEmpty()) { "buildDocRef requires a non-empty list of collection-document pairs" }
-
-        val db = Firebase.firestore
-        var ref = db.collection(nodes[0].first.name.lowercase())
-            .document(nodes[0].second)
-
-        for (i in 1 until nodes.size) {
-            val (collection, documentId) = nodes[i]
-            ref = ref.collection(collection.name.lowercase()).document(documentId)
-        }
-        return ref.collection(subCollection.name.lowercase())
-    }
-
     // Functions
     fun checkCachedListener(query: Int): Boolean {
         synchronized(this) {

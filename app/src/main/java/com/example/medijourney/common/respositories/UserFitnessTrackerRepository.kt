@@ -12,10 +12,12 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 interface UserFitnessTrackerRepository {
     suspend fun observeUserFitnessTrackers()
+    fun getUserFitnessTrackerFlow(id: String): Flow<UserFitnessTracker?>
     fun getUserFitnessTrackersFlow(): Flow<List<UserFitnessTracker>>
 }
 
@@ -27,6 +29,14 @@ class UserFitnessTrackerRepositoryImpl @Inject constructor() : UserFitnessTracke
             queryBuilder = FSQueryBuilder()
                 .equalTo("user_id", FAManger.currentUserCode)
         )
+    }
+
+    override fun getUserFitnessTrackerFlow(id: String): Flow<UserFitnessTracker?> {
+        return RealmManager.flow(
+            UserFitnessTracker::class,
+            queryBuilder = RQueryBuilder()
+                .equalTo(id, id)
+        ).map { it.firstOrNull() }
     }
 
     override fun getUserFitnessTrackersFlow(): Flow<List<UserFitnessTracker>> {

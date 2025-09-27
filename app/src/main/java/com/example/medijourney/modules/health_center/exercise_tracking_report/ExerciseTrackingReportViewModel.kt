@@ -2,11 +2,14 @@ package com.example.medijourney.modules.health_center.exercise_tracking_report
 
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.medijourney.R
+import com.example.medijourney.common.extensions.firstThenDebounce
 import com.example.medijourney.common.helpers.DateHelper
 import com.example.medijourney.common.helpers.MediJourney
+import com.example.medijourney.common.managers.AppExerciseTrackingReportDetails
 import com.example.medijourney.common.managers.InternationManager
 import com.example.medijourney.common.managers.fire_store.FireStoreCollection
 import com.example.medijourney.common.managers.fire_store.FireStoreManager
@@ -20,22 +23,35 @@ import com.example.medijourney.common.models.realm_models.UserFitnessTracker
 import com.example.medijourney.common.models.ui_models.EdgePadding
 import com.example.medijourney.common.models.ui_models.Segment
 import com.example.medijourney.common.models.ui_models.MTextStyle
+import com.example.medijourney.common.respositories.UserExerciseTrackingReportRepository
+import com.example.medijourney.common.respositories.UserFitnessTrackerRepository
 import com.example.medijourney.common.ui_components.recycle_view_adapter.h_dual_image_text_view.HDualImageTextViewHolder
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.highlight.Highlight
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.ext.isValid
-import io.realm.kotlin.query.RealmResults
 import io.realm.kotlin.query.Sort
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import java.util.Calendar
 import java.util.Date
+import javax.inject.Inject
 
-class ExerciseTrackingReportViewModel : ViewModel() {
+@HiltViewModel
+class ExerciseTrackingReportViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
+    @AppExerciseTrackingReportDetails private val currentAppExerciseTrackingReportDetails: Map<String, *>,
+    private val userFitnessTrackerRepository: UserFitnessTrackerRepository,
+    private val userExerciseTrackingReportRepository: UserExerciseTrackingReportRepository
+) : ViewModel() {
 
     // Properties
     var selectedDate = MutableLiveData<Date?>()
@@ -44,77 +60,39 @@ class ExerciseTrackingReportViewModel : ViewModel() {
     var itemModels = MutableLiveData<MutableList<DynamicUIItem>>()
     var description = MutableLiveData<String?>()
     var visibleXRangeMaximum = 5f
-    private var deviceId: String? = null
-    private var currentAppExerciseTrackingReportDetails: Map<String, Any> = mutableMapOf()
-    private var userFitnessTracker: UserFitnessTracker? = null
-    private var userExerciseTrackingReports: RealmResults<UserExerciseTrackingReport>? = null
 
     // Life cycle
-    fun onViewCreated(userFitnessTrackerId: String?) {
-        currentAppExerciseTrackingReportDetails = InternationManager.getCurrentAppExerciseTrackingReportDetails()
+    init {
+        val userFitnessTrackerId = savedStateHandle.get<String>("userFitnessTrackerId")
         viewModelScope.launch {
-            getData(userFitnessTrackerId)
-            handleReports()
-            observeFireStore()
-            observeData()
+            observeData(userFitnessTrackerId)
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        FireStoreManager.removeListeners(this::class.java)
     }
 
     // Functions
-    private suspend fun getData(userFitnessTrackerId: String?) {
-        userFitnessTrackerId ?: return
-        getUserFitnessTracker(userFitnessTrackerId)
-        getUserExerciseTrackingReports()
-    }
+    private suspend fun observeData(id: String?) = supervisorScope {
+        if (id == null) return@supervisorScope
 
-    private suspend fun getUserFitnessTracker(userFitnessTrackerId: String) {
-        userFitnessTracker = RealmManager.read(UserFitnessTracker::class.java, userFitnessTrackerId)
+        val deviceId = userFitnessTrackerRepository
+                .getUserFitnessTrackerFlow(id)
+                .first {
+                    it != null && it.isValid()
+                }?.deviceId ?: return@supervisorScope
 
-        userFitnessTracker?.let {
-            if (!it.isValid()) return
-            deviceId = it.deviceId
+        launch {
+            userExerciseTrackingReportRepository.observeUserExerciseTrackingReports(deviceId)
+        }
+        launch {
+            userExerciseTrackingReportRepository
+                .getUserExerciseTrackingReportsFlow(deviceId)
+                .firstThenDebounce(500)
+                .collect {
+                    handleReports(it)
+                }
         }
     }
 
-    private suspend fun getUserExerciseTrackingReports() {
-        val deviceId = deviceId ?: return
-
-        userExerciseTrackingReports = RealmManager.read(
-            UserExerciseTrackingReport::class.java,
-            realmQuery = RQuery.Where(UserExerciseTrackingReport::deviceId.name, Operator.EQUAL, deviceId),
-            sort = listOf(Pair(UserExerciseTrackingReport::reportedAt.name, Sort.ASCENDING)))
-    }
-
-    private fun observeFireStore() {
-        val userFitnessTracker = userFitnessTracker ?: return
-        if (!userFitnessTracker.isValid()) return
-
-        FireStoreManager.buildSubCollectionRef(
-            FireStoreCollection.USER_EXERCISE_TRACKING_REPORTS,
-            Pair(FireStoreCollection.USER_MEMBERS, userFitnessTracker.ownerUserCode))
-            .whereEqualTo("device_id", deviceId)
-            .observe(UserExerciseTrackingReport::class.java, this::class.java)
-    }
-
-    @OptIn(FlowPreview::class)
-    private suspend fun observeData() {
-        val userExerciseTrackingReports = userExerciseTrackingReports ?: return
-
-        userExerciseTrackingReports.asFlow()
-            .debounce(500)
-            .collect {
-                this.userExerciseTrackingReports = it.list
-                handleReports()
-            }
-    }
-
-    private fun handleReports() {
-        val userExerciseTrackingReports = userExerciseTrackingReports ?: return
+    private fun handleReports(userExerciseTrackingReports: List<UserExerciseTrackingReport>) {
         if (userExerciseTrackingReports.isEmpty()) return
 
         val context = MediJourney.getAppContext()

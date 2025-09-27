@@ -3,11 +3,14 @@ package com.example.medijourney.modules.health_center.nutrition_tracking_report
 import android.content.Context
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.medijourney.R
+import com.example.medijourney.common.extensions.firstThenDebounce
 import com.example.medijourney.common.helpers.DateHelper
 import com.example.medijourney.common.helpers.MediJourney
+import com.example.medijourney.common.managers.AppNutritionTrackingReportDetails
 import com.example.medijourney.common.managers.InternationManager
 import com.example.medijourney.common.managers.fire_store.FireStoreCollection
 import com.example.medijourney.common.managers.fire_store.FireStoreManager
@@ -20,22 +23,34 @@ import com.example.medijourney.common.models.realm_models.UserFitnessTracker
 import com.example.medijourney.common.models.realm_models.UserNutritionTrackingReport
 import com.example.medijourney.common.models.ui_models.EdgePadding
 import com.example.medijourney.common.models.ui_models.MTextStyle
+import com.example.medijourney.common.respositories.UserFitnessTrackerRepository
+import com.example.medijourney.common.respositories.UserNutritionTrackingReportRepository
 import com.example.medijourney.common.ui_components.recycle_view_adapter.h_dual_image_text_view.HDualImageTextViewHolder
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.highlight.Highlight
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.ext.isValid
 import io.realm.kotlin.query.RealmResults
 import io.realm.kotlin.query.Sort
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import java.util.Calendar
 import java.util.Date
+import javax.inject.Inject
 
-class NutritionTrackingReportViewModel : ViewModel() {
+@HiltViewModel
+class NutritionTrackingReportViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
+    @AppNutritionTrackingReportDetails private val appNutritionTrackingReportDetails: Map<String, *>,
+    private val userFitnessTrackerRepository: UserFitnessTrackerRepository,
+    private val userNutritionTrackingReportRepository: UserNutritionTrackingReportRepository
+    ) : ViewModel() {
 
     // Properties
     var selectedDate = MutableLiveData<Date?>()
@@ -52,73 +67,36 @@ class NutritionTrackingReportViewModel : ViewModel() {
     var micronutrientsVisibleXRangeMaximum = 5f
     var micronutrientsItemModels = MutableLiveData<MutableList<DynamicUIItem>>()
     var micronutrientsDescription = MutableLiveData<String?>()
-    private var currentAppNutritionTrackingReportDetails: Map<String, Any> = mutableMapOf()
-    private var userFitnessTracker: UserFitnessTracker? = null
-    private var deviceId: String? = null
-    private var userNutritionTrackingReports: RealmResults<UserNutritionTrackingReport>? = null
 
     // Life cycle
-    fun onCreateView(userFitnessTrackerId: String?) {
-        currentAppNutritionTrackingReportDetails = InternationManager.getCurrentAppNutritionTrackingReportDetails()
+    init {
+        val userFitnessTrackerId = savedStateHandle.get<String>("userFitnessTrackerId")
         viewModelScope.launch {
-            getData(userFitnessTrackerId)
-            handleReports()
-            observeFireStore()
-            observeData()
+            observeData(userFitnessTrackerId)
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        FireStoreManager.removeListeners(this::class.java)
     }
 
     // Functions
-    private suspend fun getData(userFitnessTrackerId: String?) {
-        userFitnessTrackerId ?: return
-        getUserFitnessTracker(userFitnessTrackerId)
-        getUserNutritionTrackingReports()
-    }
+    private suspend fun observeData(id: String?) = supervisorScope {
+        if (id == null) return@supervisorScope
 
-    private suspend fun getUserFitnessTracker(userFitnessTrackerId: String) {
-        userFitnessTracker = RealmManager.read(UserFitnessTracker::class.java, userFitnessTrackerId)
+        val deviceId = userFitnessTrackerRepository
+            .getUserFitnessTrackerFlow(id)
+            .first {
+                it != null && it.isValid()
+            }?.deviceId ?: return@supervisorScope
 
-        userFitnessTracker?.let {
-            if (!it.isValid()) return
-            deviceId = it.deviceId
+        launch {
+            userNutritionTrackingReportRepository.observeUserNutritionTrackingReports(deviceId)
         }
-    }
-
-    private suspend fun getUserNutritionTrackingReports() {
-        val deviceId = deviceId ?: return
-
-        userNutritionTrackingReports = RealmManager.read(
-            UserNutritionTrackingReport::class.java,
-            realmQuery = RQuery.Where(UserNutritionTrackingReport::deviceId.name, Operator.EQUAL, deviceId),
-            sort = listOf(Pair(UserNutritionTrackingReport::reportedAt.name, Sort.DESCENDING)))
-    }
-
-    private fun observeFireStore() {
-        val userFitnessTracker = userFitnessTracker ?: return
-        if (!userFitnessTracker.isValid()) return
-
-        FireStoreManager.buildSubCollectionRef(
-            FireStoreCollection.USER_NUTRITION_TRACKING_REPORTS,
-            Pair(FireStoreCollection.USER_MEMBERS, userFitnessTracker.ownerUserCode))
-            .whereEqualTo("device_id", deviceId)
-            .observe(UserNutritionTrackingReport::class.java, this::class.java)
-    }
-
-    @OptIn(FlowPreview::class)
-    private suspend fun observeData() {
-        val userNutritionTrackingReports = userNutritionTrackingReports ?: return
-
-        userNutritionTrackingReports.asFlow()
-            .debounce(500)
-            .collect {
-                this.userNutritionTrackingReports = it.list
-                handleReports()
-            }
+        launch {
+            userNutritionTrackingReportRepository
+                .getUserNutritionTrackingReportsFlow(deviceId)
+                .firstThenDebounce(500)
+                .collect {
+                    handleReports(it)
+                }
+        }
     }
 
     fun updateSelectedDate(month: Int, year: Int, dayOfMonth: Int) {
@@ -127,8 +105,7 @@ class NutritionTrackingReportViewModel : ViewModel() {
         selectedDate.postValue(calendar.time)
     }
 
-    private fun handleReports() {
-        val userNutritionTrackingReports = userNutritionTrackingReports ?: return
+    private fun handleReports(userNutritionTrackingReports: List<UserNutritionTrackingReport>) {
         if (userNutritionTrackingReports.isEmpty()) return
 
         val context = MediJourney.getAppContext()
@@ -236,7 +213,7 @@ class NutritionTrackingReportViewModel : ViewModel() {
     fun handleValueSelectedAtCalorieChart(e: Entry?) {
         val data = e?.data as? UserNutritionTrackingReport ?: return
         if (!data.isValid()) return
-        val macronutrients = currentAppNutritionTrackingReportDetails["macronutrients"] as? List<Map<String, Any>> ?: return
+        val macronutrients = appNutritionTrackingReportDetails["macronutrients"] as? List<Map<String, Any>> ?: return
         val unit = "mg"
 
         val items = macronutrients.map {
@@ -383,7 +360,7 @@ class NutritionTrackingReportViewModel : ViewModel() {
         val data = e?.data as? UserNutritionTrackingReport ?: return
         if (!data.isValid()) return
         val highlight = h ?: return
-        val micronutrients = currentAppNutritionTrackingReportDetails["micronutrients"] as? Map<String, Any> ?: return
+        val micronutrients = appNutritionTrackingReportDetails["micronutrients"] as? Map<String, Any> ?: return
 
         when (highlight.dataSetIndex) {
             0 -> handleMicronutrientItems(data, micronutrients, "vitamins", data.vitaminIntakeDescription)
