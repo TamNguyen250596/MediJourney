@@ -20,15 +20,6 @@ object BiometricPromptUtils {
 
         val callback = object : BiometricPrompt.AuthenticationCallback() {
 
-            override fun onAuthenticationError(errCode: Int, errString: CharSequence) {
-                super.onAuthenticationError(errCode, errString)
-
-            }
-
-            override fun onAuthenticationFailed() {
-                super.onAuthenticationFailed()
-            }
-
             override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                 super.onAuthenticationSucceeded(result)
                 processSuccess(result)

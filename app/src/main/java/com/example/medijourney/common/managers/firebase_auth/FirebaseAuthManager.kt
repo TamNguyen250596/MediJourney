@@ -302,7 +302,7 @@ class FAManger @Inject constructor() {
 
     // DeActive User
     suspend fun deActiveUser(): AuthenticationResult {
-        val currentUser = FAManger.currentUser ?: return AuthenticationResult.DEACTIVE_ACCOUNT_FAILED
+        val currentUser = currentUser ?: return AuthenticationResult.DEACTIVE_ACCOUNT_FAILED
         val isDelectedUser = suspendCancellableCoroutine { count ->
             currentUser.delete()
                 .addOnCompleteListener {
@@ -327,7 +327,7 @@ class FAManger @Inject constructor() {
 
     // Delete Account
     suspend fun deleteUser(): AuthenticationResult {
-        val currentUser = FAManger.currentUser ?: return AuthenticationResult.DELETE_ACCOUNT_FAILED
+        val currentUser = currentUser ?: return AuthenticationResult.DELETE_ACCOUNT_FAILED
         val isDelectedUser = suspendCancellableCoroutine { count ->
             currentUser.delete()
                 .addOnCompleteListener {
@@ -351,7 +351,7 @@ class FAManger @Inject constructor() {
 
     // Change password
     suspend fun changePasswordWhenLogIn(newPassword: String): AuthenticationResult {
-        val currentUser = FAManger.currentUser ?: return AuthenticationResult.CHANGE_PASSWORD_FAILED
+        val currentUser = currentUser ?: return AuthenticationResult.CHANGE_PASSWORD_FAILED
         val isUpdatedPassword = suspendCancellableCoroutine { count ->
             currentUser.updatePassword(newPassword)
                 .addOnCompleteListener {
@@ -372,7 +372,7 @@ class FAManger @Inject constructor() {
         val userName = map["user_name"] ?: return AuthenticationResult.CHANGE_PASSWORD_FAILED
         val currentPassword = map["current_password"] ?: return AuthenticationResult.CHANGE_PASSWORD_FAILED
         val credential = EmailAuthProvider.getCredential(userName, currentPassword)
-        val currentUser = FAManger.currentUser ?: return AuthenticationResult.CHANGE_PASSWORD_FAILED
+        val currentUser = currentUser ?: return AuthenticationResult.CHANGE_PASSWORD_FAILED
         val isUpdatedPassword = suspendCancellableCoroutine { count ->
             currentUser.reauthenticate(credential)
                 .addOnCompleteListener {
