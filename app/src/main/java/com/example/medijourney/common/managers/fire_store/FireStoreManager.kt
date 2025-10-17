@@ -71,13 +71,6 @@ object FireStoreManager {
         return docRef
     }
 
-    // Build Query
-    fun buildCollection(collection: FireStoreCollection): Query {
-        val db = Firebase.firestore
-        val ref = db.collection(collection.name.lowercase())
-        return ref
-    }
-
     // Functions
     fun checkCachedListener(query: Int): Boolean {
         synchronized(this) {
@@ -117,19 +110,6 @@ object FireStoreManager {
         }
     }
 
-    fun removeListener(queryId: Int) {
-        synchronized(this) {
-            listeners = listeners.filter { listener ->
-                if (listener.queryId == queryId) {
-                    listener.listener.remove()
-                    false
-                } else {
-                    true
-                }
-            }.toMutableList()
-        }
-    }
-
     fun removeListener(query: Query) {
         synchronized(this) {
             listeners = listeners.filter { listener ->
@@ -157,12 +137,6 @@ object FireStoreManager {
     }
 
     fun removeAllListeners() {
-        synchronized(this) {
-            for (listener in listeners) {
-                listener.listener.remove()
-            }
-            listeners.clear()
-        }
         for (listener in newListeners) {
             listener.registration?.remove()
         }

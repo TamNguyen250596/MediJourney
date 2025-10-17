@@ -33,7 +33,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -46,8 +45,10 @@ import com.example.medijourney.common.models.item_models.DynamicUIItem
 import com.example.medijourney.common.ui_components.composes.CIndicator
 import com.example.medijourney.common.ui_components.composes.EmptyPlaceholder
 import com.example.medijourney.modules.dashboard.medication_list.sub_views.MedicalItem
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 
+@AndroidEntryPoint
 class MedicationListFragment : Fragment() {
 
     // Properties

@@ -11,20 +11,12 @@ import com.example.medijourney.common.extensions.firstThenDebounce
 import com.example.medijourney.common.helpers.DateHelper
 import com.example.medijourney.common.helpers.MediJourney
 import com.example.medijourney.common.managers.AppNutritionTrackingReportDetails
-import com.example.medijourney.common.managers.InternationManager
-import com.example.medijourney.common.managers.fire_store.FireStoreCollection
-import com.example.medijourney.common.managers.fire_store.FireStoreManager
-import com.example.medijourney.common.managers.fire_store.observe
-import com.example.medijourney.common.managers.realm.Operator
-import com.example.medijourney.common.managers.realm.RQuery
-import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.item_models.DynamicUIItem
-import com.example.medijourney.common.models.realm_models.UserFitnessTracker
 import com.example.medijourney.common.models.realm_models.UserNutritionTrackingReport
 import com.example.medijourney.common.models.ui_models.EdgePadding
 import com.example.medijourney.common.models.ui_models.MTextStyle
-import com.example.medijourney.common.respositories.UserFitnessTrackerRepository
-import com.example.medijourney.common.respositories.UserNutritionTrackingReportRepository
+import com.example.medijourney.common.respositories.UserFitnessTrackerRepo
+import com.example.medijourney.common.respositories.UserNutritionTrackingReportRepo
 import com.example.medijourney.common.ui_components.recycle_view_adapter.h_dual_image_text_view.HDualImageTextViewHolder
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
@@ -33,10 +25,6 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.highlight.Highlight
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.ext.isValid
-import io.realm.kotlin.query.RealmResults
-import io.realm.kotlin.query.Sort
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
@@ -46,10 +34,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NutritionTrackingReportViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle,
     @AppNutritionTrackingReportDetails private val appNutritionTrackingReportDetails: Map<String, *>,
-    private val userFitnessTrackerRepository: UserFitnessTrackerRepository,
-    private val userNutritionTrackingReportRepository: UserNutritionTrackingReportRepository
+    private val userFitnessTrackerRepository: UserFitnessTrackerRepo,
+    private val userNutritionTrackingReportRepository: UserNutritionTrackingReportRepo
     ) : ViewModel() {
 
     // Properties

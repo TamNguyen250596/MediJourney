@@ -16,9 +16,9 @@ import com.example.medijourney.common.models.item_models.DynamicUIItem
 import com.example.medijourney.common.models.realm_models.Membership
 import com.example.medijourney.common.models.realm_models.User
 import com.example.medijourney.common.models.realm_models.UserMembership
-import com.example.medijourney.common.respositories.MembershipRepository
-import com.example.medijourney.common.respositories.UserMembershipRepository
-import com.example.medijourney.common.respositories.UserRepository
+import com.example.medijourney.common.respositories.MembershipRepo
+import com.example.medijourney.common.respositories.UserMembershipRepo
+import com.example.medijourney.common.respositories.UserRepo
 import com.example.medijourney.common.ui_components.recycle_view_adapter.h_dual_image_text_view.HDualImageTextViewHolder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.ext.isValid
@@ -33,9 +33,9 @@ import javax.inject.Inject
 class MainProfileViewModel @Inject constructor(
     private val mDataStore: MDataStore,
     private val faManger: FAManger,
-    private val userRepository: UserRepository,
-    private val userMembershipRepository: UserMembershipRepository,
-    private val membershipRepository: MembershipRepository
+    userRepository: UserRepo,
+    private val userMembershipRepository: UserMembershipRepo,
+    private val membershipRepository: MembershipRepo
 ) : ViewModel() {
 
     // Properties

@@ -11,12 +11,12 @@ import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-interface MembershipRepository {
+interface MembershipRepo {
     suspend fun observeMemberships()
     fun getMembershipsFlow(): Flow<List<Membership>>
 }
 
-class MembershipRepositoryImpl @Inject constructor() : MembershipRepository {
+class MembershipRepoImpl @Inject constructor() : MembershipRepo {
     override suspend fun observeMemberships() {
         FireStoreManager.observeCollection(FireStoreCollection.MEMBERSHIPS)
     }
@@ -32,5 +32,5 @@ abstract class MembershipModule {
 
     @Binds
     abstract fun bindMembershipRepository(
-        impl: MembershipRepositoryImpl): MembershipRepository
+        impl: MembershipRepoImpl): MembershipRepo
 }

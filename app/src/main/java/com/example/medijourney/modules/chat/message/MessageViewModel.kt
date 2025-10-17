@@ -21,10 +21,10 @@ import com.example.medijourney.common.models.realm_models.User
 import com.example.medijourney.common.models.realm_models.UserMessage
 import com.example.medijourney.common.models.ui_models.ImageStyle
 import com.example.medijourney.common.models.ui_models.MTextStyle
-import com.example.medijourney.common.respositories.ConversationRepository
-import com.example.medijourney.common.respositories.MessageRepository
-import com.example.medijourney.common.respositories.UserMessageRepository
-import com.example.medijourney.common.respositories.UserRepository
+import com.example.medijourney.common.respositories.ConversationRepo
+import com.example.medijourney.common.respositories.MessageRepo
+import com.example.medijourney.common.respositories.UserMessageRepo
+import com.example.medijourney.common.respositories.UserRepo
 import com.google.firebase.firestore.Query
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.ext.isValid
@@ -46,10 +46,10 @@ import javax.inject.Inject
 @HiltViewModel
 class MessageViewModel @Inject constructor(
     state: SavedStateHandle,
-    private val userRepository: UserRepository,
-    conversationRepository: ConversationRepository,
-    private val userMessageRepository: UserMessageRepository,
-    private val messageRepository: MessageRepository
+    private val userRepository: UserRepo,
+    conversationRepository: ConversationRepo,
+    private val userMessageRepository: UserMessageRepo,
+    private val messageRepository: MessageRepo
 ) : ViewModel() {
 
     // Properties
@@ -72,7 +72,6 @@ class MessageViewModel @Inject constructor(
     private var userMessagesFlow = userMessageRepository.getUserMessageFLow(conversationId)
     private var pinnedMessagesFlow = messageRepository.getPinnedMessagesFlow(conversationId)
     private var cursorCreatedAt: Long? = null
-    private var latestMessagesQuery: Query? = null
     private var observeCurrentPageJob: Job? = null
 
     // Life cycle

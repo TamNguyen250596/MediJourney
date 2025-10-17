@@ -45,8 +45,10 @@ import com.example.medijourney.common.ui_components.composes.CIndicator
 import com.example.medijourney.common.ui_components.composes.LImage3TextsRButtonView
 import com.example.medijourney.common.ui_components.composes.EmptyPlaceholder
 import com.example.medijourney.common.ui_components.dialogs.IndicatorHandler
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 
+@AndroidEntryPoint
 class SearchConversationFragment : Fragment() {
 
     // Properties

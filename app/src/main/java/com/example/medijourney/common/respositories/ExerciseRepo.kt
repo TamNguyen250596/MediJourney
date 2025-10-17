@@ -5,7 +5,7 @@ import com.example.medijourney.common.managers.fire_store.FSQueryBuilder
 import com.example.medijourney.common.managers.fire_store.FireStoreCollection
 import com.example.medijourney.common.managers.fire_store.FireStoreManager
 import com.example.medijourney.common.managers.realm.RealmManager
-import com.example.medijourney.common.models.realm_models.Recipe
+import com.example.medijourney.common.models.realm_models.Exercise
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -13,24 +13,26 @@ import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-interface RecipeRepository {
-    suspend fun observeRecipes()
-    fun getRecipesFlow(): Flow<List<Recipe>>
+// Repository interface
+interface ExerciseRepo {
+    suspend fun observeExercises()
+    fun getExercisesFlow(): Flow<List<Exercise>>
 }
 
-class RecipeRepositoryImpl @Inject constructor() : RecipeRepository {
+// Repository implementation
+class ExerciseRepoImpl @Inject constructor() : ExerciseRepo {
 
-    override suspend fun observeRecipes() {
+    override suspend fun observeExercises() {
         FireStoreManager.observeCollection(
-            FireStoreCollection.RECIPES,
+            FireStoreCollection.EXERCISES,
             queryBuilder = FSQueryBuilder()
                 .equalTo("enable", true)
         )
     }
 
-    override fun getRecipesFlow(): Flow<List<Recipe>> {
+    override fun getExercisesFlow(): Flow<List<Exercise>> {
         return RealmManager.flow(
-            Recipe::class,
+            Exercise::class,
             queryBuilder = RQueryBuilder()
                 .equalTo("enable", true)
         )
@@ -40,10 +42,10 @@ class RecipeRepositoryImpl @Inject constructor() : RecipeRepository {
 // Hilt module
 @Module
 @InstallIn(ViewModelComponent::class)
-abstract class RecipeModule {
+abstract class ExerciseModule {
 
     @Binds
-    abstract fun bindRecipeRepository(
-        impl: RecipeRepositoryImpl
-    ): RecipeRepository
+    abstract fun bindExerciseRepository(
+        impl: ExerciseRepoImpl
+    ): ExerciseRepo
 }

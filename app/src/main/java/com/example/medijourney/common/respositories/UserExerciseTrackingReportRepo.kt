@@ -6,7 +6,7 @@ import com.example.medijourney.common.managers.fire_store.FireStoreCollection
 import com.example.medijourney.common.managers.fire_store.FireStoreManager
 import com.example.medijourney.common.managers.firebase_auth.FAManger
 import com.example.medijourney.common.managers.realm.RealmManager
-import com.example.medijourney.common.models.realm_models.UserSleepTrackingReport
+import com.example.medijourney.common.models.realm_models.UserExerciseTrackingReport
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -15,31 +15,29 @@ import io.realm.kotlin.query.Sort
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-// Repository interface
-interface UserSleepTrackingReportRepository {
-    suspend fun observeUserSleepTrackingReports(deviceId: String)
-    fun getUserSleepTrackingReportsFlow(deviceId: String): Flow<List<UserSleepTrackingReport>>
+interface UserExerciseTrackingReportRepo {
+    suspend fun observeUserExerciseTrackingReports(deviceId: String)
+    fun getUserExerciseTrackingReportsFlow(deviceId: String): Flow<List<UserExerciseTrackingReport>>
 }
 
-// Repository implementation
-class UserSleepTrackingReportRepositoryImpl @Inject constructor() : UserSleepTrackingReportRepository {
+class UserExerciseTrackingReportRepoImpl @Inject constructor() : UserExerciseTrackingReportRepo {
 
-    override suspend fun observeUserSleepTrackingReports(deviceId: String) {
+    override suspend fun observeUserExerciseTrackingReports(deviceId: String) {
         FireStoreManager.observeCollection(
-            FireStoreCollection.USER_SLEEP_TRACKING_REPORTS,
+            FireStoreCollection.USER_EXERCISE_TRACKING_REPORTS,
             queryBuilder = FSQueryBuilder()
                 .equalTo("user_id", FAManger.currentUserCode)
                 .equalTo("device_id", deviceId)
         )
     }
 
-    override fun getUserSleepTrackingReportsFlow(deviceId: String): Flow<List<UserSleepTrackingReport>> {
+    override fun getUserExerciseTrackingReportsFlow(deviceId: String): Flow<List<UserExerciseTrackingReport>> {
         return RealmManager.flow(
-            UserSleepTrackingReport::class,
+            UserExerciseTrackingReport::class,
             queryBuilder = RQueryBuilder()
                 .equalTo("user_id", FAManger.currentUserCode)
-                .equalTo(UserSleepTrackingReport::deviceId.name, deviceId)
-                .sort(UserSleepTrackingReport::reportedAt.name, Sort.ASCENDING)
+                .equalTo(UserExerciseTrackingReport::deviceId.name, deviceId)
+                .sort(UserExerciseTrackingReport::reportedAt.name, Sort.ASCENDING)
         )
     }
 }
@@ -47,10 +45,10 @@ class UserSleepTrackingReportRepositoryImpl @Inject constructor() : UserSleepTra
 // Hilt module
 @Module
 @InstallIn(ViewModelComponent::class)
-abstract class UserSleepTrackingReportModule {
+abstract class UserExerciseTrackingReportModule {
 
     @Binds
-    abstract fun bindUserSleepTrackingReportRepository(
-        impl: UserSleepTrackingReportRepositoryImpl
-    ): UserSleepTrackingReportRepository
+    abstract fun bindUserExerciseTrackingReportRepository(
+        impl: UserExerciseTrackingReportRepoImpl
+    ): UserExerciseTrackingReportRepo
 }

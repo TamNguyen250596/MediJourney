@@ -15,8 +15,8 @@ import com.example.medijourney.common.models.realm_models.UserSleepTrackingRepor
 import com.example.medijourney.common.models.ui_models.EdgePadding
 import com.example.medijourney.common.models.ui_models.Segment
 import com.example.medijourney.common.models.ui_models.MTextStyle
-import com.example.medijourney.common.respositories.UserFitnessTrackerRepository
-import com.example.medijourney.common.respositories.UserSleepTrackingReportRepository
+import com.example.medijourney.common.respositories.UserFitnessTrackerRepo
+import com.example.medijourney.common.respositories.UserSleepTrackingReportRepo
 import com.example.medijourney.common.ui_components.recycle_view_adapter.h_dual_image_text_view.HDualImageTextViewHolder
 import com.github.mikephil.charting.components.LimitLine
 import com.github.mikephil.charting.data.BarData
@@ -37,8 +37,8 @@ import javax.inject.Inject
 class SleepTrackingReportViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     @AppSleepTrackingReportDetails private val currentAppSleepTrackingReportDetails: Map<String, *>,
-    private val userFitnessTrackerRepository: UserFitnessTrackerRepository,
-    private val userSleepTrackingReportRepository: UserSleepTrackingReportRepository
+    private val userFitnessTrackerRepository: UserFitnessTrackerRepo,
+    private val userSleepTrackingReportRepository: UserSleepTrackingReportRepo
 ) : ViewModel() {
 
     // Properties

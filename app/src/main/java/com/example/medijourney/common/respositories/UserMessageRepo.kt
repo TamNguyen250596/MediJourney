@@ -19,7 +19,7 @@ import javax.inject.Inject
 import kotlin.collections.mapNotNull
 import kotlin.collections.orEmpty
 
-interface UserMessageRepository {
+interface UserMessageRepo {
     suspend fun observeLatestMessages(conversationId: String): Flow<List<MutableMap<String, Any>>>
     suspend fun getOlderMessages(conversationId: String, cursorCreatedAt: Long) : List<MutableMap<String, Any>>
     suspend fun observeOlderMessages(conversationId: String, cursorCreatedAt: Long) : Flow<List<MutableMap<String, Any>>>
@@ -29,7 +29,7 @@ interface UserMessageRepository {
     fun getUserMessageFlow(messageId: String) : Flow<List<UserMessage>>
 }
 
-class UserMessageRepositoryImpl @Inject constructor(): UserMessageRepository {
+class UserMessageRepoImpl @Inject constructor(): UserMessageRepo {
     override suspend fun observeLatestMessages(conversationId: String): Flow<List<MutableMap<String, Any>>> {
         return FireStoreManager.getQuerySnapshotFlow(
             FireStoreCollection.USER_MESSAGES,
@@ -137,5 +137,5 @@ abstract class UserMessageModule {
 
     @Binds
     abstract fun bindUserMessageRepository(
-    impl: UserMessageRepositoryImpl): UserMessageRepository
+    impl: UserMessageRepoImpl): UserMessageRepo
 }

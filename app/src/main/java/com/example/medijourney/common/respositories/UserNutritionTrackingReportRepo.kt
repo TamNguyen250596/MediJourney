@@ -16,13 +16,13 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 // Repository interface
-interface UserNutritionTrackingReportRepository {
+interface UserNutritionTrackingReportRepo {
     suspend fun observeUserNutritionTrackingReports(deviceId: String)
     fun getUserNutritionTrackingReportsFlow(deviceId: String): Flow<List<UserNutritionTrackingReport>>
 }
 
 // Repository implementation
-class UserNutritionTrackingReportRepositoryImpl @Inject constructor() : UserNutritionTrackingReportRepository {
+class UserNutritionTrackingReportRepoImpl @Inject constructor() : UserNutritionTrackingReportRepo {
 
     override suspend fun observeUserNutritionTrackingReports(deviceId: String) {
         FireStoreManager.observeCollection(
@@ -51,6 +51,6 @@ abstract class UserNutritionTrackingReportModule {
 
     @Binds
     abstract fun bindUserNutritionTrackingReportRepository(
-        impl: UserNutritionTrackingReportRepositoryImpl
-    ): UserNutritionTrackingReportRepository
+        impl: UserNutritionTrackingReportRepoImpl
+    ): UserNutritionTrackingReportRepo
 }

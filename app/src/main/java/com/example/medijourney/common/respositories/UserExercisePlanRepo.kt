@@ -4,8 +4,9 @@ import com.example.medijourney.common.extensions.RQueryBuilder
 import com.example.medijourney.common.managers.fire_store.FSQueryBuilder
 import com.example.medijourney.common.managers.fire_store.FireStoreCollection
 import com.example.medijourney.common.managers.fire_store.FireStoreManager
+import com.example.medijourney.common.managers.firebase_auth.FAManger
 import com.example.medijourney.common.managers.realm.RealmManager
-import com.example.medijourney.common.models.realm_models.ExerciseLevel
+import com.example.medijourney.common.models.realm_models.UserExercisePlan
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -13,38 +14,36 @@ import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-interface ExerciseLevelRepository {
-    suspend fun observeExerciseLevels()
-    fun getExerciseLevelsFlow(): Flow<List<ExerciseLevel>>
+interface UserExercisePlanRepo {
+    suspend fun observeUserExercisePlans()
+    fun getUserExercisePlansFlow(): Flow<List<UserExercisePlan>>
 }
 
-// Repository implementation
-class ExerciseLevelRepositoryImpl @Inject constructor() : ExerciseLevelRepository {
+class UserExercisePlanRepoImpl @Inject constructor() : UserExercisePlanRepo {
 
-    override suspend fun observeExerciseLevels() {
+    override suspend fun observeUserExercisePlans() {
         FireStoreManager.observeCollection(
-            FireStoreCollection.EXERCISE_LEVELS,
+            FireStoreCollection.USER_EXERCISE_PLANS,
             queryBuilder = FSQueryBuilder()
-                .equalTo("enable", true)
+                .equalTo("user_id", FAManger.currentUserCode)
         )
     }
 
-    override fun getExerciseLevelsFlow(): Flow<List<ExerciseLevel>> {
+    override fun getUserExercisePlansFlow(): Flow<List<UserExercisePlan>> {
         return RealmManager.flow(
-            ExerciseLevel::class,
+            UserExercisePlan::class,
             queryBuilder = RQueryBuilder()
-                .equalTo("enable", true)
+                .equalTo("user_id", FAManger.currentUserCode)
         )
     }
 }
 
-// Hilt module
 @Module
 @InstallIn(ViewModelComponent::class)
-abstract class ExerciseLevelModule {
+abstract class UserExercisePlanModule {
 
     @Binds
-    abstract fun bindExerciseLevelRepository(
-        impl: ExerciseLevelRepositoryImpl
-    ): ExerciseLevelRepository
+    abstract fun bindUserExercisePlanRepository(
+        impl: UserExercisePlanRepoImpl
+    ): UserExercisePlanRepo
 }

@@ -16,7 +16,7 @@ import io.realm.kotlin.query.Sort
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-interface MessageRepository {
+interface MessageRepo {
     suspend fun getMessages(conversationIds: List<String>, keyword: String?, cursorDate: Long? = null): List<MutableMap<String, Any>>
     suspend fun observePinnedMessages(conversationId: String)
     fun geMessagesFLow(conversationId: String) : Flow<List<Message>>
@@ -24,7 +24,7 @@ interface MessageRepository {
     fun getPinnedMessagesFlow(conversationId: String) : Flow<List<Message>>
 }
 
-class MessageRepositoryImpl @Inject constructor(): MessageRepository {
+class MessageRepoImpl @Inject constructor(): MessageRepo {
     override suspend fun getMessages(
         conversationIds: List<String>,
         keyword: String?,
@@ -103,5 +103,5 @@ abstract class MessageModule {
 
     @Binds
     abstract fun bindMessageRepository(
-    impl: MessageRepositoryImpl): MessageRepository
+    impl: MessageRepoImpl): MessageRepo
 }

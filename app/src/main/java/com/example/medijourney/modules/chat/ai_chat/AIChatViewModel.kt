@@ -17,9 +17,9 @@ import com.example.medijourney.common.models.realm_models.User
 import com.example.medijourney.common.models.realm_models.UserMessage
 import com.example.medijourney.common.models.ui_models.ImageStyle
 import com.example.medijourney.common.models.ui_models.MTextStyle
-import com.example.medijourney.common.respositories.MessageRepository
-import com.example.medijourney.common.respositories.UserMessageRepository
-import com.example.medijourney.common.respositories.UserRepository
+import com.example.medijourney.common.respositories.MessageRepo
+import com.example.medijourney.common.respositories.UserMessageRepo
+import com.example.medijourney.common.respositories.UserRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.ext.isValid
 import kotlinx.coroutines.FlowPreview
@@ -39,9 +39,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AIChatViewModel @Inject constructor(
-    private val userRepository: UserRepository,
-    private val userMessageRepository: UserMessageRepository,
-    messageRepository: MessageRepository
+    private val userRepository: UserRepo,
+    private val userMessageRepository: UserMessageRepo,
+    messageRepository: MessageRepo
 ) : ViewModel() {
 
     // Properties

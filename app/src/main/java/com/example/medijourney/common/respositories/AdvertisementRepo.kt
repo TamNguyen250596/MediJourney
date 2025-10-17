@@ -10,11 +10,11 @@ import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-interface AdvertisementRepository {
+interface AdvertisementRepo {
     fun getAdvertisements(locations: List<String>): Flow<List<Advertisement>>
 }
 
-class AdvertisementImpl @Inject constructor() : AdvertisementRepository {
+class AdvertisementRepoImpl @Inject constructor() : AdvertisementRepo {
     override fun getAdvertisements(locations: List<String>): Flow<List<Advertisement>> {
         return RealmManager.flow(
                 Advertisement::class,
@@ -30,6 +30,6 @@ abstract class AdvertisementModule {
 
     @Binds
     abstract fun bindAdvertisementRepository(
-        advertisementImpl: AdvertisementImpl
-    ): AdvertisementRepository
+        advertisementImpl: AdvertisementRepoImpl
+    ): AdvertisementRepo
 }

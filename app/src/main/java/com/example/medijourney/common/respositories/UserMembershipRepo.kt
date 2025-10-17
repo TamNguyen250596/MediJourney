@@ -6,44 +6,44 @@ import com.example.medijourney.common.managers.fire_store.FireStoreCollection
 import com.example.medijourney.common.managers.fire_store.FireStoreManager
 import com.example.medijourney.common.managers.firebase_auth.FAManger
 import com.example.medijourney.common.managers.realm.RealmManager
-import com.example.medijourney.common.models.realm_models.UserExercisePlan
+import com.example.medijourney.common.models.realm_models.UserMembership
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-interface UserExercisePlanRepository {
-    suspend fun observeUserExercisePlans()
-    fun getUserExercisePlansFlow(): Flow<List<UserExercisePlan>>
+interface UserMembershipRepo {
+    suspend fun observeUserMembership()
+    fun getUserMembershipFow(): Flow<UserMembership?>
 }
 
-class UserExercisePlanRepositoryImpl @Inject constructor() : UserExercisePlanRepository {
-
-    override suspend fun observeUserExercisePlans() {
+class UserMembershipRepoImpl @Inject constructor() : UserMembershipRepo   {
+    override suspend fun observeUserMembership() {
         FireStoreManager.observeCollection(
-            FireStoreCollection.USER_EXERCISE_PLANS,
+            FireStoreCollection.USER_MEMBERSHIP,
             queryBuilder = FSQueryBuilder()
                 .equalTo("user_id", FAManger.currentUserCode)
         )
     }
 
-    override fun getUserExercisePlansFlow(): Flow<List<UserExercisePlan>> {
+    override fun getUserMembershipFow(): Flow<UserMembership?> {
         return RealmManager.flow(
-            UserExercisePlan::class,
+            UserMembership::class,
             queryBuilder = RQueryBuilder()
-                .equalTo("user_id", FAManger.currentUserCode)
-        )
+                .equalTo(UserMembership::userId.name, FAManger.currentUserCode)
+        ).map { it.firstOrNull() }
     }
 }
 
 @Module
 @InstallIn(ViewModelComponent::class)
-abstract class UserExercisePlanModule {
+abstract class UserMembershipModule {
 
     @Binds
-    abstract fun bindUserExercisePlanRepository(
-        impl: UserExercisePlanRepositoryImpl
-    ): UserExercisePlanRepository
+    abstract fun bindUserMembershipRepository(
+        impl: UserMembershipRepoImpl
+    ): UserMembershipRepo
 }

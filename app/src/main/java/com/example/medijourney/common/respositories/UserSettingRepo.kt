@@ -9,11 +9,11 @@ import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-interface UserSettingRepository {
+interface UserSettingRepo {
     fun getUserSettings(): Flow<List<UserSetting>>
 }
 
-class UserSettingImpl @Inject constructor() : UserSettingRepository {
+class UserSettingRepoImpl @Inject constructor() : UserSettingRepo {
     override fun getUserSettings(): Flow<List<UserSetting>> {
         return RealmManager.flow(UserSetting::class)
     }
@@ -25,6 +25,6 @@ abstract class UserSettingModule {
 
     @Binds
     abstract fun bindUserSettingRepository(
-        userSettingImpl: UserSettingImpl
-    ): UserSettingRepository
+        userSettingImpl: UserSettingRepoImpl
+    ): UserSettingRepo
 }

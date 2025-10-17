@@ -20,9 +20,9 @@ import com.example.medijourney.common.models.realm_models.Conversation
 import com.example.medijourney.common.models.realm_models.Message
 import com.example.medijourney.common.models.realm_models.UserConversation
 import com.example.medijourney.common.models.ui_models.MTextStyle
-import com.example.medijourney.common.respositories.MessageRepository
-import com.example.medijourney.common.respositories.UserConversationRepository
-import com.example.medijourney.common.respositories.UserMessageRepository
+import com.example.medijourney.common.respositories.MessageRepo
+import com.example.medijourney.common.respositories.UserConversationRepo
+import com.example.medijourney.common.respositories.UserMessageRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.ext.isValid
 import io.realm.kotlin.query.RealmResults
@@ -41,9 +41,9 @@ import javax.inject.Inject
 @HiltViewModel
 class SearchMessageViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val userConversationRepository: UserConversationRepository,
-    private val messageRepository: MessageRepository,
-    private val userMessageRepository: UserMessageRepository
+    private val userConversationRepository: UserConversationRepo,
+    private val messageRepository: MessageRepo,
+    private val userMessageRepository: UserMessageRepo
 ) : ViewModel() {
 
     // Properties
@@ -53,7 +53,6 @@ class SearchMessageViewModel @Inject constructor(
     val itemModels: StateFlow<List<DynamicUIItem>> = _itemModels.asStateFlow()
     val searchTextFlow = MutableStateFlow<String?>(null)
     private var userConversation: UserConversation? = null
-    private var messages: RealmResults<Message>? = null
     private var conversationIds: List<String> = listOf()
     private var cursorCreatedAt: Long? = null
     private var observeMessagesJob: Job? = null
@@ -187,7 +186,7 @@ class SearchMessageViewModel @Inject constructor(
             }
     }
 
-    private fun searchMessage(keywords: String?) {
+    private fun searchMessage() {
         _isLoading.value = true
         cursorCreatedAt = null
         viewModelScope.launch {
@@ -256,7 +255,7 @@ class SearchMessageViewModel @Inject constructor(
             val snapshot = try {
                 FireStoreManager.buildDoc(Pair(FireStoreCollection.CONVERSATIONS, conversationId))
                     .awaitGet()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 return
             }
 
@@ -287,7 +286,7 @@ class SearchMessageViewModel @Inject constructor(
         val data = try {
             FireStoreManager.buildUserDocRef(Pair(FireStoreCollection.USER_CONVERSATIONS, null))
                 .awaitSet(map)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             return
         }
 

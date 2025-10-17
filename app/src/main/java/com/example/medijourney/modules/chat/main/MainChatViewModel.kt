@@ -16,8 +16,8 @@ import com.example.medijourney.common.models.realm_models.UserConversation
 import com.example.medijourney.common.models.realm_models.UserMessage
 import com.example.medijourney.common.models.ui_models.ImageStyle
 import com.example.medijourney.common.models.ui_models.MTextStyle
-import com.example.medijourney.common.respositories.ConversationRepository
-import com.example.medijourney.common.respositories.UserConversationRepository
+import com.example.medijourney.common.respositories.ConversationRepo
+import com.example.medijourney.common.respositories.UserConversationRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.ext.isValid
 import kotlinx.coroutines.Job
@@ -33,8 +33,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainChatViewModel @Inject constructor(
-    private val userConversationRepository: UserConversationRepository,
-    conversationRepository: ConversationRepository
+    private val userConversationRepository: UserConversationRepo,
+    conversationRepository: ConversationRepo
 ) : ViewModel() {
 
     // Properties

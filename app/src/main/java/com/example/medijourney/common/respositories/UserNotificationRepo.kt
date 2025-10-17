@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-interface UserNotificationRepository {
+interface UserNotificationRepo {
     suspend fun observeLatestNotifications(): Flow<List<MutableMap<String, Any>>>
     suspend fun getOlderNotifications(cursorCreatedAt: Long) : List<MutableMap<String, Any>>
     suspend fun observeOlderNotifications(cursorCreatedAt: Long) : Flow<List<MutableMap<String, Any>>>
@@ -27,7 +27,7 @@ interface UserNotificationRepository {
     suspend fun deleteAllNotifications(): Boolean
 }
 
-class UserNotificationRepositoryImpl @Inject constructor() : UserNotificationRepository {
+class UserNotificationRepoImpl @Inject constructor() : UserNotificationRepo {
     override suspend fun observeLatestNotifications(): Flow<List<MutableMap<String, Any>>> {
         return FireStoreManager.getQuerySnapshotFlow(
             FireStoreCollection.USER_NOTIFICATIONS,
@@ -100,7 +100,7 @@ abstract class UserNotificationModule {
 
     @Binds
     abstract fun bindUserNotificationRepository(
-        impl: UserNotificationRepositoryImpl
-    ): UserNotificationRepository
+        impl: UserNotificationRepoImpl
+    ): UserNotificationRepo
 
 }

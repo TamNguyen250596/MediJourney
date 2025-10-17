@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.medijourney.common.managers.fire_store.FireStoreCollection
 import com.example.medijourney.common.managers.fire_store.FireStoreManager
-import com.example.medijourney.common.respositories.AdvertisementRepository
-import com.example.medijourney.common.respositories.UserSettingRepository
+import com.example.medijourney.common.respositories.AdvertisementRepo
+import com.example.medijourney.common.respositories.UserSettingRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.ext.isValid
 import kotlinx.coroutines.delay
@@ -17,8 +17,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(
-    advertisementRepository: AdvertisementRepository,
-    userSettingRepository: UserSettingRepository,
+    advertisementRepository: AdvertisementRepo,
+    userSettingRepository: UserSettingRepo,
     mainActivityListener: MainActivityListener
 ): ViewModel() {
 

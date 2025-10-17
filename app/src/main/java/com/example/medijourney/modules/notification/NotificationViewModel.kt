@@ -18,7 +18,7 @@ import com.example.medijourney.common.models.realm_models.UserNotification
 import com.example.medijourney.common.models.ui_models.EdgePadding
 import com.example.medijourney.common.models.ui_models.ImageStyle
 import com.example.medijourney.common.models.ui_models.MTextStyle
-import com.example.medijourney.common.respositories.UserNotificationRepository
+import com.example.medijourney.common.respositories.UserNotificationRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.ext.isValid
 import kotlinx.coroutines.Job
@@ -28,7 +28,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NotificationViewModel @Inject constructor(
-    private val userNotificationRepository: UserNotificationRepository
+    private val userNotificationRepository: UserNotificationRepo
 ) : ViewModel() {
 
     // Properties

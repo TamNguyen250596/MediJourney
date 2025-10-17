@@ -13,13 +13,13 @@ import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-interface FitnessTrackerActivityRepository {
+interface FitnessTrackerActivityRepo {
     suspend fun observeFitnessTrackerActivities()
     fun getFitnessTrackerActivitiesFlow(): Flow<List<FitnessTrackerActivity>>
 }
 
 // Repository implementation
-class FitnessTrackerActivityRepositoryImpl @Inject constructor() : FitnessTrackerActivityRepository {
+class FitnessTrackerActivityRepoImpl @Inject constructor() : FitnessTrackerActivityRepo {
 
     override suspend fun observeFitnessTrackerActivities() {
         FireStoreManager.observeCollection(
@@ -45,6 +45,6 @@ abstract class FitnessTrackerActivityModule {
 
     @Binds
     abstract fun bindFitnessTrackerActivityRepository(
-        impl: FitnessTrackerActivityRepositoryImpl
-    ): FitnessTrackerActivityRepository
+        impl: FitnessTrackerActivityRepoImpl
+    ): FitnessTrackerActivityRepo
 }

@@ -6,44 +6,47 @@ import com.example.medijourney.common.managers.fire_store.FireStoreCollection
 import com.example.medijourney.common.managers.fire_store.FireStoreManager
 import com.example.medijourney.common.managers.firebase_auth.FAManger
 import com.example.medijourney.common.managers.realm.RealmManager
-import com.example.medijourney.common.models.realm_models.UserMembership
+import com.example.medijourney.common.models.realm_models.UserRecommendExercise
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-interface UserMembershipRepository {
-    suspend fun observeUserMembership()
-    fun getUserMembershipFow(): Flow<UserMembership?>
+// Repository interface
+interface UserRecommendExerciseRepo {
+    suspend fun observeUserRecommendExercises()
+    fun getUserRecommendExercisesFlow(): Flow<List<UserRecommendExercise>>
 }
 
-class UserMembershipRepositoryImpl @Inject constructor() : UserMembershipRepository   {
-    override suspend fun observeUserMembership() {
+// Repository implementation
+class UserRecommendExerciseRepoImpl @Inject constructor() : UserRecommendExerciseRepo {
+
+    override suspend fun observeUserRecommendExercises() {
         FireStoreManager.observeCollection(
-            FireStoreCollection.USER_MEMBERSHIP,
+            FireStoreCollection.USER_RECOMMEND_EXERCISE,
             queryBuilder = FSQueryBuilder()
                 .equalTo("user_id", FAManger.currentUserCode)
         )
     }
 
-    override fun getUserMembershipFow(): Flow<UserMembership?> {
+    override fun getUserRecommendExercisesFlow(): Flow<List<UserRecommendExercise>> {
         return RealmManager.flow(
-            UserMembership::class,
+            UserRecommendExercise::class,
             queryBuilder = RQueryBuilder()
-                .equalTo(UserMembership::userId.name, FAManger.currentUserCode)
-        ).map { it.firstOrNull() }
+                .equalTo("user_id", FAManger.currentUserCode)
+        )
     }
 }
 
+// Hilt module
 @Module
 @InstallIn(ViewModelComponent::class)
-abstract class UserMembershipModule {
+abstract class UserRecommendExerciseModule {
 
     @Binds
-    abstract fun bindUserMembershipRepository(
-        impl: UserMembershipRepositoryImpl
-    ): UserMembershipRepository
+    abstract fun bindUserRecommendExerciseRepository(
+        impl: UserRecommendExerciseRepoImpl
+    ): UserRecommendExerciseRepo
 }

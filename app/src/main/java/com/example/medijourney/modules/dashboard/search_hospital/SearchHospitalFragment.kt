@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -19,10 +18,12 @@ import com.example.medijourney.common.constants.Constants
 import com.example.medijourney.common.helpers.FragmentHelper
 import com.example.medijourney.common.models.item_models.DynamicUIItem
 import com.example.medijourney.common.ui_components.composes.SearchScreen
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.getValue
 
+@AndroidEntryPoint
 class SearchHospitalFragment : Fragment() {
 
     // Properties
@@ -48,7 +49,6 @@ class SearchHospitalFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel.highlightItemTag = hospitalId
-        viewModel.onViewCreated()
     }
 
     // Functions

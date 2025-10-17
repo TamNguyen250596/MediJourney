@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import kotlin.collections.orEmpty
 
-interface UserConversationRepository {
+interface UserConversationRepo {
     suspend fun observeUserConversations(): Flow<List<MutableMap<String, Any>>>
     suspend fun getUserConversationsPageAfterTag(tag: String) : List<MutableMap<String, Any>>
     suspend fun observeUserConversationsPageAfterTag(tag: String): Flow<List<MutableMap<String, Any>>>
@@ -26,7 +26,7 @@ interface UserConversationRepository {
     fun getUserConversationsFlow(userConversationId: String?): Flow<List<UserConversation>>
 }
 
-class UserConversationRepositoryImpl @Inject constructor() : UserConversationRepository {
+class UserConversationRepoImpl @Inject constructor() : UserConversationRepo {
     override suspend fun observeUserConversations(): Flow<List<MutableMap<String, Any>>> {
         return FireStoreManager.getQuerySnapshotFlow(
             FireStoreCollection.USER_CONVERSATIONS,
@@ -104,5 +104,5 @@ abstract class UserConversationModule {
 
     @Binds
     abstract fun bindUserConversationRepository(
-        impl: UserConversationRepositoryImpl): UserConversationRepository
+        impl: UserConversationRepoImpl): UserConversationRepo
 }
