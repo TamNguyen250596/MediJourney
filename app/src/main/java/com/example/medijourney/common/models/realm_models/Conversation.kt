@@ -1,6 +1,8 @@
 package com.example.medijourney.common.models.realm_models
 
+import com.example.medijourney.common.extensions.getBooleanMap
 import com.example.medijourney.common.extensions.getStringSet
+import com.example.medijourney.common.managers.firebase_auth.FAManger
 import com.example.medijourney.common.managers.realm.RealmCycle
 import io.realm.kotlin.ext.realmSetOf
 import io.realm.kotlin.types.RealmObject
@@ -19,7 +21,7 @@ class Conversation: RealmObject, RealmCycle {
     var shortTag: String? = null
     var keywords: RealmSet<String> = realmSetOf()
     var lastMessage: String? = null
-    var isAdded: Boolean = false
+    var includeCurrentUser: Boolean = false
 
     // Functions
     override fun primaryKey(): String {
@@ -36,6 +38,7 @@ class Conversation: RealmObject, RealmCycle {
             shortTag = map["short_tag"] as? String
             lastMessage = map["last_message"] as? String
             keywords.addAll(map.getStringSet("keywords"))
+            includeCurrentUser = isIncludeCurrentUser(map)
         }
     }
 
@@ -47,6 +50,16 @@ class Conversation: RealmObject, RealmCycle {
         shortTag = map["short_tag"] as? String ?: shortTag
         keywords.addAll(map.getStringSet("keywords", keywords))
         lastMessage = map["last_message"] as? String ?: lastMessage
-        isAdded = map["is_added"] as? Boolean ?: isAdded
+        includeCurrentUser = isIncludeCurrentUser(map)
+    }
+
+    private fun isIncludeCurrentUser(map: Map<String, Any>): Boolean {
+        if (map["include_current_user"] != null) {
+            return map["include_current_user"] as? Boolean ?: false
+        } else {
+            val memberIds = map.getBooleanMap("member_ids")
+            val currentUserId = FAManger.currentUserCode
+            return memberIds[currentUserId] ?: false
+        }
     }
 }

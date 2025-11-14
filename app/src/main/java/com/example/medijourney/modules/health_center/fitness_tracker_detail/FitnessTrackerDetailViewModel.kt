@@ -1,75 +1,64 @@
 package com.example.medijourney.modules.health_center.fitness_tracker_detail
 
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.medijourney.R
 import com.example.medijourney.common.managers.InternationManager
-import com.example.medijourney.common.managers.fire_store.FireStoreCollection
-import com.example.medijourney.common.managers.fire_store.FireStoreManager
-import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.item_models.BaseItemInterface
 import com.example.medijourney.common.models.item_models.DynamicUIItem
 import com.example.medijourney.common.models.item_models.TitleItemModel
 import com.example.medijourney.common.models.realm_models.NotificationType
 import com.example.medijourney.common.models.realm_models.UserFitnessTracker
 import com.example.medijourney.common.models.ui_models.MTextStyle
+import com.example.medijourney.common.respositories.UserFitnessTrackerRepo
 import com.example.medijourney.common.ui_components.recycle_view_adapter.h_dual_image_text_view.HDualImageTextViewHolder
-import io.realm.kotlin.ext.asFlow
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.ext.isValid
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class FitnessTrackerDetailViewModel : ViewModel() {
+@HiltViewModel
+class FitnessTrackerDetailViewModel @Inject constructor(
+    saveState: SavedStateHandle,
+    private val userFitnessTrackerRepo: UserFitnessTrackerRepo
+) : ViewModel() {
 
     // Properties
     var itemModels = MutableLiveData<MutableList<BaseItemInterface>>()
-    private var userFitnessTrackerId: String? = null
-    private var userFitnessTracker: UserFitnessTracker? = null
+    private var userFitnessTrackerId: String? = saveState.get<String>("userFitnessTrackerId")
     private var currentAppFitnessTrackerDetails: Map<String, Any> = mutableMapOf()
     var didHandledNavigation = false
 
     // Life cycle
-    fun onViewCreated(userFitnessTrackerId: String?) {
+    init {
         currentAppFitnessTrackerDetails = InternationManager.getCurrentAppFitnessTrackerDetail()
-
         viewModelScope.launch {
-            this@FitnessTrackerDetailViewModel.userFitnessTrackerId = userFitnessTrackerId
-            getData()
-            generateItemModels()?.let { model ->
-                itemModels.postValue(model)
-            }
             observeData()
         }
     }
 
     // Functions
     fun getNotificationType(tag: String?): NotificationType? {
-        tag?.let {
-            return NotificationType.valueOf(tag)
-        } ?: return null
-    }
-
-    private suspend fun getData() {
-        userFitnessTrackerId?.let {
-            userFitnessTracker = RealmManager.read(UserFitnessTracker::class.java, it)
-        }
+        tag ?: return null
+        return NotificationType.valueOf(tag)
     }
 
     private suspend fun observeData() {
-        val userFitnessTracker = userFitnessTracker ?: return
+        val id = userFitnessTrackerId ?: return
 
-        userFitnessTracker.asFlow().collect {
-            this.userFitnessTracker = it.obj
-
-            generateItemModels()?.let { model ->
-                itemModels.postValue(model)
+        userFitnessTrackerRepo
+            .getUserFitnessTrackerFlow(id)
+            .collect {
+                val userFitnessTracker = it ?: return@collect
+                itemModels.postValue(generateItemModels(userFitnessTracker))
             }
-        }
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun generateItemModels(): MutableList<BaseItemInterface>? {
-        val attributes = currentAppFitnessTrackerDetails["attributes"] as? List<Map<String, Any>> ?: return null
+    private fun generateItemModels(userFitnessTracker: UserFitnessTracker): MutableList<BaseItemInterface> {
+        val attributes = currentAppFitnessTrackerDetails["attributes"] as? List<Map<String, Any>> ?: return mutableListOf()
         val dataList: MutableList<BaseItemInterface> = mutableListOf()
 
         for ((sectionIndex, attribute) in attributes.withIndex()) {
@@ -82,7 +71,7 @@ class FitnessTrackerDetailViewModel : ViewModel() {
             dataList.add(titleItemModel)
 
             for ((itemIndex, item) in items.withIndex()) {
-                val itemModel = generateDynamicUIModel(item)
+                val itemModel = generateDynamicUIModel(item, userFitnessTracker)
                 val isHideSeparator = itemIndex == items.lastIndex
                 itemModel.groupIndex = sectionIndex
                 itemModel.additionalData = mapOf(HDualImageTextViewHolder.IS_HIDE_SEPARATOR_KEY to isHideSeparator)
@@ -94,9 +83,8 @@ class FitnessTrackerDetailViewModel : ViewModel() {
         return dataList
     }
 
-    private fun generateDynamicUIModel(map: Map<String, Any>): DynamicUIItem {
+    private fun generateDynamicUIModel(map: Map<String, Any>, userFitnessTracker: UserFitnessTracker): DynamicUIItem {
         val itemModel = DynamicUIItem.fromMap(map)
-        val userFitnessTracker = userFitnessTracker ?: return itemModel
         if (!userFitnessTracker.isValid()) return itemModel
         val description = MTextStyle("", R.font.proximanova_regular, 16f, R.color.black)
 
@@ -152,17 +140,10 @@ class FitnessTrackerDetailViewModel : ViewModel() {
 
     fun deleteUserFitnessTracker(completion: ((Boolean) -> Unit)? = null) {
         userFitnessTrackerId?.let { id ->
-            FireStoreManager.buildUserDocRef(Pair(FireStoreCollection.USER_FITNESS_TRACKERS, id))
-                .delete()
-                .addOnSuccessListener {
-                    viewModelScope.launch {
-                        RealmManager.delete(UserFitnessTracker::class.java, id)
-                        completion?.invoke(true)
-                    }
-                }
-                .addOnFailureListener {
-                    completion?.invoke(false)
-                }
+            viewModelScope.launch {
+                val result = userFitnessTrackerRepo.deleteUserFitnessTracker(id)
+                completion?.invoke(result)
+            }
         }
     }
 }

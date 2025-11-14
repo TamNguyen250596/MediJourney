@@ -14,14 +14,14 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 interface ExerciseLevelRepo {
-    suspend fun observeExerciseLevels()
+    suspend fun listenExerciseLevels()
     fun getExerciseLevelsFlow(): Flow<List<ExerciseLevel>>
 }
 
 // Repository implementation
 class ExerciseLevelRepoImpl @Inject constructor() : ExerciseLevelRepo {
 
-    override suspend fun observeExerciseLevels() {
+    override suspend fun listenExerciseLevels() {
         FireStoreManager.observeCollection(
             FireStoreCollection.EXERCISE_LEVELS,
             queryBuilder = FSQueryBuilder()

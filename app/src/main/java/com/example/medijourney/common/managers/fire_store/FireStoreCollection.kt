@@ -15,14 +15,12 @@ import com.example.medijourney.common.models.realm_models.Membership
 import com.example.medijourney.common.models.realm_models.Message
 import com.example.medijourney.common.models.realm_models.Recipe
 import com.example.medijourney.common.models.realm_models.User
-import com.example.medijourney.common.models.realm_models.UserConversation
 import com.example.medijourney.common.models.realm_models.UserExercisePlan
 import com.example.medijourney.common.models.realm_models.UserExerciseTrackingReport
 import com.example.medijourney.common.models.realm_models.UserFitnessTracker
 import com.example.medijourney.common.models.realm_models.UserMedicalProduct
 import com.example.medijourney.common.models.realm_models.UserMedicalSpecialty
 import com.example.medijourney.common.models.realm_models.UserMembership
-import com.example.medijourney.common.models.realm_models.UserMessage
 import com.example.medijourney.common.models.realm_models.UserNotification
 import com.example.medijourney.common.models.realm_models.UserNutritionTrackingReport
 import com.example.medijourney.common.models.realm_models.UserRecommendExercise
@@ -46,7 +44,6 @@ enum class FireStoreCollection {
     MEMBERSHIPS,
     MESSAGES,
     RECIPES,
-    USER_CONVERSATIONS,
     USER_EXERCISE_PLANS,
     USER_EXERCISE_TRACKING_REPORTS,
     USER_FITNESS_TRACKERS,
@@ -54,7 +51,6 @@ enum class FireStoreCollection {
     USER_MEMBERS,
     USER_MEDICAL_SPECIALTIES,
     USER_MEMBERSHIP,
-    USER_MESSAGES,
     USER_NOTIFICATIONS,
     USER_NUTRITION_TRACKING_REPORTS,
     USER_RECOMMEND_EXERCISE,
@@ -80,7 +76,6 @@ fun FireStoreCollection.getRealmObject(): RealmObject? {
         FireStoreCollection.MEMBERSHIPS -> return Membership()
         FireStoreCollection.MESSAGES -> return Message()
         FireStoreCollection.RECIPES -> return Recipe()
-        FireStoreCollection.USER_CONVERSATIONS -> return UserConversation()
         FireStoreCollection.USER_EXERCISE_PLANS -> return UserExercisePlan()
         FireStoreCollection.USER_EXERCISE_TRACKING_REPORTS -> return UserExerciseTrackingReport()
         FireStoreCollection.USER_FITNESS_TRACKERS -> return UserFitnessTracker()
@@ -88,7 +83,6 @@ fun FireStoreCollection.getRealmObject(): RealmObject? {
         FireStoreCollection.USER_MEMBERS -> return User()
         FireStoreCollection.USER_MEDICAL_SPECIALTIES -> return UserMedicalSpecialty()
         FireStoreCollection.USER_MEMBERSHIP -> return UserMembership()
-        FireStoreCollection.USER_MESSAGES -> return UserMessage()
         FireStoreCollection.USER_NOTIFICATIONS -> return UserNotification()
         FireStoreCollection.USER_NUTRITION_TRACKING_REPORTS -> return UserNutritionTrackingReport()
         FireStoreCollection.USER_RECOMMEND_EXERCISE -> return UserRecommendExercise()

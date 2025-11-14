@@ -19,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -36,7 +35,9 @@ import com.example.medijourney.common.constants.proximaNovaFamily
 import com.example.medijourney.common.helpers.FragmentHelper
 import com.example.medijourney.common.ui_components.composes.HorizontalRow
 import com.example.medijourney.common.ui_components.dialogs.IndicatorHandler
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class ExercisePlanDetailFragment : Fragment(), MenuProvider {
 
     // Properties
@@ -76,7 +77,6 @@ class ExercisePlanDetailFragment : Fragment(), MenuProvider {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupView()
-        viewModel.onViewCreated(userExercisePlanId)
     }
 
     // Functions

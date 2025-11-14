@@ -19,7 +19,9 @@ import com.example.medijourney.common.ui_components.fragments.media_selection.Me
 import com.example.medijourney.common.ui_components.recycle_view_adapter.check_box.CheckBoxAdapter
 import com.example.medijourney.common.ui_components.recycle_view_adapter.check_box.CheckBoxAdapterInterface
 import com.example.medijourney.databinding.FragmentAddFitnessTrackerBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class AddFitnessTrackerFragment : Fragment(), CheckBoxAdapterInterface {
 
     // Properties
@@ -27,7 +29,6 @@ class AddFitnessTrackerFragment : Fragment(), CheckBoxAdapterInterface {
     private val mediaSelectionViewModel: MediaSelectionViewModel by activityViewModels()
     private lateinit var binding: FragmentAddFitnessTrackerBinding
     private val args: AddFitnessTrackerFragmentArgs by navArgs()
-    private val userFitnessTrackerId: String? by lazy { args.userFitnessTrackerId }
     private val viewType: String? by lazy { args.viewType }
 
     // Life cycle
@@ -42,7 +43,6 @@ class AddFitnessTrackerFragment : Fragment(), CheckBoxAdapterInterface {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupView()
-        viewModel.onViewCreated(userFitnessTrackerId)
         observeUIComponents()
         observeViewModel()
     }

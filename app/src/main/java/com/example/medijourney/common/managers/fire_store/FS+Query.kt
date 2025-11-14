@@ -9,9 +9,6 @@ import io.realm.kotlin.types.RealmObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 fun <T> Query.observe(
     clazz: Class<T>,
@@ -97,23 +94,6 @@ fun <T> Query.get(
             completion?.invoke(it)
         }
     }
-}
-
-fun Query.addListener(completion: ((QuerySnapshot) -> Unit)) {
-    if (FireStoreManager.checkCachedListener(this.hashCode())) {
-        return
-    }
-    val listenerRegistration = addSnapshotListener { snapshot, error ->
-        if (error != null) {
-            println("Error: $error")
-        }
-        snapshot?.let {
-            completion.invoke(it)
-        }
-    }
-
-    val info = FireStoreListenerInfo(this.hashCode(), listenerRegistration)
-    FireStoreManager.addListener(info)
 }
 
 fun Query.remove() {

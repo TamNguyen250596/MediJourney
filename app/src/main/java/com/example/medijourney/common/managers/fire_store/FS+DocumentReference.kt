@@ -89,17 +89,6 @@ suspend fun DocumentReference.awaitGet(): DocumentSnapshot = suspendCancellableC
     }
 }
 
-suspend fun DocumentReference.awaitSet(data: Map<String, Any>): MutableMap<String, Any> = suspendCancellableCoroutine { cont ->
-    val id = this.id
-    set(data).addOnSuccessListener {
-        val mutableMap = data.toMutableMap()
-        mutableMap["id"] = id
-        cont.resume(mutableMap)
-    }.addOnFailureListener {
-        cont.resumeWithException(it)
-    }
-}
-
 fun DocumentReference.remove() {
     FireStoreManager.removeListener(this)
 }

@@ -1,33 +1,39 @@
 package com.example.medijourney.modules.health_center.add_exercise_plan
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.medijourney.R
 import com.example.medijourney.common.constants.Constants
-import com.example.medijourney.common.managers.fire_store.FireStoreCollection
-import com.example.medijourney.common.managers.fire_store.FireStoreManager
-import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
-import com.example.medijourney.common.managers.realm.RealmManager
+import com.example.medijourney.common.extensions.firstThenDebounce
 import com.example.medijourney.common.models.item_models.DynamicUIItem
 import com.example.medijourney.common.models.realm_models.Exercise
 import com.example.medijourney.common.models.realm_models.ExerciseLevel
 import com.example.medijourney.common.models.realm_models.UserExercisePlan
 import com.example.medijourney.common.models.ui_models.ImageStyle
 import com.example.medijourney.common.models.ui_models.MTextStyle
+import com.example.medijourney.common.respositories.ExerciseLevelRepo
+import com.example.medijourney.common.respositories.ExerciseRepo
+import com.example.medijourney.common.respositories.UserExercisePlanRepo
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.ext.isValid
-import io.realm.kotlin.query.RealmResults
-import io.realm.kotlin.query.Sort
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class AddExercisePlanViewModel : ViewModel() {
+@HiltViewModel
+class AddExercisePlanViewModel @Inject constructor(
+    saveStateHandle: SavedStateHandle,
+    exerciseRepo: ExerciseRepo,
+    exerciseLevelRepo: ExerciseLevelRepo,
+    private val userExercisePlanRepo: UserExercisePlanRepo
+) : ViewModel() {
 
     // Properties
     private val _planNameErrorMessageId = MutableStateFlow<Int?>(null)
@@ -42,10 +48,10 @@ class AddExercisePlanViewModel : ViewModel() {
     val enableAddExerciseButton: StateFlow<Boolean> = _enableAddExerciseButton.asStateFlow()
     private val _planeName = MutableStateFlow("")
     val planeName: StateFlow<String> = _planeName.asStateFlow()
-    private var exerciseResults: RealmResults<Exercise>? = null
-    private var exerciseLevelResults: RealmResults<ExerciseLevel>? = null
-    private var userExercisePlanId: String? = null
-    private var userExercisePlan: UserExercisePlan? = null
+    private val userExercisePlanId = saveStateHandle.get<String>("userExercisePlanId")
+    private val exercisesFlow = exerciseRepo.getExercisesFlow()
+    private val exerciseLevelsFlow = exerciseLevelRepo.getExerciseLevelsFlow()
+    private var userExercisePlanFlow = userExercisePlanRepo.getUserExercisePlanFlow(userExercisePlanId ?: "")
 
     // Companion
     companion object {
@@ -57,59 +63,16 @@ class AddExercisePlanViewModel : ViewModel() {
     }
 
     // Lifecycle
-    fun inputUserExercisePlanId(userExercisePlanId: String?) {
-        if (!userExercisePlanId.isNullOrEmpty()) {
-            this.userExercisePlanId = userExercisePlanId
-        }
+    init {
         viewModelScope.launch {
-            getData()
             updateAvailableInfo()
-            _exerciseSequenceStateList.value = generateExerciseSequenceList()
-            _exercisesStateList.value = generateExerciseList(exerciseResults, exerciseLevelResults)
             observeData()
         }
     }
 
     // Functions
-    private suspend fun getData() {
-        getExerciseResults()
-        getExerciseLevelResults()
-        getUserExercisePlan()
-    }
-
-    private suspend fun getExerciseResults() {
-        exerciseResults = RealmManager.read(Exercise::class.java, sort = listOf(Pair(Exercise::position.name, Sort.ASCENDING)))
-    }
-
-    private suspend fun getExerciseLevelResults() {
-        exerciseLevelResults = RealmManager.read(ExerciseLevel::class.java)
-    }
-
-    private suspend fun getUserExercisePlan() {
-        val userExercisePlanId = userExercisePlanId ?: return
-        userExercisePlan = RealmManager.read(UserExercisePlan::class.java, userExercisePlanId)
-    }
-
-    @OptIn(FlowPreview::class)
-    private suspend fun observeData() {
-        val exercises = exerciseResults ?: return
-        val exerciseLevels = exerciseLevelResults ?: return
-
-        combine(
-            exercises.asFlow(),
-            exerciseLevels.asFlow(),
-        ) { exercisesChanges, exerciseLevelsChanges ->
-            exerciseResults = exercisesChanges.list
-            exerciseLevelResults = exerciseLevelsChanges.list
-        }
-            .debounce(500)
-            .collectLatest {
-                _exercisesStateList.value = generateExerciseList(exerciseResults, exerciseLevelResults)
-            }
-    }
-
-    private fun updateAvailableInfo() {
-        val userExercisePlan = userExercisePlan ?: return
+    private suspend fun updateAvailableInfo() {
+        val userExercisePlan = userExercisePlanFlow.first() ?: return
         if (!userExercisePlan.isValid()) return
 
         _planeName.value = userExercisePlan.name ?: ""
@@ -117,7 +80,34 @@ class AddExercisePlanViewModel : ViewModel() {
         _enableAddExerciseButton.value = true
     }
 
-    private fun generateExerciseSequenceList(): List<DynamicUIItem> {
+    private suspend fun observeData() {
+        combine(
+            userExercisePlanFlow,
+            exercisesFlow,
+            exerciseLevelsFlow
+        ) { userExercisePlan, exercises, exerciseLevels ->
+            Triple(userExercisePlan, exercises, exerciseLevels)
+        }
+            .firstThenDebounce(500)
+            .collectLatest {
+                _exerciseSequenceStateList.value = generateExerciseSequenceList(
+                    it.first,
+                    it.second,
+                    it.third
+                )
+                _exercisesStateList.value = generateExerciseList(
+                    it.second,
+                    it.third
+                )
+            }
+    }
+
+    private fun generateExerciseSequenceList(
+        userExercisePlan: UserExercisePlan?,
+        exercises: List<Exercise>,
+        exerciseLevels: List<ExerciseLevel>
+    ): List<DynamicUIItem> {
+
         val defaultList = MutableList(4) {
             DynamicUIItem(
                 type = Constants.ITEM,
@@ -127,8 +117,6 @@ class AddExercisePlanViewModel : ViewModel() {
         }
         val userExercisePlan = userExercisePlan ?: return defaultList
         if (!userExercisePlan.isValid()) return defaultList
-        val exercises = exerciseResults ?: return defaultList
-        val exerciseLevels = exerciseLevelResults ?: return defaultList
         val exerciseIds = userExercisePlan.exercises
         val levels = userExercisePlan.levels
 
@@ -163,17 +151,15 @@ class AddExercisePlanViewModel : ViewModel() {
         enableButton()
     }
 
-    @Suppress("NAME_SHADOWING")
-    private fun generateExerciseList(exerciseResults: RealmResults<Exercise>?,
-                                     exerciseLevelResults: RealmResults<ExerciseLevel>?): List<DynamicUIItem> {
-        val exerciseLevelResults = exerciseLevelResults ?: return listOf()
-        val exerciseResults = exerciseResults ?: return listOf()
-
-        return exerciseResults.mapNotNull { exercise ->
+    private fun generateExerciseList(
+        exercises: List<Exercise>,
+        exerciseLevels: List<ExerciseLevel>
+    ): List<DynamicUIItem> {
+        return exercises.mapNotNull { exercise ->
             if (!exercise.isValid()) return@mapNotNull null
 
             val levelItems = exercise.levels.mapNotNull {
-                val level = exerciseLevelResults.firstOrNull { level -> level.isValid() && level.id == it } ?: return@mapNotNull null
+                val level = exerciseLevels.firstOrNull { level -> level.isValid() && level.id == it } ?: return@mapNotNull null
 
                 DynamicUIItem(
                     type = Constants.ITEM,
@@ -263,49 +249,33 @@ class AddExercisePlanViewModel : ViewModel() {
     }
 
     fun saveUserPlanExercise(completion: (Boolean) -> Unit) {
-        val map = mutableMapOf<String, Any>()
-        map["name"] = _planeName.value
+        viewModelScope.launch {
+            val map = mutableMapOf<String, Any>()
+            map["name"] = _planeName.value
 
-        val exerciseIds = mutableListOf<Int>()
-        val levels = mutableMapOf<String, Int>()
+            val exerciseIds = mutableListOf<Int>()
+            val levels = mutableMapOf<String, Int>()
 
-        _exerciseSequenceStateList.value.forEach {
-            val additionalData = it.additionalData as? Map<*, *> ?: return@forEach
-            val exercise = additionalData[SELECTED_EXERCISE_KEY] as? Exercise ?: return@forEach
-            val level = additionalData[SELECTED_LEVEL_KEY] as? ExerciseLevel ?: return@forEach
-            if (exercise.isValid() && level.isValid()) {
-                exerciseIds.add(exercise.id)
-                levels[exercise.tag] = level.id
-            }
-        }
-        map["duration"] = _durationState.value
-        map["exercises"] = exerciseIds
-        map["levels"] = levels
-
-        userExercisePlanId?.let { id ->
-            val docRef = FireStoreManager.buildUserDocRef(Pair(FireStoreCollection.USER_EXERCISE_PLANS, id))
-
-            docRef.update(map)
-                .addOnSuccessListener {
-                    viewModelScope.launch {
-                        RealmManager.update(UserExercisePlan::class.java, id,  map)
-                        completion.invoke(true)
-                    }
+            _exerciseSequenceStateList.value.forEach {
+                val additionalData = it.additionalData as? Map<*, *> ?: return@forEach
+                val exercise = additionalData[SELECTED_EXERCISE_KEY] as? Exercise ?: return@forEach
+                val level = additionalData[SELECTED_LEVEL_KEY] as? ExerciseLevel ?: return@forEach
+                if (exercise.isValid() && level.isValid()) {
+                    exerciseIds.add(exercise.id)
+                    levels[exercise.tag] = level.id
                 }
-                .addOnFailureListener {
-                    completion.invoke(false)
-                }
-
-        } ?: run {
-            val docRef = FireStoreManager.buildUserDocRef(Pair(FireStoreCollection.USER_EXERCISE_PLANS, null))
-            map["id"] = docRef.id
-            FirebaseAuthManager.getCurrentUserCode()?.let {
-                map["user_code"] = it
             }
+            map["duration"] = _durationState.value
+            map["exercises"] = exerciseIds
+            map["levels"] = levels
 
-            docRef.set(map).addOnCompleteListener {
-                completion.invoke(it.isSuccessful)
+            var result = false
+            userExercisePlanId?.let {
+                result = userExercisePlanRepo.updateUserExercisePlan(it, map)
+            } ?: run {
+                result = userExercisePlanRepo.createUserExercisePlan(map)
             }
+            completion.invoke(result)
         }
     }
 }

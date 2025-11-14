@@ -11,7 +11,7 @@ class FSQueryBuilder {
     private var limit: Long? = null
 
     // Functions
-    fun equalTo(key: String, value: Any): FSQueryBuilder {
+    fun equalTo(key: String, value: Any?): FSQueryBuilder {
         val filter = Filter.equalTo(key, value)
         filters.add(filter)
         return this

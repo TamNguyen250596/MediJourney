@@ -17,6 +17,8 @@ import io.realm.kotlin.types.RealmObject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
 import java.util.concurrent.ConcurrentHashMap
@@ -49,25 +51,6 @@ object FireStoreManager {
             }
         }
 
-        return docRef
-    }
-
-    fun buildUserDocRef(vararg nodes: Pair<FireStoreCollection, String?>): DocumentReference {
-        require(nodes.isNotEmpty()) { "buildDocRef requires a non-empty list of collection-document pairs" }
-
-        val db = Firebase.firestore
-        val currentUserCode = FAManger.currentUserCode
-        var docRef = db.collection(FireStoreCollection.USER_MEMBERS.name.lowercase())
-            .document(currentUserCode)
-
-        nodes.forEach {
-            val (collection, documentId) = it
-            documentId?.let {
-                docRef = docRef.collection(collection.name.lowercase()).document(documentId)
-            } ?: run {
-                docRef = docRef.collection(collection.name.lowercase()).document()
-            }
-        }
         return docRef
     }
 
@@ -322,6 +305,42 @@ object FireStoreManager {
             awaitClose {
                 removeListener(listenerWrapper)
             }
+        }
+    }
+
+    fun getDataFlow(
+        collection: FireStoreCollection,
+        queryBuilder: FSQueryBuilder? = null
+    ): Flow<List<Map<String, Any>>> {
+        val realmObject = collection.getRealmObject() ?: return flowOf()
+        val query = buildQuery(collection, queryBuilder)
+        val listenerWrapper = FSListener(FSListerType.COLLECTION(query))
+
+        return callbackFlow {
+            if (checkCachedListener(listenerWrapper)) {
+                close()
+                return@callbackFlow
+            }
+
+            val registration = query.addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    trySend(emptyList())
+                    return@addSnapshotListener
+                }
+
+                val data = snapshot?.documents?.mapNotNull { it.data } ?: emptyList()
+                trySend(data)
+            }
+
+            listenerWrapper.registration = registration
+            addListener(listenerWrapper)
+
+            awaitClose {
+                registration.remove()
+                removeListener(listenerWrapper)
+            }
+        }.onEach {
+            RealmManager.write(realmObject, it)
         }
     }
     

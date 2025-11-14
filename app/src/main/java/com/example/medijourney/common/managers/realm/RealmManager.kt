@@ -12,6 +12,7 @@ import io.realm.kotlin.types.RealmObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 
@@ -157,6 +158,18 @@ object RealmManager {
             }
             entities.find()
         }
+    }
+
+    fun <T : RealmObject> flow(
+        kClazz: KClass<T>,
+        id: String,
+        configuration: RealmConfiguration? = null
+    ): Flow<T?> {
+        val realm = createRealm(configuration)
+        val entities = realm.query(kClazz)
+            .query("id == $0", id)
+
+        return entities.toFlow().map { it.firstOrNull() }
     }
 
     fun <T : RealmObject> flow(

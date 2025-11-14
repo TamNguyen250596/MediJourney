@@ -26,6 +26,14 @@ fun Map<String, Any>.getIntMap(key: String, defaultValue: Map<String, Int>? = nu
     }?.toMap() ?: defaultValue ?: emptyMap()
 }
 
+fun Map<String, Any>.getBooleanMap(key: String, defaultValue: Map<String, Boolean>? = null): Map<String, Boolean> {
+    return (this[key] as? Map<*, *>)?.mapNotNull {
+        val stringKey = it.key as? String
+        val boolValue = it.value as? Boolean
+        if (stringKey != null && boolValue != null) stringKey to boolValue else null
+    }?.toMap() ?: defaultValue ?: emptyMap()
+}
+
 fun Map<String, Any>.getUserObjectKey(defaultKey: String): String {
     return this["id"] as? String ?: this["doc_ref"] as? String ?: defaultKey
 }

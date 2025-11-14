@@ -6,31 +6,22 @@ import androidx.lifecycle.viewModelScope
 import com.example.medijourney.common.constants.Constants
 import com.example.medijourney.common.extensions.firstThenDebounce
 import com.example.medijourney.common.helpers.DateHelper
-import com.example.medijourney.common.managers.fire_store.FireStoreCollection
-import com.example.medijourney.common.managers.fire_store.FireStoreManager
 import com.example.medijourney.common.managers.firebase_auth.FAManger
 import com.example.medijourney.common.managers.firebase_storage.FirebaseStorageManager
-import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.item_models.DynamicUIItem
 import com.example.medijourney.common.models.realm_models.Message
 import com.example.medijourney.common.models.realm_models.User
-import com.example.medijourney.common.models.realm_models.UserMessage
 import com.example.medijourney.common.models.ui_models.ImageStyle
 import com.example.medijourney.common.models.ui_models.MTextStyle
 import com.example.medijourney.common.respositories.MessageRepo
-import com.example.medijourney.common.respositories.UserMessageRepo
 import com.example.medijourney.common.respositories.UserRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.ext.isValid
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -39,8 +30,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AIChatViewModel @Inject constructor(
-    private val userRepository: UserRepo,
-    private val userMessageRepository: UserMessageRepo,
+    private val userRepo: UserRepo,
+    private val messageRepo: MessageRepo,
     messageRepository: MessageRepo
 ) : ViewModel() {
 
@@ -51,8 +42,7 @@ class AIChatViewModel @Inject constructor(
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
     var shouldScrollToBottom = false
     private val conversationId: String = FAManger.currentUserCode.plus(Constants.CHAT_GPT)
-    private val userMessagesFlow = userMessageRepository.getUserMessageFLow(conversationId)
-    private var messagesFlow = messageRepository.geMessagesFLow(conversationId)
+    private var messagesFlow = messageRepository.geMessagesFLow(conversationId, null)
     private var user: User? = null
     private var cursorCreatedAt: Long? = null
     private var observeCurrentPageJob: Job? = null
@@ -60,7 +50,7 @@ class AIChatViewModel @Inject constructor(
     // Life cycle
     init {
         viewModelScope.launch {
-            user = userRepository.getUserFlow(FAManger.currentUserCode).firstOrNull()
+            user = userRepo.getUserFlow(FAManger.currentUserCode).firstOrNull()
             observeLatestMessages()
             observeData()
         }
@@ -70,8 +60,8 @@ class AIChatViewModel @Inject constructor(
     private suspend fun observeLatestMessages() {
         var firstHandled = false
 
-        userMessageRepository
-            .observeLatestMessages(conversationId)
+        messageRepo
+            .listenMessages(conversationId, null, null)
             .collect {
                 if (firstHandled) {
                     updateCursorCreatedAt(it)
@@ -80,16 +70,9 @@ class AIChatViewModel @Inject constructor(
             }
     }
 
-    @OptIn(FlowPreview::class)
-    @Suppress("NAME_SHADOWING")
     private suspend fun observeData() {
 
-        combine(
-            messagesFlow,
-            userMessagesFlow
-        ) { _, userMessageResults ->
-            userMessageResults
-        }
+        messagesFlow
             .firstThenDebounce(500)
             .collectLatest {
                 _itemModels.value = generateDynamicList(it)
@@ -97,27 +80,25 @@ class AIChatViewModel @Inject constructor(
             }
     }
 
-    private fun generateDynamicList(userMessageResults: List<UserMessage>?): List<DynamicUIItem> {
-        userMessageResults ?: return emptyList()
-        val size = userMessageResults.size
+    private fun generateDynamicList(messageResults: List<Message>): List<DynamicUIItem> {
+        val size = messageResults.size
         val currentUserCode = FAManger.currentUserCode
 
-        return userMessageResults.mapIndexedNotNull { index, entity ->
-            val message = entity.message ?: return@mapIndexedNotNull null
+        return messageResults.mapIndexedNotNull { index, entity ->
             if (!entity.isValid()) return@mapIndexedNotNull null
             var elderMessage: Message? = null
             val elderIndex = index + 1
             var laterMessage: Message? = null
             val laterIndex = index - 1
-            val isComingMessage = currentUserCode != message.senderId
+            val isComingMessage = currentUserCode != entity.senderId
 
             if (elderIndex < size) {
-                elderMessage = userMessageResults[elderIndex].message
+                elderMessage = messageResults[elderIndex]
             }
             if (laterIndex >= 0) {
-                laterMessage = userMessageResults[laterIndex].message
+                laterMessage = messageResults[laterIndex]
             }
-            val isFirstConsecutiveFromUser = checkIsFirstConsecutiveFromUser(message, laterMessage)
+            val isFirstConsecutiveFromUser = checkIsFirstConsecutiveFromUser(entity, laterMessage)
 
             DynamicUIItem(
                 type = Constants.ITEM,
@@ -127,18 +108,18 @@ class AIChatViewModel @Inject constructor(
                 backgroundColor = 0
             ).apply {
                 if (isFirstConsecutiveFromUser && isComingMessage) {
-                    image =  ImageStyle(url = "images/${message.senderId}/${message.senderImageName}.jpg")
+                    image =  ImageStyle(url = "images/${entity.senderId}/${entity.senderImageName}.jpg")
                 }
-                generateTitle(isComingMessage, message, elderMessage)?.let {
+                generateTitle(isComingMessage, entity, elderMessage)?.let {
                     title = it
                 }
-                message.message?.let { msg ->
+                entity.message?.let { msg ->
                     description = MTextStyle(msg)
                 }
-                generateSecondaryDescription(message, elderMessage)?.let {
+                generateSecondaryDescription(entity, elderMessage)?.let {
                     secondaryDescription = it
                 }
-                generatesSecondaryImage(message)?.let {
+                generatesSecondaryImage(entity)?.let {
                     secondaryImage = it
                 }
                 val mutableMap: MutableMap<String, Any> = mutableMapOf(
@@ -146,7 +127,7 @@ class AIChatViewModel @Inject constructor(
                     Constants.IS_FIRST_CONSECUTIVE_FROM_USER to isFirstConsecutiveFromUser,
                     Constants.ENABLE_TYPED_ANIMATION to (index == 0 && isComingMessage)
                 )
-                message.createdAt?.let {
+                entity.createdAt?.let {
                     mutableMap[Constants.MESSAGE_DATE] = DateHelper.convertRealmInstantToString(it, Constants.DATE_FORMAT_2)
                 }
                 additionalData = mutableMap
@@ -225,27 +206,20 @@ class AIChatViewModel @Inject constructor(
 
     // Send Message
     fun sendMessage(text: String, imageUri: Uri?) {
-        val messageDocRef = FireStoreManager.buildDoc(Pair(FireStoreCollection.MESSAGES, null))
-        val userMessageDocRef = FireStoreManager.buildUserDocRef(Pair(FireStoreCollection.USER_MESSAGES, null))
-        val messageMap = generateMessageMap(messageDocRef.id, text, imageUri)
-        val userMessageMap = generateUserMessageMap(userMessageDocRef.id, messageDocRef.id, messageMap)
+        val messageMap = generateMessageMap(text, imageUri)
 
         imageUri?.let {
             FirebaseStorageManager.saveImage(it, UUID.randomUUID().toString()) {}
         }
         viewModelScope.launch {
-            RealmManager.create(Message::class.java, messageMap)
-            RealmManager.create(UserMessage::class.java, userMessageMap)
+            messageRepo.createMessage(messageMap)
+            shouldScrollToBottom = true
         }
-        messageDocRef.set(messageMap)
-        userMessageDocRef.set(userMessageMap)
-        shouldScrollToBottom = true
     }
 
-    private fun generateMessageMap(id: String, text: String, imageUri: Uri?): Map<String, Any> {
+    private fun generateMessageMap(text: String, imageUri: Uri?): Map<String, Any> {
         val messageMap: MutableMap<String, Any> = mutableMapOf()
         messageMap["message"] = text
-        messageMap["id"] = id
 
         val user = user
         if (user != null && user.isValid()) {
@@ -264,20 +238,6 @@ class AIChatViewModel @Inject constructor(
         return messageMap
     }
 
-    @Suppress("NAME_SHADOWING")
-    private fun generateUserMessageMap(userMessageId: String,
-                                       messageId: String,
-                                       json: Map<String, Any>): Map<String, Any> {
-        val json = json.toMutableMap()
-        json["id"] = userMessageId
-        json["message_id"] = messageId
-        json.remove("message")
-        json.remove("sender_id")
-        json.remove("sender_image_name")
-        json.remove("sender_name")
-        return json
-    }
-
     // Pagination
     fun fetchNextPage(index: Int) {
         val dateLong = getDateLong(index) ?: return
@@ -286,38 +246,22 @@ class AIChatViewModel @Inject constructor(
 
         observeCurrentPageJob?.cancel()
         observeCurrentPageJob = null
-        viewModelScope.launch {
-            getCurrentPage(dateLong)
+
+        observeCurrentPageJob = viewModelScope.launch {
+            messageRepo.listenMessages(conversationId, null, dateLong).collect {
+                updateCursorCreatedAt(it)
+            }
         }
     }
 
     private fun getDateLong(index: Int): Long? {
         if (index >= _itemModels.value.size) return null
         val item = _itemModels.value[index]
-        val userMessage = item.data as? UserMessage ?: return null
+        val userMessage = item.data as? Message ?: return null
         if (!userMessage.isValid()) return null
         val createdAt = userMessage.createdAt ?: return null
 
         return DateHelper.convertRealmInstantToMillis(createdAt)
-    }
-
-    private suspend fun getCurrentPage(dateLong: Long) {
-        val dataList = userMessageRepository.getOlderMessages(conversationId, dateLong)
-        updateCursorCreatedAt(dataList)
-        observeCurrentPage()
-    }
-
-    private fun observeCurrentPage() {
-        observeCurrentPageJob = viewModelScope.launch {
-            delay(10_000)
-            val dateLong = cursorCreatedAt ?: return@launch
-            userMessageRepository.observeOlderMessages(conversationId, dateLong)
-                .collect {
-                    updateCursorCreatedAt(it)
-                }
-            userMessageRepository.observeLaterMessages(conversationId, dateLong)
-                .collect()
-        }
     }
 
     private fun updateCursorCreatedAt(documents: List<Map<String, Any>>) {

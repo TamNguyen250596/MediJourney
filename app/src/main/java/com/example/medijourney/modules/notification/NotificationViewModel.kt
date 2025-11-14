@@ -13,7 +13,7 @@ import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
 import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.item_models.BaseItemInterface
 import com.example.medijourney.common.models.item_models.DynamicUIItem
-import com.example.medijourney.common.models.realm_models.UserMessage
+import com.example.medijourney.common.models.realm_models.Message
 import com.example.medijourney.common.models.realm_models.UserNotification
 import com.example.medijourney.common.models.ui_models.EdgePadding
 import com.example.medijourney.common.models.ui_models.ImageStyle
@@ -181,7 +181,7 @@ class NotificationViewModel @Inject constructor(
 
     fun getUserMessageId(userNotification: UserNotification): String? {
         if (!userNotification.isValid()) return null
-        if (userNotification.relatedObjectType != UserMessage::class.simpleName) return null
+        if (userNotification.relatedObjectType != Message::class.simpleName) return null
         return userNotification.relatedObjectId
     }
 }

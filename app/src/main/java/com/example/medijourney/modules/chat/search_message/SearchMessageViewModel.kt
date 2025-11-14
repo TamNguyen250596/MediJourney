@@ -10,29 +10,21 @@ import com.example.medijourney.common.helpers.DateHelper
 import com.example.medijourney.common.managers.fire_store.FireStoreCollection
 import com.example.medijourney.common.managers.fire_store.FireStoreManager
 import com.example.medijourney.common.managers.fire_store.awaitGet
-import com.example.medijourney.common.managers.fire_store.awaitSet
-import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
-import com.example.medijourney.common.managers.realm.Operator
-import com.example.medijourney.common.managers.realm.RQuery
 import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.item_models.DynamicUIItem
 import com.example.medijourney.common.models.realm_models.Conversation
 import com.example.medijourney.common.models.realm_models.Message
-import com.example.medijourney.common.models.realm_models.UserConversation
 import com.example.medijourney.common.models.ui_models.MTextStyle
+import com.example.medijourney.common.respositories.ConversationRepo
 import com.example.medijourney.common.respositories.MessageRepo
-import com.example.medijourney.common.respositories.UserConversationRepo
-import com.example.medijourney.common.respositories.UserMessageRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.ext.isValid
-import io.realm.kotlin.query.RealmResults
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
@@ -40,10 +32,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchMessageViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
-    private val userConversationRepository: UserConversationRepo,
-    private val messageRepository: MessageRepo,
-    private val userMessageRepository: UserMessageRepo
+    savedStateHandle: SavedStateHandle,
+    private val conversationRepo: ConversationRepo,
+    private val messageRepo: MessageRepo
 ) : ViewModel() {
 
     // Properties
@@ -52,9 +43,8 @@ class SearchMessageViewModel @Inject constructor(
     private val _itemModels = MutableStateFlow<List<DynamicUIItem>>(emptyList())
     val itemModels: StateFlow<List<DynamicUIItem>> = _itemModels.asStateFlow()
     val searchTextFlow = MutableStateFlow<String?>(null)
-    private var userConversation: UserConversation? = null
-    private var conversationIds: List<String> = listOf()
-    private var cursorCreatedAt: Long? = null
+    private var conversationId: String? = savedStateHandle.get<String>("conversationId")
+    private var dateCursor: Long? = null
     private var observeMessagesJob: Job? = null
 
     // Companion
@@ -65,7 +55,6 @@ class SearchMessageViewModel @Inject constructor(
     // View cycle
     init {
         viewModelScope.launch {
-            conversationIds = getConversationIds()
             observeMessagesFlow()
             launch {
                 observeSearchText()
@@ -73,34 +62,27 @@ class SearchMessageViewModel @Inject constructor(
         }
     }
 
-    private suspend fun getConversationIds(): List<String> {
-        return savedStateHandle.get<String>("conversationId")?.let {
-            listOf(it)
-        } ?: run {
-            userConversationRepository
-                .observeUserConversations()
-                .collect()
-            userConversationRepository
-                .getUserConversationsFlow(null)
-                .firstOrNull()?.map {
-                it.conversationId
-            } ?: listOf()
-        }
-    }
-
     private fun observeMessagesFlow() {
-        if (observeMessagesJob != null) {
-            observeMessagesJob?.cancel()
+        observeMessagesJob?.let {
+            it.cancel()
             observeMessagesJob = null
         }
         observeMessagesJob = viewModelScope.launch {
-            val dataList = messageRepository.getMessages(conversationIds, searchTextFlow.value)
-            updateCursorCreatedAt(dataList)
-            messageRepository.geMessagesFLow(conversationIds, searchTextFlow.value)
-                .firstThenDebounce(500)
-                .collect {
-                    _itemModels.value = generateDynamicUIItemModels(it)
-                }
+            launch {
+                messageRepo
+                    .listenMessages(conversationId, searchTextFlow.value, null)
+                    .collect {
+                        updateDateCursor(it)
+                    }
+            }
+            launch {
+                messageRepo
+                    .geMessagesFLow(conversationId, searchTextFlow.value)
+                    .firstThenDebounce(500)
+                    .collect {
+                        _itemModels.value = generateDynamicUIItemModels(it)
+                    }
+            }
         }
     }
 
@@ -182,13 +164,13 @@ class SearchMessageViewModel @Inject constructor(
         searchTextFlow
             .debounce(500)
             .collect {
-                searchMessage(it)
+                searchMessage()
             }
     }
 
     private fun searchMessage() {
         _isLoading.value = true
-        cursorCreatedAt = null
+        dateCursor = null
         viewModelScope.launch {
             observeMessagesFlow()
             _isLoading.value = false
@@ -201,29 +183,28 @@ class SearchMessageViewModel @Inject constructor(
         val item = _itemModels.value[index]
         val message = item.data as? Message ?: return
         if (!message.isValid()) return
-        val cursorCreatedAt = cursorCreatedAt ?: return
+        val cursorCreatedAt = dateCursor ?: return
         val createdAt = message.createdAt ?: return
         val dateLong = DateHelper.convertRealmInstantToMillis(createdAt)
         if (dateLong >= cursorCreatedAt) return
 
         viewModelScope.launch {
-            val dataList = messageRepository.getMessages(
-                conversationIds,
-                searchTextFlow.value,
-                cursorCreatedAt
-            )
-            updateCursorCreatedAt(dataList)
+            messageRepo
+                .listenMessages(conversationId, searchTextFlow.value, dateLong)
+                .collect {
+                    updateDateCursor(it)
+                }
         }
     }
 
-    private fun updateCursorCreatedAt(documents: List<MutableMap<String, Any>>) {
+    private fun updateDateCursor(documents: List<Map<String, Any>>) {
         val lastData = documents.lastOrNull() ?: return
         val eldestCreatedDateNumber = lastData[Constants.CREATED_AT] as? Long ?: return
         val eldestCreatedDateLong = eldestCreatedDateNumber
-        val cursorDate = cursorCreatedAt
+        val cursorDate = dateCursor
         if (cursorDate != null && eldestCreatedDateLong > cursorDate) return
 
-        cursorCreatedAt = eldestCreatedDateLong
+        dateCursor = eldestCreatedDateLong
     }
 
     // Selected Message Handle
@@ -234,10 +215,8 @@ class SearchMessageViewModel @Inject constructor(
         val conversationId = message.conversationId
 
         viewModelScope.launch {
-            if (userConversation == null) {
-                val userConvDeferred = async { ensureUserConversation(conversationId) }
+            if (conversationRepo.getConversationFlow(conversationId).firstOrNull() == null) {
                 val convDeferred = async { ensureConversation(conversationId) }
-                userConvDeferred.await()
                 convDeferred.await()
             }
 
@@ -247,9 +226,9 @@ class SearchMessageViewModel @Inject constructor(
     }
 
     private suspend fun ensureConversation(conversationId: String) {
-        val existing = RealmManager.read(Conversation::class.java, conversationId)
+        val existing = conversationRepo.getConversationFlow(conversationId).firstOrNull()
         if (existing != null) {
-            if (!existing.isAdded) return
+            if (!existing.includeCurrentUser) return
             RealmManager.update(Conversation::class.java, existing.id, mapOf("is_added" to true))
         } else {
             val snapshot = try {
@@ -260,47 +239,16 @@ class SearchMessageViewModel @Inject constructor(
             }
 
             snapshot.data?.let {
-                it["is_added"] = true
+                it["include_current_user"] = true
                 RealmManager.create(Conversation::class.java, it)
             }
         }
     }
 
-    private suspend fun ensureUserConversation(conversationId: String) {
-        val existing = RealmManager.read(
-            clazz = UserConversation::class.java,
-            realmQuery = RQuery.Where(UserConversation::conversationId.name, Operator.EQUAL, conversationId)
-        ).firstOrNull()
-
-        if (existing != null) return
-        val conversation = RealmManager.read(Conversation::class.java, conversationId) ?: return
-        if (!conversation.isValid()) return
-
-        val map: MutableMap<String, Any> = mutableMapOf()
-        FirebaseAuthManager.getCurrentUserCode()?.let {
-            map["user_code"] = it
-        }
-        map["conversation_id"] = conversationId
-        map["tag"] = conversation.tag
-
-        val data = try {
-            FireStoreManager.buildUserDocRef(Pair(FireStoreCollection.USER_CONVERSATIONS, null))
-                .awaitSet(map)
-        } catch (_: Exception) {
-            return
-        }
-
-        RealmManager.create(UserConversation::class.java, data)
-    }
-
     private suspend fun ensureUserMessage(messageId: String): String? {
-        val existing = userMessageRepository.getUserMessageFlow(messageId).firstOrNull()?.firstOrNull()
+        val existing = messageRepo.getMessageFlow(messageId).firstOrNull() ?: return null
+        if (!existing.isValid()) return null
 
-        if (existing?.isValid() == true) return existing.id
-
-        return userMessageRepository.getUserMessages(messageId)
-            .firstOrNull()?.firstOrNull()?.let {
-                it["id"] as? String
-            }
+        return existing.id
     }
 }

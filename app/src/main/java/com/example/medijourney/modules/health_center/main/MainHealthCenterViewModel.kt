@@ -38,21 +38,21 @@ class MainHealthCenterViewModel @Inject constructor(
     private suspend fun observeFS() = supervisorScope {
         // Fitness trackers section
         launch {
-            userFitnessTrackerRepository.observeUserFitnessTrackers()
+            userFitnessTrackerRepository.listenUserFitnessTrackers()
         }
         launch {
-            fitnessTrackerActivityRepository.observeFitnessTrackerActivities()
+            fitnessTrackerActivityRepository.listenFitnessTrackerActivities()
         }
 
         // Exercise plans section
         launch {
-            exerciseRepository.observeExercises()
+            exerciseRepository.listenExercises()
         }
         launch {
-            exerciseLevelRepository.observeExerciseLevels()
+            exerciseLevelRepository.listenExerciseLevels()
         }
         launch {
-            userExercisePlanRepository.observeUserExercisePlans()
+            userExercisePlanRepository.listenUserExercisePlans()
         }
 
         // Recommended exercises section

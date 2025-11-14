@@ -15,14 +15,14 @@ import javax.inject.Inject
 
 // Repository interface
 interface ExerciseRepo {
-    suspend fun observeExercises()
+    suspend fun listenExercises()
     fun getExercisesFlow(): Flow<List<Exercise>>
 }
 
 // Repository implementation
 class ExerciseRepoImpl @Inject constructor() : ExerciseRepo {
 
-    override suspend fun observeExercises() {
+    override suspend fun listenExercises() {
         FireStoreManager.observeCollection(
             FireStoreCollection.EXERCISES,
             queryBuilder = FSQueryBuilder()
@@ -35,6 +35,7 @@ class ExerciseRepoImpl @Inject constructor() : ExerciseRepo {
             Exercise::class,
             queryBuilder = RQueryBuilder()
                 .equalTo("enable", true)
+                .sort("position", true)
         )
     }
 }

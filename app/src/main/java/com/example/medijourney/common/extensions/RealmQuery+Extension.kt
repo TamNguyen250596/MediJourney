@@ -131,8 +131,13 @@ class RQueryBuilder {
         return this
     }
 
-
     fun sort(key: String, sortOrder: Sort): RQueryBuilder {
+        sorts.add(Pair(key, sortOrder))
+        return this
+    }
+
+    fun sort(key: String, isAscending: Boolean): RQueryBuilder {
+        val sortOrder = if (isAscending) Sort.ASCENDING else Sort.DESCENDING
         sorts.add(Pair(key, sortOrder))
         return this
     }

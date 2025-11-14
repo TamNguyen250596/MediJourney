@@ -9,23 +9,17 @@ import com.example.medijourney.common.constants.Constants
 import com.example.medijourney.common.constants.MessageMenuAction
 import com.example.medijourney.common.extensions.firstThenDebounce
 import com.example.medijourney.common.helpers.DateHelper
-import com.example.medijourney.common.managers.fire_store.FireStoreCollection
-import com.example.medijourney.common.managers.fire_store.FireStoreManager
 import com.example.medijourney.common.managers.firebase_auth.FAManger
 import com.example.medijourney.common.managers.firebase_storage.FirebaseStorageManager
-import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.item_models.DynamicUIItem
 import com.example.medijourney.common.models.realm_models.Conversation
 import com.example.medijourney.common.models.realm_models.Message
 import com.example.medijourney.common.models.realm_models.User
-import com.example.medijourney.common.models.realm_models.UserMessage
 import com.example.medijourney.common.models.ui_models.ImageStyle
 import com.example.medijourney.common.models.ui_models.MTextStyle
 import com.example.medijourney.common.respositories.ConversationRepo
 import com.example.medijourney.common.respositories.MessageRepo
-import com.example.medijourney.common.respositories.UserMessageRepo
 import com.example.medijourney.common.respositories.UserRepo
-import com.google.firebase.firestore.Query
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.ext.isValid
 import kotlinx.coroutines.CoroutineScope
@@ -34,9 +28,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -48,8 +40,7 @@ class MessageViewModel @Inject constructor(
     state: SavedStateHandle,
     private val userRepository: UserRepo,
     conversationRepository: ConversationRepo,
-    private val userMessageRepository: UserMessageRepo,
-    private val messageRepository: MessageRepo
+    private val messageRepo: MessageRepo
 ) : ViewModel() {
 
     // Properties
@@ -68,9 +59,8 @@ class MessageViewModel @Inject constructor(
     private var conversationId: String = state.get<String>("conversationId") ?: ""
     private var user: User? = null
     private var conversationFlow = conversationRepository.getConversationFlow(conversationId)
-    private var messagesFlow = messageRepository.geMessagesFLow(conversationId)
-    private var userMessagesFlow = userMessageRepository.getUserMessageFLow(conversationId)
-    private var pinnedMessagesFlow = messageRepository.getPinnedMessagesFlow(conversationId)
+    private var messagesFlow = messageRepo.geMessagesFLow(conversationId, null)
+    private var pinnedMessagesFlow = messageRepo.getPinnedMessagesFlow(conversationId)
     private var cursorCreatedAt: Long? = null
     private var observeCurrentPageJob: Job? = null
 
@@ -97,7 +87,6 @@ class MessageViewModel @Inject constructor(
 
         coroutineScope.launch {
             messagesFlow
-                .combine(userMessagesFlow) { _, userMessages -> userMessages }
                 .firstThenDebounce(500)
                 .collectLatest {
                     _itemModels.value = generateDynamicList(it)
@@ -124,10 +113,8 @@ class MessageViewModel @Inject constructor(
 
     private fun observeFS(coroutineScope: CoroutineScope) {
         coroutineScope.launch {
-            messageRepository.observePinnedMessages(conversationId)
-        }
-        coroutineScope.launch {
-            userMessageRepository.observeLatestMessages(conversationId)
+            messageRepo
+                .listenMessages(conversationId, null, null)
                 .collect {
                     updateCursorCreatedAt(it)
                 }
@@ -155,27 +142,25 @@ class MessageViewModel @Inject constructor(
         }
     }
 
-    private fun generateDynamicList(userMessageResults: List<UserMessage>?): List<DynamicUIItem> {
-        userMessageResults ?: return emptyList()
-        val size = userMessageResults.size
+    private fun generateDynamicList(messages: List<Message>): List<DynamicUIItem> {
+        val size = messages.size
         val currentUserCode = FAManger.currentUserCode
 
-        return userMessageResults.mapIndexedNotNull { index, entity ->
-            val message = entity.message ?: return@mapIndexedNotNull null
+        return messages.mapIndexedNotNull { index, entity ->
             if (!entity.isValid()) return@mapIndexedNotNull null
             var elderMessage: Message? = null
             val elderIndex = index + 1
             var laterMessage: Message? = null
             val laterIndex = index - 1
-            val isComingMessage = currentUserCode != message.senderId
+            val isComingMessage = currentUserCode != entity.senderId
 
             if (elderIndex < size) {
-                elderMessage = userMessageResults[elderIndex].message
+                elderMessage = messages[elderIndex]
             }
             if (laterIndex >= 0) {
-                laterMessage = userMessageResults[laterIndex].message
+                laterMessage = messages[laterIndex]
             }
-            val isFirstConsecutiveFromUser = checkIsFirstConsecutiveFromUser(message, laterMessage)
+            val isFirstConsecutiveFromUser = checkIsFirstConsecutiveFromUser(entity, laterMessage)
 
             DynamicUIItem(
                 type = Constants.ITEM,
@@ -185,26 +170,26 @@ class MessageViewModel @Inject constructor(
                 backgroundColor = 0
             ).apply {
                 if (isFirstConsecutiveFromUser && isComingMessage) {
-                    image =  ImageStyle(url = "images/${message.senderId}/${message.senderImageName}.jpg")
+                    image =  ImageStyle(url = "images/${entity.senderId}/${entity.senderImageName}.jpg")
                 }
-                generateTitle(isComingMessage, message, elderMessage)?.let {
+                generateTitle(isComingMessage, entity, elderMessage)?.let {
                     title = it
                 }
-                message.message?.let { msg ->
+                entity.message?.let { msg ->
                     description = MTextStyle(msg)
                 }
-                generateSecondaryDescription(message, elderMessage)?.let {
+                generateSecondaryDescription(entity, elderMessage)?.let {
                     secondaryDescription = it
                 }
-                generatesSecondaryImage(message)?.let {
+                generatesSecondaryImage(entity)?.let {
                     secondaryImage = it
                 }
                 val mutableMap: MutableMap<String, Any> = mutableMapOf(
                     Constants.IS_INCOMING_MESSAGE to isComingMessage,
                     Constants.IS_FIRST_CONSECUTIVE_FROM_USER to isFirstConsecutiveFromUser,
-                    Constants.MESSAGE_MENU_ACTIONS to generateMessageMenuAction(message)
+                    Constants.MESSAGE_MENU_ACTIONS to generateMessageMenuAction(entity)
                 )
-                message.createdAt?.let {
+                entity.createdAt?.let {
                     mutableMap[Constants.MESSAGE_DATE] = DateHelper.convertRealmInstantToString(it, Constants.DATE_FORMAT_2)
                 }
                 additionalData = mutableMap
@@ -297,27 +282,20 @@ class MessageViewModel @Inject constructor(
 
     // Send Message
     fun sendMessage(text: String, imageUri: Uri?) {
-        val messageDocRef = FireStoreManager.buildDoc(Pair(FireStoreCollection.MESSAGES, null))
-        val userMessageDocRef = FireStoreManager.buildUserDocRef(Pair(FireStoreCollection.USER_MESSAGES, null))
-        val messageMap = generateMessageMap(messageDocRef.id, text, imageUri)
-        val userMessageMap = generateUserMessageMap(userMessageDocRef.id, messageDocRef.id, messageMap)
+        val messageMap = generateMessageMap(text, imageUri)
 
         imageUri?.let {
             FirebaseStorageManager.saveImage(it, UUID.randomUUID().toString()) {}
         }
         viewModelScope.launch {
-            RealmManager.create(Message::class.java, messageMap)
-            RealmManager.create(UserMessage::class.java, userMessageMap)
+            messageRepo.createMessage(messageMap)
+            shouldScrollToBottom = true
         }
-        messageDocRef.set(messageMap)
-        userMessageDocRef.set(userMessageMap)
-        shouldScrollToBottom = true
     }
 
-    private fun generateMessageMap(id: String, text: String, imageUri: Uri?): Map<String, Any> {
+    private fun generateMessageMap(text: String, imageUri: Uri?): Map<String, Any> {
         val messageMap: MutableMap<String, Any> = mutableMapOf()
         messageMap["message"] = text
-        messageMap["id"] = id
 
         val user = user
         if (user != null && user.isValid()) {
@@ -334,20 +312,6 @@ class MessageViewModel @Inject constructor(
             messageMap["media_url"] = it.toString()
         }
         return messageMap
-    }
-
-    @Suppress("NAME_SHADOWING")
-    private fun generateUserMessageMap(userMessageId: String,
-                                       messageId: String,
-                                       json: Map<String, Any>): Map<String, Any> {
-        val json = json.toMutableMap()
-        json["id"] = userMessageId
-        json["message_id"] = messageId
-        json.remove("message")
-        json.remove("sender_id")
-        json.remove("sender_image_name")
-        json.remove("sender_name")
-        return json
     }
 
     // Message Menu Actions
@@ -367,42 +331,26 @@ class MessageViewModel @Inject constructor(
 
     // Delete Message
     private fun deleteMessage(itemModel: DynamicUIItem) {
-        val userMessage = itemModel.data as? UserMessage ?: return
-        if (!userMessage.isValid()) return
-        val message = userMessage.message ?: return
+        val message = itemModel.data as? Message ?: return
         if (!message.isValid()) return
-        val userMessageId = userMessage.id
         val messageId = message.id
+        val senderId = message.senderId
         _isLoading.value = true
 
-        FireStoreManager.buildUserDocRef(Pair(FireStoreCollection.USER_MESSAGES, userMessageId))
-            .delete()
-            .addOnSuccessListener {
-                viewModelScope.launch {
-                    RealmManager.delete(UserMessage::class.java, userMessageId)
-                    RealmManager.delete(Message::class.java, messageId)
-                    _isLoading.value = false
-                }
-            }
-            .addOnFailureListener {
-                _isLoading.value = false
-            }
+        viewModelScope.launch {
+            messageRepo.deleteMessage(messageId, senderId)
+            _isLoading.value = false
+        }
     }
 
     // Pin Message
     private fun pinMessage(itemModel: DynamicUIItem, isPinned: Boolean) {
-        val userMessage = itemModel.data as? UserMessage ?: return
-        if (!userMessage.isValid()) return
-        val message = userMessage.message ?: return
+        val message = itemModel.data as? Message ?: return
         if (!message.isValid()) return
 
-        FireStoreManager.buildDoc(Pair(FireStoreCollection.MESSAGES, message.id))
-            .update("is_pinned", isPinned)
-            .addOnSuccessListener {
-                viewModelScope.launch {
-                    RealmManager.update(Message::class.java, message.id, mapOf("is_pinned" to isPinned))
-                }
-            }
+        viewModelScope.launch {
+            messageRepo.updateMessage(message.id, mapOf("is_pinned" to isPinned))
+        }
     }
 
     fun getNextPinnedMessageIndex(currentIndex: Int?): Int {
@@ -422,8 +370,7 @@ class MessageViewModel @Inject constructor(
         if (!pinnedMessage.isValid()) return 0
 
         return _itemModels.value.indexOfFirst {
-            val userMessage = it.data as? UserMessage ?: return@indexOfFirst false
-            val message = userMessage.message ?: return@indexOfFirst false
+            val message = it.data as? Message ?: return@indexOfFirst false
             message.isValid() && message.id == pinnedMessage.id
         }
     }
@@ -436,38 +383,23 @@ class MessageViewModel @Inject constructor(
 
         observeCurrentPageJob?.cancel()
         observeCurrentPageJob = null
-        viewModelScope.launch {
-            getCurrentPage(dateLong)
+
+        observeCurrentPageJob = viewModelScope.launch {
+            messageRepo.listenMessages(conversationId, null, cursorCreatedAt)
+                .collect {
+                    updateCursorCreatedAt(it)
+                }
         }
     }
 
     private fun getDateLong(index: Int): Long? {
         if (index >= _itemModels.value.size) return null
         val item = _itemModels.value[index]
-        val userMessage = item.data as? UserMessage ?: return null
-        if (!userMessage.isValid()) return null
-        val createdAt = userMessage.createdAt ?: return null
+        val message = item.data as? Message ?: return null
+        if (!message.isValid()) return null
+        val createdAt = message.createdAt ?: return null
 
         return DateHelper.convertRealmInstantToMillis(createdAt)
-    }
-
-    private suspend fun getCurrentPage(dateLong: Long) {
-        val dataList = userMessageRepository.getOlderMessages(conversationId, dateLong)
-        updateCursorCreatedAt(dataList)
-        observeCurrentPage()
-    }
-
-    private fun observeCurrentPage() {
-        observeCurrentPageJob = viewModelScope.launch {
-            delay(10_000)
-            val dateLong = cursorCreatedAt ?: return@launch
-            userMessageRepository.observeOlderMessages(conversationId, dateLong)
-                .collect {
-                    updateCursorCreatedAt(it)
-                }
-            userMessageRepository.observeLaterMessages(conversationId, dateLong)
-                .collect()
-        }
     }
 
     private fun updateCursorCreatedAt(documents: List<Map<String, Any>>) {
@@ -490,13 +422,12 @@ class MessageViewModel @Inject constructor(
         }
     }
 
-    fun updateSelectedSearchMessageIndex(userMessageId: String) {
+    fun updateSelectedSearchMessageIndex(messageId: String) {
         viewModelScope.launch {
-            val entities = userMessagesFlow.firstOrNull()
-            val index = entities?.indexOfFirst {
-                it.isValid() && it.id == userMessageId
+            val index = _itemModels.value.indexOfFirst {
+                it.itemTag == messageId
             }
-            if (index != null && index >= 0) {
+            if (index >= 0) {
                 _selectedSearchMessageIndex.value = index
             }
         }

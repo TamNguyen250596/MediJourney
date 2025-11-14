@@ -16,14 +16,12 @@ import com.example.medijourney.common.models.realm_models.Membership
 import com.example.medijourney.common.models.realm_models.Message
 import com.example.medijourney.common.models.realm_models.Recipe
 import com.example.medijourney.common.models.realm_models.User
-import com.example.medijourney.common.models.realm_models.UserConversation
 import com.example.medijourney.common.models.realm_models.UserExercisePlan
 import com.example.medijourney.common.models.realm_models.UserExerciseTrackingReport
 import com.example.medijourney.common.models.realm_models.UserFitnessTracker
 import com.example.medijourney.common.models.realm_models.UserMedicalProduct
 import com.example.medijourney.common.models.realm_models.UserMedicalSpecialty
 import com.example.medijourney.common.models.realm_models.UserMembership
-import com.example.medijourney.common.models.realm_models.UserMessage
 import com.example.medijourney.common.models.realm_models.UserNotification
 import com.example.medijourney.common.models.realm_models.UserNutritionTrackingReport
 import com.example.medijourney.common.models.realm_models.UserRecommendExercise
@@ -53,14 +51,12 @@ object MRealmConfiguration {
             Message::class,
             Recipe::class,
             User::class,
-            UserConversation::class,
             UserExercisePlan::class,
             UserExerciseTrackingReport::class,
             UserFitnessTracker::class,
             UserMedicalProduct::class,
             UserMedicalSpecialty::class,
             UserMembership::class,
-            UserMessage::class,
             UserNotification::class,
             UserNutritionTrackingReport::class,
             UserRecommendExercise::class,

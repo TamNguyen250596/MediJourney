@@ -14,14 +14,14 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 interface FitnessTrackerActivityRepo {
-    suspend fun observeFitnessTrackerActivities()
+    suspend fun listenFitnessTrackerActivities()
     fun getFitnessTrackerActivitiesFlow(): Flow<List<FitnessTrackerActivity>>
 }
 
 // Repository implementation
 class FitnessTrackerActivityRepoImpl @Inject constructor() : FitnessTrackerActivityRepo {
 
-    override suspend fun observeFitnessTrackerActivities() {
+    override suspend fun listenFitnessTrackerActivities() {
         FireStoreManager.observeCollection(
             FireStoreCollection.FITNESS_TRACKER_ACTIVITIES,
             queryBuilder = FSQueryBuilder()

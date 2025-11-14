@@ -106,7 +106,7 @@ class MedicationListViewModel @Inject constructor(
         searchTextFlow
             .firstThenDebounce(500)
             .collect {
-                searchMedicalProduct(it)
+                searchMedicalProduct()
             }
     }
 

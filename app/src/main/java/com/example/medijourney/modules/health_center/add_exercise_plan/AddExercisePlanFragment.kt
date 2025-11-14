@@ -65,7 +65,9 @@ import com.example.medijourney.common.ui_components.composes.TextFieldItem
 import com.example.medijourney.common.ui_components.dialogs.IndicatorHandler
 import com.example.medijourney.modules.health_center.add_exercise_plan.sub_views.ElevatedButtonItem
 import com.example.medijourney.modules.health_center.add_exercise_plan.sub_views.ExerciseSequenceItem
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class AddExercisePlanFragment : Fragment() {
 
    // Properties
@@ -88,7 +90,6 @@ class AddExercisePlanFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupView()
-        viewModel.inputUserExercisePlanId(userExercisePlanId)
     }
 
     // Functions

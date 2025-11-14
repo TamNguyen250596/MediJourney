@@ -3,18 +3,13 @@ package com.example.medijourney.modules.chat.search_conversation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.medijourney.common.constants.Constants
-import com.example.medijourney.common.extensions.RQueryBuilder
 import com.example.medijourney.common.extensions.firstThenDebounce
-import com.example.medijourney.common.managers.fire_store.FireStoreCollection
-import com.example.medijourney.common.managers.fire_store.FireStoreManager
 import com.example.medijourney.common.managers.fire_store.remove
-import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.item_models.DynamicUIItem
 import com.example.medijourney.common.models.realm_models.Conversation
 import com.example.medijourney.common.models.ui_models.ImageStyle
 import com.example.medijourney.common.models.ui_models.MTextStyle
 import com.example.medijourney.common.respositories.ConversationRepo
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.Query
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.ext.isValid
@@ -31,7 +26,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchConversationViewModel @Inject constructor(
-    private val conversationRepository: ConversationRepo
+    private val conversationRepo: ConversationRepo
 ) : ViewModel() {
 
     // Properties
@@ -65,7 +60,7 @@ class SearchConversationViewModel @Inject constructor(
 
     // Functions
     private suspend fun observeFS(keywords: String? = null) {
-        conversationRepository.observeConversations(keywords, null)
+        conversationRepo.listenConversations(false, keywords, null)
             .collect {
                 updateCursorTag(it)
                 _isLoading.value = false
@@ -73,7 +68,8 @@ class SearchConversationViewModel @Inject constructor(
     }
 
     private suspend fun observeData(keyword: String?) {
-        conversationRepository.getConversationsFlow(keyword)
+        conversationRepo
+            .getConversationsFlow(false, keyword)
             .firstThenDebounce(500)
             .collect {
                 _itemModels.value = generateDynamicUIItemModels(it)
@@ -152,8 +148,8 @@ class SearchConversationViewModel @Inject constructor(
         if (conversationTag <= conversationCursorTag) return
         observeCurrentPageJob?.cancel()
         observeCurrentPageJob = viewModelScope.launch {
-            conversationRepository
-                .observeConversations(searchTextFlow.value, conversationTag)
+            conversationRepo
+                .listenConversations(false, searchTextFlow.value, conversationTag)
                 .collect {
                     updateCursorTag(it)
                 }
@@ -181,24 +177,11 @@ class SearchConversationViewModel @Inject constructor(
     // Add Conversation
     fun addUserConversation(itemModel: DynamicUIItem, completion: (Boolean) -> Unit) {
         val conversation = itemModel.data as? Conversation ?: return
-        val conversationId = conversation.id
         if (!conversation.isValid()) return
-
-        val map: MutableMap<String, Any> = mutableMapOf()
-        map["tag"] = conversation.tag
-        map["conversation_id"] = conversation.id
+        val  id = conversation.id
 
         viewModelScope.launch {
-            val result = FireStoreManager.createDoc(
-                FireStoreCollection.USER_CONVERSATIONS,
-                null,
-                map
-            )
-            RealmManager.update(
-                Conversation::class,
-                queryBuilder = RQueryBuilder().equalTo("id", conversationId),
-                mapOf("is_added" to true)
-            )
+            val result = conversationRepo.createUserConversation(id)
             completion.invoke(result)
         }
     }

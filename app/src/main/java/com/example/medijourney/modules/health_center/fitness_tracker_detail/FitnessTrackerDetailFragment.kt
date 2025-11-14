@@ -23,7 +23,9 @@ import com.example.medijourney.databinding.FragmentFitnessTrackerDetailBinding
 import com.example.medijourney.modules.health_center.add_fitness_tracker.AddFitnessTrackerFragment
 import com.example.medijourney.common.ui_components.recycle_view_adapter.BaseAdapterInterface
 import com.example.medijourney.modules.profile.manage_profile.ManageProfileAdapter
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class FitnessTrackerDetailFragment : Fragment(), MenuProvider, BaseAdapterInterface {
 
     // Properties
@@ -46,7 +48,6 @@ class FitnessTrackerDetailFragment : Fragment(), MenuProvider, BaseAdapterInterf
         super.onViewCreated(view, savedInstanceState)
         setupView()
         observeViewModel()
-        viewModel.onViewCreated(userFitnessTrackerId)
         if (!viewModel.didHandledNavigation) {
             handleNavigation()
             viewModel.didHandledNavigation = true

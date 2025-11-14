@@ -12,18 +12,26 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 interface UserFitnessTrackerRepo {
-    suspend fun observeUserFitnessTrackers()
+    suspend fun createUserFitnessTracker(data: Map<String, Any>): Boolean
+    suspend fun listenUserFitnessTrackers()
     fun getUserFitnessTrackerFlow(id: String): Flow<UserFitnessTracker?>
     fun getUserFitnessTrackersFlow(): Flow<List<UserFitnessTracker>>
+    suspend fun updateUserFitnessTracker(id: String, data: Map<String, Any>): Boolean
+    suspend fun deleteUserFitnessTracker(id: String): Boolean
 }
 
 class UserFitnessTrackerRepoImpl @Inject constructor() : UserFitnessTrackerRepo {
+    override suspend fun createUserFitnessTracker(data: Map<String, Any>): Boolean {
+        return FireStoreManager.createDoc(
+            FireStoreCollection.USER_FITNESS_TRACKERS,
+            data = data
+        )
+    }
 
-    override suspend fun observeUserFitnessTrackers() {
+    override suspend fun listenUserFitnessTrackers() {
         FireStoreManager.observeCollection(
             FireStoreCollection.USER_FITNESS_TRACKERS,
             queryBuilder = FSQueryBuilder()
@@ -32,11 +40,7 @@ class UserFitnessTrackerRepoImpl @Inject constructor() : UserFitnessTrackerRepo 
     }
 
     override fun getUserFitnessTrackerFlow(id: String): Flow<UserFitnessTracker?> {
-        return RealmManager.flow(
-            UserFitnessTracker::class,
-            queryBuilder = RQueryBuilder()
-                .equalTo(id, id)
-        ).map { it.firstOrNull() }
+        return RealmManager.flow(UserFitnessTracker::class, id)
     }
 
     override fun getUserFitnessTrackersFlow(): Flow<List<UserFitnessTracker>> {
@@ -44,6 +48,24 @@ class UserFitnessTrackerRepoImpl @Inject constructor() : UserFitnessTrackerRepo 
             UserFitnessTracker::class,
             queryBuilder = RQueryBuilder()
                 .equalTo("user_id", FAManger.currentUserCode)
+        )
+    }
+
+    override suspend fun updateUserFitnessTracker(
+        id: String,
+        data: Map<String, Any>
+    ): Boolean {
+        return FireStoreManager.updateDoc(
+            FireStoreCollection.USER_FITNESS_TRACKERS,
+            id,
+            data
+        )
+    }
+
+    override suspend fun deleteUserFitnessTracker(id: String): Boolean {
+        return FireStoreManager.deleteDoc(
+            FireStoreCollection.USER_FITNESS_TRACKERS,
+            id
         )
     }
 }

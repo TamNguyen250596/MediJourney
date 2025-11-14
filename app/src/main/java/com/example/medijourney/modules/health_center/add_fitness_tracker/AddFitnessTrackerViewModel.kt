@@ -3,59 +3,58 @@ package com.example.medijourney.modules.health_center.add_fitness_tracker
 import android.net.Uri
 import android.view.Gravity
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.medijourney.R
-import com.example.medijourney.common.managers.firebase_storage.FirebaseStorageManager
-import com.example.medijourney.common.managers.fire_store.FireStoreCollection
-import com.example.medijourney.common.managers.fire_store.FireStoreManager
+import com.example.medijourney.common.extensions.firstThenDebounce
 import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
-import com.example.medijourney.common.managers.realm.RealmManager
+import com.example.medijourney.common.managers.firebase_storage.FirebaseStorageManager
 import com.example.medijourney.common.models.item_models.BaseItemInterface
 import com.example.medijourney.common.models.item_models.SelectionItemModel
 import com.example.medijourney.common.models.realm_models.FitnessTrackerActivity
 import com.example.medijourney.common.models.realm_models.UserFitnessTracker
 import com.example.medijourney.common.models.ui_models.EdgePadding
 import com.example.medijourney.common.models.ui_models.MTextStyle
+import com.example.medijourney.common.respositories.FitnessTrackerActivityRepo
+import com.example.medijourney.common.respositories.UserFitnessTrackerRepo
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.ext.isValid
-import io.realm.kotlin.query.RealmResults
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class AddFitnessTrackerViewModel : ViewModel() {
+@HiltViewModel
+class AddFitnessTrackerViewModel @Inject constructor(
+    saveStateHandle: SavedStateHandle,
+    fitnessTrackerActivityRepo: FitnessTrackerActivityRepo,
+    private val userFitnessTrackerRepo: UserFitnessTrackerRepo
+) : ViewModel() {
 
     // Properties
     var trackerImage = MutableLiveData<Uri?>()
     var trackerDeviceName = MutableLiveData<String?>()
     var itemModels = MutableLiveData<MutableList<SelectionItemModel>>()
-    private var fitnessTrackerActivities: RealmResults<FitnessTrackerActivity>? = null
+    private val userFitnessTrackerId = saveStateHandle.get<String>("userFitnessTrackerId")
+    private val fitnessTrackerActivitiesFlow = fitnessTrackerActivityRepo.getFitnessTrackerActivitiesFlow()
+    private val userFitnessTrackerFlow = userFitnessTrackerRepo.getUserFitnessTrackerFlow(userFitnessTrackerId ?: "")
     private var params: MutableMap<String, Any> = mutableMapOf()
     private var trackerImageUri: Uri? = null
-    private var userFitnessTracker: UserFitnessTracker? = null
-    private var userFitnessTrackerId: String? = null
 
     // Life cycle
-    fun onViewCreated(userFitnessTrackerId: String?) {
+    init {
         viewModelScope.launch {
-            this@AddFitnessTrackerViewModel.userFitnessTrackerId = userFitnessTrackerId
-            getData()
             handleUserFitnessTracker()
-            val models = generateItemModels()
-            itemModels.postValue(models)
-
-            launch {
-                observeData()
-            }
+            observeData()
         }
     }
 
     // Functions
-    private fun handleUserFitnessTracker() {
-        val userFitnessTracker = this.userFitnessTracker ?: return
+    private suspend fun handleUserFitnessTracker() {
+        val userFitnessTracker = userFitnessTrackerFlow.first() ?: return
         if (!userFitnessTracker.isValid()) return
 
         trackerDeviceName.postValue(userFitnessTracker.deviceId)
@@ -78,29 +77,23 @@ class AddFitnessTrackerViewModel : ViewModel() {
         }
     }
 
-    private suspend fun getData() {
-        userFitnessTrackerId?.let {
-            userFitnessTracker = RealmManager.read(UserFitnessTracker::class.java, it)
-        }
-        fitnessTrackerActivities = RealmManager.read(FitnessTrackerActivity::class.java)
-    }
-
-    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     private suspend fun observeData() {
-        val fitnessTrackerActivities = fitnessTrackerActivities ?: return
-
-        fitnessTrackerActivities.asFlow()
-            .debounce(500)
+        fitnessTrackerActivitiesFlow
+            .combine(userFitnessTrackerFlow) { fitnessTrackerActivities, userFitnessTracker ->
+                Pair(fitnessTrackerActivities, userFitnessTracker)
+            }
+            .firstThenDebounce(500)
             .collect {
-                this.fitnessTrackerActivities = it.list
-                val list = generateItemModels()
+                val list = generateItemModels(it.first, it.second)
                 itemModels.postValue(list)
-        }
+            }
     }
 
-    private fun generateItemModels(): MutableList<SelectionItemModel> {
+    private fun generateItemModels(
+        fitnessTrackerActivities: List<FitnessTrackerActivity>,
+        userFitnessTracker: UserFitnessTracker?
+    ): MutableList<SelectionItemModel> {
         val list = mutableListOf<SelectionItemModel>()
-        val fitnessTrackerActivities = fitnessTrackerActivities ?: return list
 
         fitnessTrackerActivities.forEach { tracker ->
             if (!tracker.isValid()) return@forEach
@@ -173,22 +166,14 @@ class AddFitnessTrackerViewModel : ViewModel() {
     }
 
     private fun saveUserFitnessTracker(completion: (Boolean) -> Unit) {
-        userFitnessTrackerId?.let {
-            FireStoreManager.buildUserDocRef(Pair(FireStoreCollection.USER_FITNESS_TRACKERS, it))
-                .update(params)
-                .addOnCompleteListener {
-                    completion.invoke(it.isSuccessful)
-                }
-        } ?: run {
-            val docRef = FireStoreManager.buildUserDocRef(Pair(FireStoreCollection.USER_FITNESS_TRACKERS, null))
-            params["id"] = docRef.id
-            FirebaseAuthManager.getCurrentUserCode()?.let {
-                params["user_code"] = it
+        viewModelScope.launch {
+            var result = false
+            userFitnessTrackerId?.let {
+                result = userFitnessTrackerRepo.updateUserFitnessTracker(it, params)
+            } ?: run {
+                result = userFitnessTrackerRepo.createUserFitnessTracker(params)
             }
-
-            docRef.set(params).addOnCompleteListener {
-                completion.invoke(it.isSuccessful)
-            }
+            completion.invoke(result)
         }
     }
 }
