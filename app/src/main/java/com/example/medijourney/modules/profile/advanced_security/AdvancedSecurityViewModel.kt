@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.medijourney.R
 import com.example.medijourney.common.constants.Constants
 import com.example.medijourney.common.helpers.DataStoreHelper
@@ -38,11 +37,6 @@ class AdvancedSecurityViewModel @Inject constructor() : ViewModel() {
             getUserSetting()
             updateOTPSwitch()
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        FireStoreManager.removeListeners(this::class.java)
     }
 
     // Functions

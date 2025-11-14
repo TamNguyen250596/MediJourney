@@ -7,10 +7,6 @@ import com.example.medijourney.common.managers.fire_store.FireStoreManager
 import com.example.medijourney.common.managers.firebase_auth.FAManger
 import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.realm_models.UserExercisePlan
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -58,14 +54,4 @@ class UserExercisePlanRepoImpl @Inject constructor() : UserExercisePlanRepo {
     override suspend fun deleteUserExercisePlan(id: String): Boolean {
         return FireStoreManager.deleteDoc(FireStoreCollection.USER_EXERCISE_PLANS, id)
     }
-}
-
-@Module
-@InstallIn(ViewModelComponent::class)
-abstract class UserExercisePlanModule {
-
-    @Binds
-    abstract fun bindUserExercisePlanRepository(
-        impl: UserExercisePlanRepoImpl
-    ): UserExercisePlanRepo
 }

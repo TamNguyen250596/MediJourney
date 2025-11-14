@@ -7,10 +7,6 @@ import com.example.medijourney.common.managers.fire_store.FireStoreManager
 import com.example.medijourney.common.managers.firebase_auth.FAManger
 import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.realm_models.UserMembership
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -18,6 +14,7 @@ import javax.inject.Inject
 interface UserMembershipRepo {
     suspend fun observeUserMembership()
     fun getUserMembershipFow(): Flow<UserMembership?>
+    suspend fun updateMembership(id: String, data: Map<String, Any>): Boolean
 }
 
 class UserMembershipRepoImpl @Inject constructor() : UserMembershipRepo   {
@@ -36,14 +33,11 @@ class UserMembershipRepoImpl @Inject constructor() : UserMembershipRepo   {
                 .equalTo(UserMembership::userId.name, FAManger.currentUserCode)
         ).map { it.firstOrNull() }
     }
-}
 
-@Module
-@InstallIn(ViewModelComponent::class)
-abstract class UserMembershipModule {
-
-    @Binds
-    abstract fun bindUserMembershipRepository(
-        impl: UserMembershipRepoImpl
-    ): UserMembershipRepo
+    override suspend fun updateMembership(
+        id: String,
+        data: Map<String, Any>
+    ): Boolean {
+        return FireStoreManager.updateDoc(FireStoreCollection.USER_MEMBERSHIP, id, data)
+    }
 }

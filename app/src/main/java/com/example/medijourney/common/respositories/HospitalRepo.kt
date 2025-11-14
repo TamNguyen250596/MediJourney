@@ -9,10 +9,6 @@ import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.realm_models.Hospital
 import com.google.firebase.firestore.Filter.arrayContains
 import com.google.firebase.firestore.Query
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ViewModelComponent
 import io.realm.kotlin.query.Sort
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -62,15 +58,4 @@ class HospitalRepoImpl @Inject constructor() : HospitalRepo {
                 .sort(Hospital::tag.name, Sort.ASCENDING)
         )
     }
-}
-
-// Hilt module
-@Module
-@InstallIn(ViewModelComponent::class)
-abstract class HospitalModule {
-
-    @Binds
-    abstract fun bindHospitalRepository(
-        impl: HospitalRepoImpl
-    ): HospitalRepo
 }

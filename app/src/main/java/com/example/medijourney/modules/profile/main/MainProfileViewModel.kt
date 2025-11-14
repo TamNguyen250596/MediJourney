@@ -10,7 +10,6 @@ import com.example.medijourney.common.extensions.firstThenDebounce
 import com.example.medijourney.common.helpers.MDataStore
 import com.example.medijourney.common.managers.firebase_storage.FirebaseStorageManager
 import com.example.medijourney.common.managers.InternationManager
-import com.example.medijourney.common.managers.fire_store.FireStoreManager
 import com.example.medijourney.common.managers.firebase_auth.FAManger
 import com.example.medijourney.common.models.item_models.DynamicUIItem
 import com.example.medijourney.common.models.realm_models.Membership
@@ -61,11 +60,6 @@ class MainProfileViewModel @Inject constructor(
 
         val modelList = generateCellViewModels()
         itemModels.postValue(modelList)
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        FireStoreManager.removeListeners(this::class.java)
     }
 
     // Get Data

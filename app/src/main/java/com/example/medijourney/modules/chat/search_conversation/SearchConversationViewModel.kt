@@ -4,13 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.medijourney.common.constants.Constants
 import com.example.medijourney.common.extensions.firstThenDebounce
-import com.example.medijourney.common.managers.fire_store.remove
 import com.example.medijourney.common.models.item_models.DynamicUIItem
 import com.example.medijourney.common.models.realm_models.Conversation
 import com.example.medijourney.common.models.ui_models.ImageStyle
 import com.example.medijourney.common.models.ui_models.MTextStyle
 import com.example.medijourney.common.respositories.ConversationRepo
-import com.google.firebase.firestore.Query
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.ext.isValid
 import io.realm.kotlin.query.RealmResults
@@ -38,7 +36,6 @@ class SearchConversationViewModel @Inject constructor(
     private var conversationResults: RealmResults<Conversation>? = null
     private var observeConversationsJob: Job? = null
     private var cursorTag: String? = null
-    private var firstPageQuery: Query? = null
     private var observeCurrentPageJob: Job? = null
 
     // Life cycle
@@ -125,7 +122,6 @@ class SearchConversationViewModel @Inject constructor(
     }
 
     private fun resetAll() {
-        removeAllFSListeners()
         observeCurrentPageJob?.cancel()
         observeCurrentPageJob = null
 
@@ -134,11 +130,6 @@ class SearchConversationViewModel @Inject constructor(
         cursorTag = null
         observeConversationsJob?.cancel()
         observeConversationsJob = null
-    }
-
-    private fun removeAllFSListeners() {
-        firstPageQuery?.remove()
-        firstPageQuery = null
     }
 
     // Pagination

@@ -35,7 +35,7 @@ object RealmManager {
         realm.write {
             val realmEntryInstance = clazz.getConstructor().newInstance()
             val realmObject = realmEntryInstance.create(data)
-            realmEntryInstance.didInit(data)
+            realmEntryInstance.setUpAfterCreation(data)
 
             try {
                 copyToRealm(realmObject, UpdatePolicy.ERROR)
@@ -54,18 +54,13 @@ object RealmManager {
         val realm = createRealm(configuration)
 
         realm.write {
-            val primaryKey = data["id"]
-            val kClass = realmObject.javaClass.kotlin
-            val primaryKeyName = realmObject.primaryKey()
-            val existingEntity = query(kClass, "$primaryKeyName == $0", primaryKey).find().firstOrNull()
-            if (existingEntity != null) {
-                existingEntity.update(data)
-            } else {
-                val unmanagedEntity = realmObject.create(data)
-                val entity = copyToRealm(unmanagedEntity, UpdatePolicy.ALL)
-                if (entity is RealmCycle) {
-                    entity.didInit(data)
-                }
+            val unmanagedEntity = realmObject.create(data)
+            val entity = copyToRealm(unmanagedEntity, UpdatePolicy.ALL)
+            if (entity is RealmCycle) {
+                entity.setUpAfterCreation(data)
+
+                val scope = CoroutineScope(Dispatchers.IO)
+                entity.handleNestedObjects(data, scope, configuration)
             }
         }
     }
@@ -92,7 +87,7 @@ object RealmManager {
                     val unmanagedEntity = realmObject.create(data)
                     val entity = copyToRealm(unmanagedEntity, UpdatePolicy.ALL)
                     if (entity is RealmCycle) {
-                        entity.didInit(data)
+                        entity.setUpAfterCreation(data)
                         entity.handleNestedObjects(data, scope, configuration)
                     }
                 }
@@ -111,7 +106,7 @@ object RealmManager {
             val realmEntryInstance = clazz.getConstructor().newInstance()
             for (data in dataList) {
                 val realmObject = realmEntryInstance.create(data)
-                realmEntryInstance.didInit(data)
+                realmEntryInstance.setUpAfterCreation(data)
 
                 try {
                     copyToRealm(realmObject, UpdatePolicy.ERROR)
@@ -223,25 +218,28 @@ object RealmManager {
         }
     }
 
-    suspend fun <T : RealmObject, R : RealmObject> linkEntity(
-        id: String,
-        entityClass: Class<T>,
-        relatedClass: Class<R>,
+    suspend fun <T : RealmObject, R : RealmObject> link(
+        relatedId: String,
+        relatedClass: KClass<R>,
+        entityId: String,
+        entityClass: KClass<T>,
         relationProperty: KMutableProperty1<T, R?>,
         configuration: RealmConfiguration? = null
     ) {
         val realm = createRealm(configuration)
 
         realm.write {
-            val entity = query(entityClass.kotlin, "id == $0", id)
-                .find()
-                .firstOrNull { relationProperty.get(it) == null }
-
-            val relatedEntity = query(relatedClass.kotlin, "id == $0", id)
+            val relatedEntity = query(relatedClass, "id == $0", relatedId)
                 .find()
                 .firstOrNull()
 
-            if (entity != null && relatedEntity != null) {
+            val entities = query(entityClass, "id == $0 && ${relationProperty.name} == $1", entityId, null)
+                .find()
+
+            if (entities.isEmpty()) return@write
+            if (relatedEntity == null) return@write
+
+            entities.forEach { entity ->
                 relationProperty.set(entity, relatedEntity)
             }
         }

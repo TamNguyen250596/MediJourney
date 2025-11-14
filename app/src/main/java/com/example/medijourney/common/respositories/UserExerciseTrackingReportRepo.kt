@@ -7,10 +7,6 @@ import com.example.medijourney.common.managers.fire_store.FireStoreManager
 import com.example.medijourney.common.managers.firebase_auth.FAManger
 import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.realm_models.UserExerciseTrackingReport
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ViewModelComponent
 import io.realm.kotlin.query.Sort
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -40,15 +36,4 @@ class UserExerciseTrackingReportRepoImpl @Inject constructor() : UserExerciseTra
                 .sort(UserExerciseTrackingReport::reportedAt.name, Sort.ASCENDING)
         )
     }
-}
-
-// Hilt module
-@Module
-@InstallIn(ViewModelComponent::class)
-abstract class UserExerciseTrackingReportModule {
-
-    @Binds
-    abstract fun bindUserExerciseTrackingReportRepository(
-        impl: UserExerciseTrackingReportRepoImpl
-    ): UserExerciseTrackingReportRepo
 }

@@ -6,10 +6,6 @@ import com.example.medijourney.common.managers.fire_store.FireStoreCollection
 import com.example.medijourney.common.managers.fire_store.FireStoreManager
 import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.realm_models.Recipe
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -35,15 +31,4 @@ class RecipeRepoImpl @Inject constructor() : RecipeRepo {
                 .equalTo("enable", true)
         )
     }
-}
-
-// Hilt module
-@Module
-@InstallIn(ViewModelComponent::class)
-abstract class RecipeModule {
-
-    @Binds
-    abstract fun bindRecipeRepository(
-        impl: RecipeRepoImpl
-    ): RecipeRepo
 }

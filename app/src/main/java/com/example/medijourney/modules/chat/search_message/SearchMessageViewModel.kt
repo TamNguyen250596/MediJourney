@@ -7,12 +7,7 @@ import com.example.medijourney.R
 import com.example.medijourney.common.constants.Constants
 import com.example.medijourney.common.extensions.firstThenDebounce
 import com.example.medijourney.common.helpers.DateHelper
-import com.example.medijourney.common.managers.fire_store.FireStoreCollection
-import com.example.medijourney.common.managers.fire_store.FireStoreManager
-import com.example.medijourney.common.managers.fire_store.awaitGet
-import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.item_models.DynamicUIItem
-import com.example.medijourney.common.models.realm_models.Conversation
 import com.example.medijourney.common.models.realm_models.Message
 import com.example.medijourney.common.models.ui_models.MTextStyle
 import com.example.medijourney.common.respositories.ConversationRepo
@@ -21,7 +16,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.ext.isValid
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -216,36 +210,15 @@ class SearchMessageViewModel @Inject constructor(
 
         viewModelScope.launch {
             if (conversationRepo.getConversationFlow(conversationId).firstOrNull() == null) {
-                val convDeferred = async { ensureConversation(conversationId) }
-                convDeferred.await()
+                conversationRepo.fetchConversation(conversationId)
             }
 
-            val userMessageId = ensureUserMessage(messageId)
-            completion(userMessageId)
+            val messageId = ensurMessage(messageId)
+            completion(messageId)
         }
     }
 
-    private suspend fun ensureConversation(conversationId: String) {
-        val existing = conversationRepo.getConversationFlow(conversationId).firstOrNull()
-        if (existing != null) {
-            if (!existing.includeCurrentUser) return
-            RealmManager.update(Conversation::class.java, existing.id, mapOf("is_added" to true))
-        } else {
-            val snapshot = try {
-                FireStoreManager.buildDoc(Pair(FireStoreCollection.CONVERSATIONS, conversationId))
-                    .awaitGet()
-            } catch (_: Exception) {
-                return
-            }
-
-            snapshot.data?.let {
-                it["include_current_user"] = true
-                RealmManager.create(Conversation::class.java, it)
-            }
-        }
-    }
-
-    private suspend fun ensureUserMessage(messageId: String): String? {
+    private suspend fun ensurMessage(messageId: String): String? {
         val existing = messageRepo.getMessageFlow(messageId).firstOrNull() ?: return null
         if (!existing.isValid()) return null
 

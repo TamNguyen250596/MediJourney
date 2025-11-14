@@ -7,7 +7,7 @@ import kotlinx.coroutines.CoroutineScope
 interface RealmCycle {
     fun primaryKey(): String
     fun create(map: Map<String, Any>): RealmObject
-    fun didInit(map: Map<String, Any>) {}
+    fun setUpAfterCreation(map: Map<String, Any>) {}
     fun update(map: Map<String, Any>)
     fun handleNestedObjects(map: Map<String, Any>, coroutine: CoroutineScope, configuration: RealmConfiguration? = null) {}
     fun removeDependencies() {}

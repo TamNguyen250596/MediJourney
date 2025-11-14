@@ -7,10 +7,6 @@ import com.example.medijourney.common.managers.fire_store.FireStoreManager
 import com.example.medijourney.common.managers.firebase_auth.FAManger
 import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.realm_models.UserRecommendExercise
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -38,15 +34,4 @@ class UserRecommendExerciseRepoImpl @Inject constructor() : UserRecommendExercis
                 .equalTo("user_id", FAManger.currentUserCode)
         )
     }
-}
-
-// Hilt module
-@Module
-@InstallIn(ViewModelComponent::class)
-abstract class UserRecommendExerciseModule {
-
-    @Binds
-    abstract fun bindUserRecommendExerciseRepository(
-        impl: UserRecommendExerciseRepoImpl
-    ): UserRecommendExerciseRepo
 }

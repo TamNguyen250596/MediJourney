@@ -9,10 +9,6 @@ import com.example.medijourney.common.managers.firebase_auth.FAManger
 import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.realm_models.UserNotification
 import com.google.firebase.firestore.Query
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ViewModelComponent
 import io.realm.kotlin.query.Sort
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -23,6 +19,7 @@ interface UserNotificationRepo {
     suspend fun getOlderNotifications(cursorCreatedAt: Long) : List<MutableMap<String, Any>>
     suspend fun observeOlderNotifications(cursorCreatedAt: Long) : Flow<List<MutableMap<String, Any>>>
     fun getUserNotificationsFlow(): Flow<List<UserNotification>>
+    suspend fun updateNotification(id: String, data: Map<String, Any>): Boolean
     suspend fun deleteNotification(id: String): Boolean
     suspend fun deleteAllNotifications(): Boolean
 }
@@ -78,6 +75,17 @@ class UserNotificationRepoImpl @Inject constructor() : UserNotificationRepo {
         )
     }
 
+    override suspend fun updateNotification(
+        id: String,
+        data: Map<String, Any>
+    ): Boolean {
+        return FireStoreManager.updateDoc(
+            FireStoreCollection.USER_NOTIFICATIONS,
+            id,
+            data
+        )
+    }
+
     override suspend fun deleteNotification(id: String): Boolean {
         return FireStoreManager.deleteDoc(
             FireStoreCollection.USER_NOTIFICATIONS,
@@ -92,15 +100,4 @@ class UserNotificationRepoImpl @Inject constructor() : UserNotificationRepo {
                 .equalTo("user_id", FAManger.currentUserCode)
         )
     }
-}
-
-@Module
-@InstallIn(ViewModelComponent::class)
-abstract class UserNotificationModule {
-
-    @Binds
-    abstract fun bindUserNotificationRepository(
-        impl: UserNotificationRepoImpl
-    ): UserNotificationRepo
-
 }

@@ -1,6 +1,5 @@
 package com.example.medijourney.common.models.realm_models
 
-import com.example.medijourney.common.extensions.getInt
 import com.example.medijourney.common.extensions.getRealmInstant
 import com.example.medijourney.common.extensions.getUserObjectKey
 import com.example.medijourney.common.managers.realm.RealmCycle
@@ -14,7 +13,7 @@ class UserMembership: RealmObject, RealmCycle {
     @PrimaryKey
     var id: String = ""
     var userId: String = ""
-    var membershipId = 0
+    var membershipId: String = ""
     var expiredAt: RealmInstant? = null
 
     // Functions
@@ -26,13 +25,10 @@ class UserMembership: RealmObject, RealmCycle {
         return UserMembership().apply {
             id = map.getUserObjectKey(id)
             userId = map["user_id"] as? String ?: userId
-            membershipId = map.getInt("membership_id")
+            membershipId = map["membership_id"] as? String ?: membershipId
             expiredAt = map.getRealmInstant("expired_at")
         }
     }
 
-    override fun update(map: Map<String, Any>) {
-        membershipId = map.getInt("membership_id", membershipId)
-        expiredAt = map.getRealmInstant("expired_at", expiredAt)
-    }
+    override fun update(map: Map<String, Any>) {}
 }

@@ -17,6 +17,7 @@ import io.realm.kotlin.types.RealmObject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -28,102 +29,33 @@ import kotlin.coroutines.resumeWithException
 object FireStoreManager {
 
     // Properties
-    private var listeners: MutableList<FireStoreListenerInfo> = mutableListOf()
-    private var newListeners = ConcurrentHashMap.newKeySet<FSListener>()
-
-    // Build DocumentReference
-    fun buildDoc(vararg nodes: Pair<FireStoreCollection, String?>): DocumentReference {
-        require(nodes.isNotEmpty()) { "buildDocRef requires a non-empty list of collection-document pairs" }
-
-        val db = Firebase.firestore
-        var docRef = nodes[0].second?.let {
-            db.collection(nodes[0].first.name.lowercase()).document(it)
-        } ?: run {
-            db.collection(nodes[0].first.name.lowercase()).document()
-        }
-
-        for (i in 1 until nodes.size) {
-            val (collection, documentId) = nodes[i]
-            documentId?.let {
-                docRef = docRef.collection(collection.name.lowercase()).document(documentId)
-            } ?: run {
-                docRef = docRef.collection(collection.name.lowercase()).document()
-            }
-        }
-
-        return docRef
-    }
+    private var listeners = ConcurrentHashMap.newKeySet<FSListener>()
 
     // Functions
-    fun checkCachedListener(query: Int): Boolean {
-        synchronized(this) {
-            return listeners.count { it.queryId == query } > 0
-        }
-    }
-
     fun checkCachedListener(listener: FSListener) : Boolean {
-        return newListeners.contains(listener)
-    }
-
-    fun addListener(listenerInfo: FireStoreListenerInfo) {
-        synchronized(this) {
-            listeners.add(listenerInfo)
-        }
+        return listeners.contains(listener)
     }
 
     fun addListener(listener: FSListener) {
-        newListeners.add(listener)
+        listeners.add(listener)
     }
 
     fun removeListener(listener: FSListener) {
         listener.registration?.remove()
-        newListeners.remove(listener)
-    }
-
-    fun removeListeners(observer: Class<*>) {
-        synchronized(this) {
-            listeners = listeners.filter { listener ->
-                if (listener.firstObserverId == observer.simpleName) {
-                    listener.listener.remove()
-                    false
-                } else {
-                    true
-                }
-            }.toMutableList()
-        }
-    }
-
-    fun removeListener(query: Query) {
-        synchronized(this) {
-            listeners = listeners.filter { listener ->
-                if (listener.queryId == query.hashCode()) {
-                    listener.listener.remove()
-                    false
-                } else {
-                    true
-                }
-            }.toMutableList()
-        }
-    }
-
-    fun removeListener(query: DocumentReference) {
-        synchronized(this) {
-            listeners = listeners.filter { listener ->
-                if (listener.hashCode() == query.hashCode()) {
-                    listener.listener.remove()
-                    false
-                } else {
-                    true
-                }
-            }.toMutableList()
-        }
+        listeners.remove(listener)
     }
 
     fun removeAllListeners() {
-        for (listener in newListeners) {
+        for (listener in listeners) {
             listener.registration?.remove()
         }
-        newListeners.clear()
+        listeners.clear()
+    }
+
+    fun removeListener(collection: FireStoreCollection, documentId: String) {
+        val doc = buildDoc(collection, documentId)
+        val listener = FSListener(FSListerType.DOCUMENT(doc))
+        removeListener(listener)
     }
 
     // DocumentReference - Build
@@ -205,10 +137,9 @@ object FireStoreManager {
     fun getDocumentSnapshotFlow(collection: FireStoreCollection, documentId: String): Flow<DocumentSnapshot?> {
         val docRef = buildDoc(collection, documentId)
         val listenerWrapper = FSListener(FSListerType.DOCUMENT(docRef))
+        if (checkCachedListener(listenerWrapper)) return emptyFlow()
 
         return callbackFlow {
-            if (checkCachedListener(listenerWrapper)) return@callbackFlow
-
             val registration: ListenerRegistration = docRef.addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     trySend(null)

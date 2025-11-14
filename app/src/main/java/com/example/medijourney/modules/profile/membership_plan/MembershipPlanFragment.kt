@@ -13,7 +13,9 @@ import com.example.medijourney.common.ui_components.item_decoration.ItemBorderDe
 import com.example.medijourney.common.ui_components.recycle_view_adapter.check_box.CheckBoxAdapter
 import com.example.medijourney.common.ui_components.recycle_view_adapter.check_box.CheckBoxAdapterInterface
 import com.example.medijourney.databinding.FragmentMembershipPlanBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MembershipPlanFragment : Fragment(), CheckBoxAdapterInterface {
 
     // Properties

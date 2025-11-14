@@ -9,10 +9,6 @@ import com.example.medijourney.common.managers.firebase_auth.FAManger
 import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.realm_models.Message
 import com.google.firebase.firestore.Query
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ViewModelComponent
 import io.realm.kotlin.query.Sort
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -126,13 +122,4 @@ class MessageRepoImpl @Inject constructor(): MessageRepo {
             }
         }
     }
-}
-
-@Module
-@InstallIn(ViewModelComponent::class)
-abstract class MessageModule {
-
-    @Binds
-    abstract fun bindMessageRepository(
-    impl: MessageRepoImpl): MessageRepo
 }

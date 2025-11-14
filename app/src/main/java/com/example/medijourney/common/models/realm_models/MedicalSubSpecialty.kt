@@ -45,8 +45,8 @@ class MedicalSubSpecialty: RealmObject, RealmCycle {
         }
     }
 
-    override fun didInit(map: Map<String, Any>) {
-        super.didInit(map)
+    override fun setUpAfterCreation(map: Map<String, Any>) {
+        super.setUpAfterCreation(map)
         val id = map["id"] as? String ?: return
 
         CoroutineScope(Dispatchers.IO).launch {

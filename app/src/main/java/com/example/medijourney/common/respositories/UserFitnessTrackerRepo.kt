@@ -7,10 +7,6 @@ import com.example.medijourney.common.managers.fire_store.FireStoreManager
 import com.example.medijourney.common.managers.firebase_auth.FAManger
 import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.realm_models.UserFitnessTracker
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -69,14 +65,3 @@ class UserFitnessTrackerRepoImpl @Inject constructor() : UserFitnessTrackerRepo 
         )
     }
 }
-
-@Module
-@InstallIn(ViewModelComponent::class)
-abstract class UserFitnessTrackerModule {
-
-    @Binds
-    abstract fun bindUserFitnessTrackerRepository(
-        impl: UserFitnessTrackerRepoImpl
-    ): UserFitnessTrackerRepo
-}
-

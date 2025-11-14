@@ -3,8 +3,6 @@ package com.example.medijourney.common.models.realm_models
 import com.example.medijourney.common.extensions.getRealmInstant
 import com.example.medijourney.common.managers.fire_store.FireStoreCollection
 import com.example.medijourney.common.managers.fire_store.FireStoreManager
-import com.example.medijourney.common.managers.fire_store.addListener
-import com.example.medijourney.common.managers.fire_store.remove
 import com.example.medijourney.common.managers.realm.RealmCycle
 import com.example.medijourney.common.managers.realm.RealmManager
 import io.realm.kotlin.RealmConfiguration
@@ -52,124 +50,90 @@ class DoctorAppointment: RealmObject, RealmCycle {
         }
     }
 
-    override fun update(map: Map<String, Any>) {
-        patientId = map["patient_id"] as? String ?: patientId
-        appointmentDateString = map["appointment_date_string"] as? String ?: appointmentDateString
-        appointmentDate = map.getRealmInstant("appointment_date", appointmentDate)
-        startTime = map["start_time"] as? String ?: startTime
-        endTime = map["end_time"] as? String ?: endTime
+    override fun update(map: Map<String, Any>) {}
+
+    override fun setUpAfterCreation(map: Map<String, Any>) {
+        super.setUpAfterCreation(map)
+        handleHospital(map)
+        handleDoctor(map)
+        handleMedicalSubSpecialty(map)
     }
 
-    override fun didInit(map: Map<String, Any>) {
-        super.didInit(map)
-        handleToSaveHospital(map)
-        handleToSaveDoctor(map)
-    }
-
-    private fun handleToSaveHospital(map: Map<String, Any>) {
+    private fun handleHospital(map: Map<String, Any>) {
+        if (!isValid()) return
+        if (hospital != null) return
         val hospitalId = map["hospital_id"] as? String ?: return
 
         CoroutineScope(Dispatchers.IO).launch {
-            RealmManager.createRealm().write {
-                val hospital = query(Hospital::class, "${Hospital::id.name} == $0", hospitalId).find().firstOrNull()
-                query(
+            launch {
+                FireStoreManager.observeDoc(FireStoreCollection.HOSPITALS, hospitalId)
+            }
+            launch {
+                RealmManager.link(
+                    hospitalId,
+                    Hospital::class,
+                    id,
                     DoctorAppointment::class,
-                    "${DoctorAppointment::hospitalId.name} == $0 AND ${DoctorAppointment::hospital.name} == $1", hospitalId, null)
-                    .find()
-                    .forEach { it.hospital = hospital }
-
+                    DoctorAppointment::hospital
+                )
             }
         }
-
-        FireStoreManager.buildDoc(FireStoreCollection.HOSPITALS to hospitalId)
-            .addListener {
-                val data = it.data
-                if (data != null) {
-                    CoroutineScope(Dispatchers.IO).launch {
-                        RealmManager.createRealm().write {
-                            val existingHospital = query(Hospital::class, "${Hospital::id.name} == $0", hospitalId).find().firstOrNull()
-                            if (existingHospital == null) {
-                                val hospital = Hospital().create(data) as? Hospital ?: return@write
-                                query(
-                                    DoctorAppointment::class,
-                                    "${DoctorAppointment::hospitalId.name} == $0 AND ${DoctorAppointment::hospital.name} == $1", hospitalId, null)
-                                    .find()
-                                    .forEach { it.hospital = copyToRealm(hospital) }
-                            } else {
-                                existingHospital.update(data)
-                            }
-                        }
-                    }
-                }
-            }
     }
 
-    private fun handleToSaveDoctor(map: Map<String, Any>) {
+    private fun handleDoctor(map: Map<String, Any>) {
+        if (!isValid()) return
+        if (doctor != null) return
         val doctorId = map["doctor_id"] as? String ?: return
 
         CoroutineScope(Dispatchers.IO).launch {
-            RealmManager.createRealm().write {
-                val doctor = query(Doctor::class, "${Doctor::id.name} == $0", doctorId).find().firstOrNull()
-                query(
+            launch {
+                FireStoreManager.observeDoc(FireStoreCollection.DOCTORS, hospitalId)
+            }
+            launch {
+                RealmManager.link(
+                    doctorId,
+                    Doctor::class,
+                    id,
                     DoctorAppointment::class,
-                    "${DoctorAppointment::doctorId.name} == $0 AND ${DoctorAppointment::doctor.name} == $1", doctorId, null)
-                    .find()
-                    .forEach { it.doctor = doctor }
+                    DoctorAppointment::doctor
+                )
             }
         }
+    }
 
-        FireStoreManager.buildDoc(FireStoreCollection.DOCTORS to doctorId)
-            .addListener {
-                val data = it.data
-                if (data != null) {
-                    CoroutineScope(Dispatchers.IO).launch {
-                        RealmManager.createRealm().write {
-                            val existingDoctor = query(Doctor::class, "${Doctor::id.name} == $0", doctorId).find().firstOrNull()
-                            if (existingDoctor == null) {
-                                val doctor = Doctor().create(data) as? Doctor ?: return@write
-                                query(
-                                    DoctorAppointment::class,
-                                    "${DoctorAppointment::doctorId.name} == $0 AND ${DoctorAppointment::doctor.name} == $1", doctorId, null)
-                                    .find()
-                                    .forEach { it.doctor = copyToRealm(doctor) }
-                            } else {
-                                existingDoctor.update(data)
-                            }
-                        }
-                    }
-                }
+    private fun handleMedicalSubSpecialty(map: Map<String, Any>) {
+        if (!isValid()) return
+        if (medicalSubSpecialty != null) return
+        val medicalSubSpecialtyId = map["medical_sub_specialty_id"] as? String ?: return
+
+        CoroutineScope(Dispatchers.IO).launch {
+            launch {
+                FireStoreManager.observeDoc(FireStoreCollection.MEDICAL_SUB_SPECIALTIES, hospitalId)
             }
+            launch {
+                RealmManager.link(
+                    medicalSubSpecialtyId,
+                    MedicalSubSpecialty::class,
+                    id,
+                    DoctorAppointment::class,
+                    DoctorAppointment::medicalSubSpecialty
+                )
+            }
+        }
     }
 
     override fun removeDependencies() {
         super.removeDependencies()
         if (!isValid()) return
 
-        FireStoreManager.buildDoc(FireStoreCollection.HOSPITALS to hospitalId).remove()
-        FireStoreManager.buildDoc(FireStoreCollection.MEDICAL_SUB_SPECIALTIES to medicalSubSpecialtyId).remove()
-        FireStoreManager.buildDoc(FireStoreCollection.DOCTORS to doctorId).remove()
+        FireStoreManager.removeListener(FireStoreCollection.HOSPITALS, hospitalId)
+        FireStoreManager.removeListener(FireStoreCollection.MEDICAL_SUB_SPECIALTIES, medicalSubSpecialtyId)
+        FireStoreManager.removeListener(FireStoreCollection.DOCTORS, doctorId)
     }
 
     override fun handleNestedObjects(
         map: Map<String, Any>,
         coroutine: CoroutineScope,
         configuration: RealmConfiguration?
-    ) {
-        val medicalSubSpecialtyId = map["medical_sub_specialty_id"] as? String
-
-        coroutine.launch {
-            if (!medicalSubSpecialtyId.isNullOrBlank()) {
-                RealmManager.linkEntity(
-                    medicalSubSpecialtyId,
-                    DoctorAppointment::class.java,
-                    MedicalSubSpecialty::class.java,
-                    DoctorAppointment::medicalSubSpecialty
-                )
-                FireStoreManager.observeDoc(
-                    FireStoreCollection.MEDICAL_SUB_SPECIALTIES,
-                    medicalSubSpecialtyId
-                )
-            }
-        }
-    }
+    ) {}
 }

@@ -6,10 +6,6 @@ import com.example.medijourney.common.managers.fire_store.FireStoreCollection
 import com.example.medijourney.common.managers.fire_store.FireStoreManager
 import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.realm_models.ExerciseLevel
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -36,15 +32,4 @@ class ExerciseLevelRepoImpl @Inject constructor() : ExerciseLevelRepo {
                 .equalTo("enable", true)
         )
     }
-}
-
-// Hilt module
-@Module
-@InstallIn(ViewModelComponent::class)
-abstract class ExerciseLevelModule {
-
-    @Binds
-    abstract fun bindExerciseLevelRepository(
-        impl: ExerciseLevelRepoImpl
-    ): ExerciseLevelRepo
 }

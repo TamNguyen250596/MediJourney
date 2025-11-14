@@ -10,7 +10,7 @@ class Membership: RealmObject, RealmCycle {
 
     // Properties
     @PrimaryKey
-    var id: Int = 0
+    var id: String = ""
     var name: String? = null
     var imageName: String? = null
     var position: Int = 0
@@ -22,16 +22,12 @@ class Membership: RealmObject, RealmCycle {
 
     override fun create(map: Map<String, Any>): RealmObject {
         return Membership().apply {
-            id = map.getInt("id")
+            id = map["id"] as? String ?: id
             name = map.getLocalizedString("name_localized")
             imageName = map["image_name"] as? String
             position = map.getInt("position")
         }
     }
 
-    override fun update(map: Map<String, Any>) {
-        name = map.getLocalizedString("name_localized", name)
-        imageName = map["image_name"] as? String ?: imageName
-        position = map.getInt("position", position)
-    }
+    override fun update(map: Map<String, Any>) {}
 }

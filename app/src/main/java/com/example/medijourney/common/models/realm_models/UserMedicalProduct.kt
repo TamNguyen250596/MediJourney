@@ -4,9 +4,9 @@ import com.example.medijourney.common.extensions.getInt
 import com.example.medijourney.common.extensions.getRealmInstant
 import com.example.medijourney.common.managers.fire_store.FireStoreCollection
 import com.example.medijourney.common.managers.fire_store.FireStoreManager
-import com.example.medijourney.common.managers.fire_store.addListener
 import com.example.medijourney.common.managers.realm.RealmCycle
 import com.example.medijourney.common.managers.realm.RealmManager
+import io.realm.kotlin.ext.isValid
 import io.realm.kotlin.types.RealmInstant
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
@@ -50,57 +50,36 @@ class UserMedicalProduct: RealmObject, RealmCycle {
         }
     }
 
-    override fun update(map: Map<String, Any>) {
-        totalPriceString = map["total_price_string"] as? String ?: totalPriceString
-        rate = map.getInt("rate", rate)
-        isRated = map["is_rated"] as? Boolean ?: isRated
-        isRead = map["is_read"] as? Boolean ?: isRead
-        status = map["status"] as? String ?: status
+    override fun update(map: Map<String, Any>) {}
+
+    override fun setUpAfterCreation(map: Map<String, Any>) {
+        super.setUpAfterCreation(map)
+        handleMedicalProduct(map)
     }
 
-    override fun didInit(map: Map<String, Any>) {
-        super.didInit(map)
-        handleToSaveMedicalProduct(map)
-    }
-
-    private fun handleToSaveMedicalProduct(map: Map<String, Any>) {
+    private fun handleMedicalProduct(map: Map<String, Any>) {
+        if (!isValid()) return
+        if (medicalProduct != null) return
         val medicalProductId = map["medical_product_id"] as? String ?: return
 
         CoroutineScope(Dispatchers.IO).launch {
-            RealmManager.createRealm().write {
-                val medicalProduct = query(MedicalProduct::class, "${MedicalProduct::id.name} == $0", medicalProductId).find().firstOrNull()
-                query(
+            launch {
+                FireStoreManager.observeDoc(FireStoreCollection.MEDICAL_PRODUCTS, medicalProductId)
+            }
+            launch {
+                RealmManager.link(
+                    medicalProductId,
+                    MedicalProduct::class,
+                    id,
                     UserMedicalProduct::class,
-                    "${UserMedicalProduct::medicalProductId.name} == $0 AND ${UserMedicalProduct::medicalProduct.name} == $1", medicalProductId, null)
-                    .find()
-                    .forEach { it.medicalProduct = medicalProduct }
+                    UserMedicalProduct::medicalProduct
+                )
             }
         }
-
-        FireStoreManager.buildDoc(FireStoreCollection.MEDICAL_PRODUCTS to medicalProductId)
-            .addListener {
-                val data = it.data
-                if (data != null) {
-                    CoroutineScope(Dispatchers.IO).launch {
-                        RealmManager.createRealm().write {
-                            val existingMedicalProduct = query(MedicalProduct::class, "${MedicalProduct::id.name} == $0", medicalProductId).find().firstOrNull()
-                            if (existingMedicalProduct == null) {
-                                val medicalProduct = MedicalProduct().create(data) as? MedicalProduct ?: return@write
-                                query(
-                                    UserMedicalProduct::class,
-                                    "${UserMedicalProduct::medicalProductId.name} == $0 AND ${UserMedicalProduct::medicalProduct.name} == $1", medicalProductId, null)
-                                    .find()
-                                    .forEach { it.medicalProduct = copyToRealm(medicalProduct) }
-                            } else {
-                                existingMedicalProduct.update(data)
-                            }
-                        }
-                    }
-                }
-            }
     }
 }
 
+// UserMedicalProductStatus
 enum class UserMedicalProductStatus() {
     TO_PAY,
     TO_SHIP,

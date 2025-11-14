@@ -11,10 +11,6 @@ import com.example.medijourney.common.extensions.RQueryBuilder
 import com.example.medijourney.common.managers.fire_store.FireStoreCollection
 import com.example.medijourney.common.managers.fire_store.FireStoreManager
 import com.example.medijourney.common.managers.realm.RealmManager
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ViewModelComponent
 import io.realm.kotlin.query.Sort
 import javax.inject.Inject
 
@@ -63,15 +59,3 @@ class MedicalProductRepoImpl @Inject constructor() : MedicalProductRepo {
         )
     }
 }
-
-// Hilt module
-@Module
-@InstallIn(ViewModelComponent::class)
-abstract class MedicalProductModule {
-
-    @Binds
-    abstract fun bindMedicalProductRepository(
-        impl: MedicalProductRepoImpl
-    ): MedicalProductRepo
-}
-

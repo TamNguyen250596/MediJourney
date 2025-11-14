@@ -7,10 +7,6 @@ import com.example.medijourney.common.managers.fire_store.FireStoreManager
 import com.example.medijourney.common.managers.firebase_auth.FAManger
 import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.realm_models.Conversation
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ViewModelComponent
 import io.realm.kotlin.query.Sort
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -18,6 +14,7 @@ import javax.inject.Inject
 
 interface ConversationRepo {
     suspend fun createUserConversation(conversationId: String): Boolean
+    suspend fun fetchConversation(conversationId: String)
     fun getConversationFlow(conversationId: String): Flow<Conversation?>
     fun getConversationsFlow(): Flow<List<Conversation>>
     fun getConversationsFlow(includeCurrentUser: Boolean, keyword: String?): Flow<List<Conversation>>
@@ -48,6 +45,10 @@ class ConversationRepoImpl @Inject constructor() : ConversationRepo {
         } else {
             false
         }
+    }
+
+    override suspend fun fetchConversation(conversationId: String) {
+        FireStoreManager.observeDoc(FireStoreCollection.CONVERSATIONS, conversationId)
     }
 
     override fun getConversationFlow(conversationId: String): Flow<Conversation?> {
@@ -134,13 +135,4 @@ class ConversationRepoImpl @Inject constructor() : ConversationRepo {
             false
         }
     }
-}
-
-@Module
-@InstallIn(ViewModelComponent::class)
-abstract class ConversationModule {
-
-    @Binds
-    abstract fun bindConversationRepository(
-        impl: ConversationRepoImpl): ConversationRepo
 }

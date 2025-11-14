@@ -7,10 +7,6 @@ import com.example.medijourney.R
 import com.example.medijourney.common.constants.Constants
 import com.example.medijourney.common.extensions.firstThenDebounce
 import com.example.medijourney.common.helpers.DateHelper
-import com.example.medijourney.common.managers.fire_store.FireStoreCollection
-import com.example.medijourney.common.managers.fire_store.FireStoreManager
-import com.example.medijourney.common.managers.firebase_auth.FirebaseAuthManager
-import com.example.medijourney.common.managers.realm.RealmManager
 import com.example.medijourney.common.models.item_models.BaseItemInterface
 import com.example.medijourney.common.models.item_models.DynamicUIItem
 import com.example.medijourney.common.models.realm_models.Message
@@ -28,12 +24,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NotificationViewModel @Inject constructor(
-    private val userNotificationRepository: UserNotificationRepo
+    private val userNotificationRepo: UserNotificationRepo
 ) : ViewModel() {
 
     // Properties
     val models = MutableLiveData<MutableList<DynamicUIItem>>(mutableListOf())
-    private val notificationsFlow = userNotificationRepository.getUserNotificationsFlow()
+    private val notificationsFlow = userNotificationRepo.getUserNotificationsFlow()
     private var currentMinCreatedDate: Long? = null
     private var currentObserverJob: Job? = null
 
@@ -60,7 +56,7 @@ class NotificationViewModel @Inject constructor(
 
     // Functions
     private suspend fun observeLatestUserNotifications() {
-        userNotificationRepository
+        userNotificationRepo
             .observeLatestNotifications()
             .collect {
                 if (currentMinCreatedDate == null) {
@@ -87,11 +83,11 @@ class NotificationViewModel @Inject constructor(
             }
 
             currentObserverJob = viewModelScope.launch {
-                val list = userNotificationRepository.getOlderNotifications(millis)
+                val list = userNotificationRepo.getOlderNotifications(millis)
                 setCurrentMinCreatedDate(list)
 
                 delay(15000L)
-                userNotificationRepository
+                userNotificationRepo
                     .observeOlderNotifications(millis)
                     .collect { list ->
                         setCurrentMinCreatedDate(list)
@@ -141,7 +137,7 @@ class NotificationViewModel @Inject constructor(
 
     fun deleteAllNotifications(callback: () -> Unit) {
         viewModelScope.launch {
-            userNotificationRepository.deleteAllNotifications()
+            userNotificationRepo.deleteAllNotifications()
             callback.invoke()
         }
     }
@@ -154,7 +150,7 @@ class NotificationViewModel @Inject constructor(
         val id = notification.id
 
         viewModelScope.launch {
-            userNotificationRepository.deleteNotification(id)
+            userNotificationRepo.deleteNotification(id)
             callback.invoke()
 
         }
@@ -163,19 +159,11 @@ class NotificationViewModel @Inject constructor(
     fun readNotification(model: BaseItemInterface?) {
         val notification = model?.data as? UserNotification ?: return
         if (!notification.isValid()) return
-        val userCode = FirebaseAuthManager.getCurrentUserCode() ?: return
         val notificationId = notification.id
 
-        FireStoreManager.buildDoc(
-            Pair(FireStoreCollection.USER_MEMBERS, userCode),
-            Pair(FireStoreCollection.USER_NOTIFICATIONS, notification.id)
-        )
-            .update("is_read", true)
-            .addOnCompleteListener {
-                viewModelScope.launch {
-                    RealmManager.update(UserNotification::class.java, notificationId, mapOf("is_read" to true))
-                }
-            }
+        viewModelScope.launch {
+            userNotificationRepo.updateNotification(notificationId, mapOf("is_read" to true))
+        }
 
     }
 
